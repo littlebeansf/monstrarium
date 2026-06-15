@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   THE MONSTRARIUM — a bestiary book
-   Aesthetic: aged parchment, ink & gilt, candle-dark room
+   MONSTRARIUM OF REPRESENTATION — an interactive codex (v2)
+   Aesthetic: aged parchment, ink & gilt, candle-dark room.
+   Real cover/back art · one full plate per leaf · side pagination.
 ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -14,8 +15,6 @@
   --blood:      #7a1f17;
   --room:       #0b0805;
   --room-2:     #18110a;
-  --leather:    #2a1a10;
-  --leather-2:  #1a0f08;
 
   --serif: "Cormorant Garamond", Georgia, serif;
   --titling: "Cinzel", "Cormorant Garamond", serif;
@@ -24,8 +23,6 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --page-turn: cubic-bezier(0.42, 0, 0.2, 1);
-
-  --shadow-deep: 0 40px 90px rgba(0,0,0,0.7);
 
   /* page geometry — set by JS */
   --page-w: 460px;
@@ -44,7 +41,6 @@ html, body {
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
-
 body { position: relative; }
 
 /* ── Ambient atmosphere ──────────────────────────────────────── */
@@ -98,9 +94,10 @@ body { position: relative; }
 .stage {
   position: relative; z-index: 10;
   display: flex; align-items: center; justify-content: center;
+  gap: 30px;
   height: 100%;
-  perspective: 2600px;
-  padding: 60px 20px 110px;
+  perspective: 3000px;
+  padding: 46px 16px 96px;
 }
 
 .book {
@@ -111,19 +108,17 @@ body { position: relative; }
   /* shift right by half a page so the spine sits near centre,
      leaving room for the turned page to rest on the left without clipping */
   margin-left: var(--page-w);
-  transition: transform 700ms var(--ease-in-out), margin-left 700ms var(--ease-in-out);
+  transition: margin-left 700ms var(--ease-in-out);
 }
 /* when the book is closed (cover showing) centre it fully */
 .book.closed { margin-left: 0; }
-/* subtle resting tilt for depth */
-.book.tilt { transform: rotateX(3deg); }
 
 /* book shadow on the table */
 .book::after {
   content: "";
   position: absolute;
   left: -8%; right: -8%;
-  bottom: -34px; height: 60px;
+  bottom: -30px; height: 56px;
   background: radial-gradient(ellipse at center, rgba(0,0,0,0.75), transparent 72%);
   filter: blur(8px);
   z-index: -2;
@@ -149,6 +144,7 @@ body { position: relative; }
   -webkit-backface-visibility: hidden;
   overflow: hidden;
   border-radius: 3px 9px 9px 3px;
+  background: var(--parch);
 }
 .face--back {
   transform: rotateY(180deg);
@@ -174,242 +170,152 @@ body { position: relative; }
 .face--front .spine-shade { left: 0; background: linear-gradient(90deg, rgba(30,18,8,0.55), transparent); }
 .face--back  .spine-shade { right: 0; background: linear-gradient(270deg, rgba(30,18,8,0.55), transparent); }
 
-/* page edge highlight while turning */
-.page-gradient {
-  position: absolute; inset: 0; z-index: 6; pointer-events: none;
-  opacity: 0; background: linear-gradient(90deg, transparent 60%, rgba(0,0,0,0.45));
-  transition: opacity 300ms linear;
-}
-.page.turning .page-gradient { opacity: 1; }
-
-/* ── COVER ───────────────────────────────────────────────────── */
-.cover-face {
+/* ── COVER & BACK — real painted art, full bleed ─────────────── */
+.art-face {
   position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 30%, #3a2415 0%, var(--leather) 55%, var(--leather-2) 100%);
-  box-shadow: inset 0 0 80px rgba(0,0,0,0.7), inset 0 0 0 2px rgba(0,0,0,0.5);
-  display: flex; align-items: center; justify-content: center;
+  background: #160f08;
+  overflow: hidden;
 }
-.cover-face::before { /* leather grain */
-  content: ""; position: absolute; inset: 0;
-  background-image:
-    repeating-linear-gradient(48deg, rgba(0,0,0,0.05) 0 2px, transparent 2px 5px),
-    repeating-linear-gradient(-42deg, rgba(255,200,140,0.025) 0 3px, transparent 3px 7px);
-  mix-blend-mode: overlay; opacity: 0.7;
+.art-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
 }
-.cover-inner {
-  position: absolute; inset: 22px;
-  border: 2px solid rgba(201,161,74,0.55);
-  border-radius: 4px;
-  box-shadow: inset 0 0 0 4px rgba(201,161,74,0.12);
+/* a faint inset shadow grounds the art against the room */
+.art-face::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
 }
-.cover-corner { position: absolute; width: 46px; height: 46px; stroke: var(--gilt); fill: none; opacity: 0.85; }
-.cover-corner.tl { top: 10px; left: 10px; }
-.cover-corner.tr { top: 10px; right: 10px; transform: scaleX(-1); }
-.cover-corner.bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
-.cover-corner.br { bottom: 10px; right: 10px; transform: scale(-1,-1); }
 
-.cover-content { position: relative; text-align: center; z-index: 2; padding: 0 30px; }
-.cover-kicker {
-  font-family: var(--titling); font-size: 12px; letter-spacing: 0.42em;
-  text-transform: uppercase; color: var(--parch-dark); margin-bottom: 18px;
+/* ── Content pages (intro / plates / colophon) ───────────────── */
+.page-pad {
+  position: absolute; inset: 0; height: 100%;
+  padding: 9% 9% 7%;
+  display: flex; flex-direction: column;
+  z-index: 2;
 }
-.cover-title {
-  font-family: var(--black-letter);
-  font-size: clamp(38px, 9cqw, 60px);
-  line-height: 0.95;
-  color: var(--gilt-lit);
-  text-shadow: 0 2px 1px rgba(0,0,0,0.7), 0 0 22px rgba(201,161,74,0.35);
-  margin: 0;
-}
-.cover-sub {
-  margin-top: 16px; font-style: italic; font-size: 17px;
-  color: var(--parch); letter-spacing: 0.04em;
-}
-.cover-emblem { margin: 26px auto 0; width: 116px; height: 116px; }
-.cover-emblem path, .cover-emblem circle, .cover-emblem line { stroke: var(--gilt); fill: none; }
-.cover-open-hint {
-  position: absolute; bottom: 34px; left: 0; right: 0;
-  font-family: var(--titling); font-size: 10.5px; letter-spacing: 0.3em;
-  text-transform: uppercase; color: var(--parch-dark);
-  animation: pulse 2.6s var(--ease-in-out) infinite;
-}
-@keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.95; } }
 
-/* ── Content pages (intro / contents / plates) ───────────────── */
-.page-pad { position: absolute; inset: 0; height: 100%; padding: 30px 30px 26px; display: flex; flex-direction: column; z-index: 2; }
-
-/* INTRO */
+/* INTRO — the opening page */
+.intro { text-align: left; }
+.intro-head { text-align: center; margin-bottom: 6%; }
+.intro-kicker {
+  font-family: var(--titling); font-size: 11px; letter-spacing: 0.42em;
+  text-transform: uppercase; color: var(--parch-dark); margin-bottom: 10px;
+}
 .intro h1 {
-  font-family: var(--black-letter); font-size: clamp(30px, 7cqw, 42px);
-  color: var(--ink); margin: 0 0 4px; line-height: 1;
+  font-family: var(--black-letter);
+  font-size: clamp(30px, 11cqw, 56px);
+  color: var(--ink); margin: 0; line-height: 0.96;
 }
-.intro .intro-rule { width: 70px; height: 2px; background: var(--ink-soft); margin: 14px 0 18px; opacity: 0.6; }
-.intro p { font-size: clamp(14px, 3.2cqw, 17px); line-height: 1.62; color: var(--ink-soft); margin: 0 0 13px; }
-.intro .drop { float: left; font-family: var(--black-letter); font-size: 4.6em; line-height: 0.72; padding: 6px 10px 0 0; color: var(--blood); }
-.intro .intro-foot { margin-top: auto; font-style: italic; text-align: center; color: var(--ink-soft); font-size: 14px; border-top: 1px solid rgba(40,26,12,0.3); padding-top: 14px; }
+.intro-motto {
+  margin-top: 12px; font-style: italic;
+  font-size: clamp(13px, 3.4cqw, 18px); color: var(--blood);
+  letter-spacing: 0.04em;
+}
+.intro-body { margin-top: 2%; }
+.intro p {
+  font-size: clamp(13px, 3.6cqw, 18px); line-height: 1.66;
+  color: var(--ink-soft); margin: 0 0 0.85em; text-align: justify;
+}
+.intro .drop {
+  float: left; font-family: var(--black-letter);
+  font-size: 4.4em; line-height: 0.7; padding: 6px 10px 0 0; color: var(--blood);
+}
+.intro-foot {
+  margin-top: auto; padding-top: 16px;
+  font-style: italic; text-align: center; color: var(--ink-soft);
+  font-size: clamp(12px, 3.2cqw, 16px);
+  border-top: 1px solid rgba(40,26,12,0.3);
+}
+.intro-foot.small { font-size: clamp(11px, 2.8cqw, 14px); border: none; }
+.orn { color: var(--gilt); font-style: normal; font-size: 0.9em; }
 
-/* CONTENTS */
-.contents h2 {
-  font-family: var(--titling); font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ink); margin: 0 0 4px; text-align: center;
-}
-.contents .sub { text-align: center; font-style: italic; color: var(--ink-soft); margin: 0 0 16px; font-size: 14px; }
-.toc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
-.toc li { margin: 0; }
-.toc-link {
-  display: flex; align-items: center; gap: 12px; width: 100%;
-  background: none; border: none; cursor: pointer; text-align: left;
-  padding: 7px 8px; border-radius: 4px;
-  transition: background 180ms var(--ease-out);
-}
-.toc-link:hover { background: rgba(40,26,12,0.09); }
-.toc-thumb {
-  width: 42px; height: 60px; object-fit: cover; border-radius: 2px; flex: none;
-  border: 1px solid rgba(40,26,12,0.4);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  filter: sepia(0.15);
-}
-.toc-num { font-family: var(--titling); font-size: 13px; color: var(--blood); width: 22px; flex: none; }
-.toc-body { flex: 1; min-width: 0; }
-.toc-name { font-family: var(--titling); font-size: 16px; color: var(--ink); letter-spacing: 0.04em; }
-.toc-sin { font-style: italic; font-size: 13px; color: var(--ink-soft); }
-.toc-dots { flex: 1; border-bottom: 1px dotted rgba(40,26,12,0.4); margin: 0 2px 5px; }
+/* shared rule used by colophon */
+.intro-rule { width: 64px; height: 2px; background: var(--ink-soft); opacity: 0.55; margin: 14px auto 18px; }
 
-/* PLATE PAGE */
+/* PLATE PAGE — one full painted plate per leaf, no interaction */
 .plate { position: absolute; inset: 0; height: 100%; }
 .plate__img-wrap {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  background: #2b2014;
-  cursor: zoom-in;
+  background: #241a10;
 }
 .plate__img { width: 100%; height: 100%; object-fit: cover; display: block; }
-/* inner frame + page number on plate */
-.plate__frame {
-  position: absolute; inset: 10px; pointer-events: none; z-index: 3;
-  border: 1px solid rgba(201,161,74,0.0);
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35), inset 0 0 40px rgba(0,0,0,0.4);
-}
+/* engraved folio caption at the foot of each plate */
 .plate__folio {
-  position: absolute; bottom: 8px; left: 0; right: 0; z-index: 4;
+  position: absolute; bottom: 10px; left: 0; right: 0; z-index: 4;
   text-align: center; font-family: var(--titling); font-size: 10px;
-  letter-spacing: 0.3em; text-transform: uppercase;
+  letter-spacing: 0.28em; text-transform: uppercase;
   color: var(--parch-lit); text-shadow: 0 1px 3px #000;
   pointer-events: none;
 }
-/* zoom affordance */
-.plate__zoom {
-  position: absolute; top: 12px; right: 12px; z-index: 5;
-  width: 34px; height: 34px; border-radius: 50%;
-  background: rgba(15,10,6,0.6); border: 1px solid rgba(201,161,74,0.5);
-  color: var(--gilt-lit); display: grid; place-items: center;
-  opacity: 0; transition: opacity 200ms var(--ease-out);
-  pointer-events: none;
-}
-.plate__img-wrap:hover .plate__zoom { opacity: 1; }
 
-/* The plates carry their own painted wax-seal sigils, so instead of overlaying
-   foreign iconography we honour the art: as each plate settles, a warm sin-tinted
-   ember glow blooms from within the frame, then a faint breathing aura remains. */
-.plate__sigil { display: none; }   /* overlaid SVG sigil retired in favour of in-art glow */
+/* COLOPHON — the closing page, with an in-style drawn ornament */
+.colophon { text-align: center; align-items: center; }
+.colophon-mark { width: clamp(74px, 28cqw, 120px); margin: 2% auto 0; }
+.colophon-mark svg { width: 100%; height: auto; display: block; }
+.ink-line { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; opacity: 0.82; }
+.ink-line.thin { stroke-width: 0.9; opacity: 0.55; }
+.ink-fill { fill: var(--blood); stroke: none; }
+.colophon h1 {
+  font-family: var(--black-letter);
+  font-size: clamp(34px, 13cqw, 62px);
+  color: var(--ink); margin: 4% 0 0; line-height: 1;
+}
+.colophon-body { max-width: 84%; margin: 0 auto; }
+.colophon p {
+  font-size: clamp(13px, 3.6cqw, 18px); line-height: 1.66;
+  color: var(--ink-soft); margin: 0 0 0.85em;
+}
+.colophon .intro-foot.small { margin-top: auto; color: var(--ink-soft); }
 
-.plate__aura {
-  position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  opacity: 0;
-  background:
-    radial-gradient(ellipse 75% 60% at 50% 52%, var(--seal-glow, rgba(201,161,74,0.4)), transparent 70%);
-  mix-blend-mode: screen;
-}
-.plate.lit .plate__aura {
-  animation: aura-bloom 2.8s var(--ease-out) forwards;
-}
-@keyframes aura-bloom {
-  0%   { opacity: 0; }
-  35%  { opacity: 0.9; }
-  100% { opacity: 0.18; }
-}
-/* a thin gilt frame line that ignites with the sin's accent on arrival */
-.plate.lit .plate__frame {
-  animation: frame-ignite 2.8s var(--ease-out) forwards;
-}
-@keyframes frame-ignite {
-  0%   { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35), inset 0 0 40px rgba(0,0,0,0.4); }
-  40%  { box-shadow: inset 0 0 0 1px var(--seal, #c9a14a), inset 0 0 40px rgba(0,0,0,0.3), inset 0 0 22px var(--seal-glow); }
-  100% { box-shadow: inset 0 0 0 1px rgba(201,161,74,0.35), inset 0 0 40px rgba(0,0,0,0.4); }
-}
-
-/* ── Navigation bar ──────────────────────────────────────────── */
-.nav {
-  position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
-  z-index: 40; display: flex; align-items: center; gap: 22px;
-}
+/* ── Side pagination — arrows flank the book ─────────────────── */
 .nav__arrow {
-  width: 50px; height: 50px; border-radius: 50%;
+  flex: none;
+  width: 60px; height: 60px; border-radius: 50%;
   display: grid; place-items: center;
   color: var(--parch);
   background: linear-gradient(180deg, rgba(42,26,16,0.9), rgba(20,12,7,0.92));
   border: 1px solid rgba(201,161,74,0.4);
   cursor: pointer;
+  z-index: 30;
   transition: color 180ms var(--ease-out), border-color 180ms var(--ease-out), transform 180ms var(--ease-out), opacity 180ms var(--ease-out);
 }
-.nav__arrow:hover:not(:disabled) { color: var(--gilt-lit); border-color: var(--gilt); transform: translateY(-2px); }
-.nav__arrow:active:not(:disabled) { transform: translateY(0); }
-.nav__arrow:disabled { opacity: 0.3; cursor: default; }
-.nav__meta { text-align: center; min-width: 170px; }
-.nav__title { display: block; font-family: var(--titling); font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--parch-lit); }
-.nav__progress { display: block; font-size: 12px; font-style: italic; color: var(--parch-dark); margin-top: 3px; }
+.nav__arrow:hover:not(:disabled) { color: var(--gilt-lit); border-color: var(--gilt); transform: scale(1.06); }
+.nav__arrow:active:not(:disabled) { transform: scale(0.98); }
+.nav__arrow:disabled { opacity: 0.22; cursor: default; }
+
+/* title plate beneath the book */
+.nav__meta {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  z-index: 40; text-align: center; min-width: 200px; pointer-events: none;
+}
+.nav__title { display: block; font-family: var(--titling); font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--parch-lit); }
+.nav__progress { display: block; font-size: 13px; font-style: italic; color: var(--parch-dark); margin-top: 3px; }
 
 /* ── Hint ────────────────────────────────────────────────────── */
 .hint {
-  position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%);
-  z-index: 35; font-style: italic; font-size: 14px; color: var(--parch-dark);
-  background: rgba(11,8,5,0.6); padding: 6px 16px; border-radius: 20px;
-  border: 1px solid rgba(201,161,74,0.2);
-  transition: opacity 600ms var(--ease-out);
+  position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%);
+  z-index: 35; font-style: italic; font-size: 13.5px; color: var(--parch-dark);
+  letter-spacing: 0.04em;
+  transition: opacity 700ms var(--ease-out);
   pointer-events: none;
 }
 .hint.hidden { opacity: 0; }
 
-/* ── Lightbox ────────────────────────────────────────────────── */
-.lightbox {
-  position: fixed; inset: 0; z-index: 100;
-  background: rgba(6,4,2,0.94);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  opacity: 0; visibility: hidden; transition: opacity 350ms var(--ease-out), visibility 350ms;
-  padding: 30px;
-}
-.lightbox.open { opacity: 1; visibility: visible; }
-.lightbox__img {
-  max-width: min(92vw, 760px); max-height: 82vh; object-fit: contain;
-  border: 1px solid rgba(201,161,74,0.4);
-  box-shadow: 0 30px 80px rgba(0,0,0,0.8);
-  transform: scale(0.94); transition: transform 350ms var(--ease-out);
-  cursor: zoom-out;
-}
-.lightbox.open .lightbox__img { transform: scale(1); }
-.lightbox__cap { margin-top: 16px; font-family: var(--titling); letter-spacing: 0.14em; text-transform: uppercase; font-size: 13px; color: var(--parch); }
-.lightbox__close {
-  position: absolute; top: 22px; right: 28px; font-size: 34px; line-height: 1;
-  background: none; border: none; color: var(--parch); cursor: pointer;
-  transition: color 180ms var(--ease-out);
-}
-.lightbox__close:hover { color: var(--gilt-lit); }
-
 /* ── Responsive ──────────────────────────────────────────────── */
 /* Tablet / phone: single centred page (no two-page offset) */
-@media (max-width: 760px) {
-  .stage { padding: 40px 10px 140px; perspective: 1700px; overflow: hidden; }
+@media (max-width: 820px) {
+  .stage { padding: 30px 8px 120px; perspective: 1800px; overflow: hidden; gap: 8px; }
   /* keep the book centred — the turning page swings left over empty space
      and is clipped by the stage, which reads as a page lifting away */
   .book { margin-left: 0 !important; }
   .hud__label { display: none; }
   .hud__btn { padding: 8px 10px; }
-  .hint { font-size: 12px; bottom: 100px; width: 84%; text-align: center; }
-  .nav { gap: 14px; bottom: 20px; }
-  .nav__arrow { width: 46px; height: 46px; }
-  .nav__meta { min-width: 130px; }
-  .page-pad { padding: 22px 22px 20px; }
+  .hint { font-size: 12px; bottom: 96px; width: 84%; text-align: center; }
+  .nav__arrow { width: 44px; height: 44px; }
+  .nav__meta { min-width: 150px; bottom: 22px; }
 }
 
 /* container query units for cover/intro scaling */
@@ -417,6 +323,6 @@ body { position: relative; }
 
 @media (prefers-reduced-motion: reduce) {
   .page { transition: transform 1ms linear; }
-  .dust, .cover-open-hint, .plate.lit .plate__sigil { animation: none; }
+  .dust { animation: none; }
   .book { transition: none; }
 }

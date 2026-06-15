@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>The Monstrarium — A Bestiary of the Seven</title>
-<meta name="description" content="An illustrated bestiary of seven creatures, each the embodiment of a deadly sin. Turn the pages of the Monstrarium." />
+<title>Monstrarium of Representation</title>
+<meta name="description" content="An illustrated codex of concepts, emotions, and disorders given form — each an idea made flesh. Turn the pages of the Monstrarium." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@500;600;700&family=UnifrakturMaguntia&display=swap" rel="stylesheet" />
@@ -31,36 +31,29 @@
   </button>
 </div>
 
-<!-- The book stage -->
+<!-- The book stage: arrows flank the book on the left and right -->
 <main class="stage" id="stage">
-  <div class="book" id="book" role="group" aria-roledescription="book" aria-label="The Monstrarium, an interactive bestiary">
+  <button class="nav__arrow nav__arrow--prev" id="prevBtn" aria-label="Previous page" disabled>
+    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+  <div class="book" id="book" role="group" aria-roledescription="book" aria-label="Monstrarium of Representation, an interactive codex">
     <!-- pages injected by JS -->
   </div>
+
+  <button class="nav__arrow nav__arrow--next" id="nextBtn" aria-label="Next page">
+    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
 </main>
 
-<!-- Navigation -->
-<nav class="nav" aria-label="Book navigation">
-  <button class="nav__arrow nav__arrow--prev" id="prevBtn" aria-label="Previous page" disabled>
-    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-  <div class="nav__meta">
-    <span class="nav__title" id="navTitle">The Monstrarium</span>
-    <span class="nav__progress" id="navProgress"></span>
-  </div>
-  <button class="nav__arrow nav__arrow--next" id="nextBtn" aria-label="Next page">
-    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-</nav>
-
-<!-- Hint -->
-<div class="hint" id="hint">Drag the page corner, click the edges, or use ← → to turn</div>
-
-<!-- Plate lightbox (zoom) -->
-<div class="lightbox" id="lightbox" aria-hidden="true">
-  <button class="lightbox__close" id="lbClose" aria-label="Close">&times;</button>
-  <img class="lightbox__img" id="lbImg" alt="" />
-  <div class="lightbox__cap" id="lbCap"></div>
+<!-- Title plate beneath the book -->
+<div class="nav__meta">
+  <span class="nav__title" id="navTitle">Monstrarium</span>
+  <span class="nav__progress" id="navProgress">of Representation</span>
 </div>
+
+<!-- Quiet hint, fades away -->
+<div class="hint" id="hint">Turn with the arrows, the page corners, or &larr; &rarr;</div>
 
 <script src="js/data.js"></script>
 <script src="js/audio.js"></script>
