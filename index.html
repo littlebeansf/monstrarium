@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>The Monstrarium — A Bestiary of the Seven</title>
+<meta name="description" content="An illustrated bestiary of seven creatures, each the embodiment of a deadly sin. Turn the pages of the Monstrarium." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@500;600;700&family=UnifrakturMaguntia&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23120d08'/%3E%3Cpath d='M16 4 L20 12 L28 12 L21 18 L24 27 L16 21 L8 27 L11 18 L4 12 L12 12 Z' fill='none' stroke='%23c9a14a' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='15' r='3' fill='%23c9a14a'/%3E%3C/svg%3E" />
+</head>
+<body>
+
+<!-- Ambient vignette + dust -->
+<div class="ambient" aria-hidden="true">
+  <div class="ambient__vignette"></div>
+  <div class="ambient__dust" id="dustLayer"></div>
+</div>
+
+<!-- Sound + controls -->
+<div class="hud" aria-hidden="false">
+  <button class="hud__btn" id="soundBtn" aria-pressed="false" title="Toggle ambient sound">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path class="snd-on" d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path class="snd-on" d="M16 8c1.5 1.2 1.5 6.8 0 8" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path class="snd-on" d="M18.5 5.5c3 2.6 3 10.4 0 13" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+    <span class="hud__label">Sound</span>
+  </button>
+  <button class="hud__btn" id="fsBtn" title="Toggle fullscreen">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+    <span class="hud__label">Fullscreen</span>
+  </button>
+</div>
+
+<!-- The book stage -->
+<main class="stage" id="stage">
+  <div class="book" id="book" role="group" aria-roledescription="book" aria-label="The Monstrarium, an interactive bestiary">
+    <!-- pages injected by JS -->
+  </div>
+</main>
+
+<!-- Navigation -->
+<nav class="nav" aria-label="Book navigation">
+  <button class="nav__arrow nav__arrow--prev" id="prevBtn" aria-label="Previous page" disabled>
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="nav__meta">
+    <span class="nav__title" id="navTitle">The Monstrarium</span>
+    <span class="nav__progress" id="navProgress"></span>
+  </div>
+  <button class="nav__arrow nav__arrow--next" id="nextBtn" aria-label="Next page">
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</nav>
+
+<!-- Hint -->
+<div class="hint" id="hint">Drag the page corner, click the edges, or use ← → to turn</div>
+
+<!-- Plate lightbox (zoom) -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lightbox__close" id="lbClose" aria-label="Close">&times;</button>
+  <img class="lightbox__img" id="lbImg" alt="" />
+  <div class="lightbox__cap" id="lbCap"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/book.js"></script>
+</body>
+</html>
