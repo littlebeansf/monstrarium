@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   The Monstrarium — book engine (v2)
-   Real cover & back art · single full plate per leaf · side pagination.
+   Monstrarium of Representation — book engine (v3)
+   Real cover & back art · two-page spread · clean page-turn ·
+   per-page folios · hover loupe on plates · proper open/close.
 ═══════════════════════════════════════════════════════════════ */
 
 (() => {
@@ -70,10 +71,12 @@
     if (face.type === "plate") {
       const m = face.monster;
       const folio = `${roman(face.index + 1)} &middot; ${m.name} &middot; embodiment of ${m.subject}`;
-      return `<div class="plate">
+      const src = `assets/plates/${m.id}.webp`;
+      return `<div class="plate" data-zoom="${src}">
         <div class="plate__img-wrap">
-          <img class="plate__img" src="assets/plates/${m.id}.webp" alt="${m.name}, ${m.title}, embodiment of ${m.subject}" />
+          <img class="plate__img" src="${src}" alt="${m.name}, ${m.title}, embodiment of ${m.subject}" draggable="false" />
         </div>
+        <div class="plate__loupe" aria-hidden="true"></div>
         <div class="plate__folio">${folio}</div>
       </div>`;
     }
@@ -82,7 +85,6 @@
       const paras = COLOPHON.paragraphs.map(p => `<p>${p}</p>`).join("");
       return `<div class="paper"></div><div class="page-pad colophon">
         <div class="colophon-mark" aria-hidden="true">
-          <!-- in-style drawn ornament: concentric ring + faint compass star, ink line -->
           <svg viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="46" class="ink-line"/>
             <circle cx="60" cy="60" r="38" class="ink-line thin"/>
@@ -106,8 +108,8 @@
     page.className = "page";
     page.dataset.leaf = idx;
     page.innerHTML = `
-      <div class="face face--front">${renderFace(leaf.front)}<div class="spine-shade"></div></div>
-      <div class="face face--back">${renderFace(leaf.back)}<div class="spine-shade"></div></div>
+      <div class="face face--front">${renderFace(leaf.front)}<div class="spine-shade"></div><div class="turn-shade turn-shade--front"></div></div>
+      <div class="face face--back">${renderFace(leaf.back)}<div class="spine-shade"></div><div class="turn-shade turn-shade--back"></div></div>
     `;
     book.appendChild(page);
   });
@@ -117,68 +119,128 @@
   let currentLeaf = 0;   // number of leaves already flipped
   let animating = false;
 
-  function updateChrome() {
+  // Stack the leaves in depth so faces never share a plane (kills z-fighting
+  // that produced the "fanned pages" glitch mid-turn). Unturned leaves lean a
+  // hair toward the viewer on the right; turned leaves stack on the left.
+  const DEPTH = 0.6; // px per leaf
+
+  function applyResting() {
     pageEls.forEach((p, i) => {
-      if (i < currentLeaf) { p.classList.add("flipped"); p.style.zIndex = i; }
-      else { p.classList.remove("flipped"); p.style.zIndex = totalLeaves - i; }
+      const flipped = i < currentLeaf;
+      p.classList.toggle("flipped", flipped);
+      // depth: pages near the spine sit lowest; outer pages lift slightly.
+      // turned pages (left) and unturned (right) get separated z translation.
+      if (flipped) {
+        const d = (currentLeaf - i) * DEPTH;          // further-back turned pages sit deeper
+        p.style.zIndex = i;                            // earlier leaves below later turned ones
+        p.style.transform = `translateZ(${-d}px) rotateY(-180deg)`;
+      } else {
+        const d = (i - currentLeaf) * DEPTH;           // further-ahead pages sit deeper
+        p.style.zIndex = totalLeaves - i;              // top unturned leaf highest
+        p.style.transform = `translateZ(${-d}px) rotateY(0deg)`;
+      }
     });
+  }
+
+  function updateChrome() {
+    applyResting();
 
     prevBtn.disabled = currentLeaf === 0;
     nextBtn.disabled = currentLeaf >= maxLeaf;
 
-    book.classList.toggle("closed", currentLeaf === 0);
-    book.classList.toggle("at-back", currentLeaf >= maxLeaf);
+    const closed = currentLeaf === 0;
+    const atBack = currentLeaf >= maxLeaf;
+    book.classList.toggle("closed", closed);
+    book.classList.toggle("at-back", atBack);
 
-    // label = the right-hand visible face (front of the top unflipped leaf).
-    // at the final spread the right face is the back cover, so prefer the
-    // colophon on the left of that spread for a graceful "Finis".
+    // Bottom meta describes the whole spread, never a single monster, so the
+    // two pages on screen are both honoured.
+    const leftFace = faces[currentLeaf * 2 - 1];   // verso (left page)
+    const rightFace = faces[currentLeaf * 2];      // recto (right page)
     let label = "Monstrarium", prog = "of Representation";
-    let face = faces[currentLeaf * 2];
-    if (face && (face.type === "back" || face.type === "blank")) {
-      const left = faces[currentLeaf * 2 - 1];
-      if (left) face = left;
+
+    if (closed) {
+      label = "Monstrarium"; prog = "of Representation";
+    } else if (atBack) {
+      label = "Finis"; prog = "Close the book";
+    } else {
+      const names = [];
+      [leftFace, rightFace].forEach(f => {
+        if (!f) return;
+        if (f.type === "plate") names.push(f.monster.name);
+        else if (f.type === "intro") names.push("Foreword");
+        else if (f.type === "colophon") names.push("Finis");
+      });
+      if (names.length) {
+        label = names.join("  &  ");
+        // count of plates shown so far for orientation
+        const lastPlate = [leftFace, rightFace].filter(f => f && f.type === "plate").pop();
+        prog = lastPlate ? `of ${MONSTERS.length} representations` : "";
+      }
     }
-    if (currentLeaf === 0) { label = "Monstrarium"; prog = "of Representation"; }
-    else if (face && face.type === "plate") {
-      label = face.monster.name;
-      prog = `${roman(face.index + 1)} of ${MONSTERS.length} \u00b7 embodiment of ${face.monster.subject}`;
-    }
-    else if (face && face.type === "intro") { label = "Of Representation"; prog = "Foreword"; }
-    else if (face && face.type === "colophon") { label = "Finis"; prog = "Afterword"; }
-    else if (face && (face.type === "back" || face.type === "blank")) { label = "Finis"; prog = ""; }
-    navTitle.textContent = label;
+    navTitle.innerHTML = label;
     navProgress.textContent = prog;
   }
 
   // ── Turn logic ──────────────────────────────────────────────────
-  const TURN_MS = reduceMotion ? 20 : 950;
+  const TURN_MS = reduceMotion ? 20 : 1000;
 
   function turnNext() {
     if (animating || currentLeaf >= maxLeaf) return;
     animating = true;
+    book.classList.add("turning");
     const p = pageEls[currentLeaf];
+    p.classList.add("is-turning");
+    p.style.transition = "none";
     p.style.zIndex = 999;
-    p.classList.add("flipped");
+    // start from rest then animate to flipped on next frame
+    requestAnimationFrame(() => {
+      p.style.transition = "";
+      p.classList.add("flipped");
+      p.style.transform = `translateZ(0px) rotateY(-180deg)`;
+    });
     Atmos.sfx("rustle");
-    setTimeout(() => { currentLeaf++; animating = false; updateChrome(); hideHint(); }, TURN_MS);
+    setTimeout(() => {
+      currentLeaf++;
+      p.classList.remove("is-turning");
+      book.classList.remove("turning");
+      animating = false;
+      updateChrome();
+      hideHint();
+    }, TURN_MS);
   }
+
   function turnPrev() {
     if (animating || currentLeaf <= 0) return;
     animating = true;
+    book.classList.add("turning");
     const p = pageEls[currentLeaf - 1];
+    p.classList.add("is-turning");
+    p.style.transition = "none";
     p.style.zIndex = 999;
-    p.classList.remove("flipped");
+    requestAnimationFrame(() => {
+      p.style.transition = "";
+      p.classList.remove("flipped");
+      p.style.transform = `translateZ(0px) rotateY(0deg)`;
+    });
     Atmos.sfx("rustle");
-    setTimeout(() => { currentLeaf--; animating = false; updateChrome(); }, TURN_MS);
+    setTimeout(() => {
+      currentLeaf--;
+      p.classList.remove("is-turning");
+      book.classList.remove("turning");
+      animating = false;
+      updateChrome();
+    }, TURN_MS);
   }
 
   // ── Click zones on the book (left half = prev, right half = next) ──
   book.addEventListener("click", (e) => {
     if (animating) return;
+    // don't treat a loupe drag-release as a turn
     const rect = book.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    // anywhere on the right turns forward (covers the cover too); left turns back
     if (currentLeaf === 0) { turnNext(); return; }
+    if (currentLeaf >= maxLeaf) { turnPrev(); return; }
     if (x < rect.width * 0.42) turnPrev();
     else if (x > rect.width * 0.58) turnNext();
   });
@@ -193,11 +255,13 @@
   function pointerDown(e) {
     if (animating) return;
     const { x, rect } = getXY(e);
-    const nearRight = x > rect.width * 0.55;
-    const nearLeft = x < rect.width * 0.45;
+    const nearRight = x > rect.width * 0.62;
+    const nearLeft = x < rect.width * 0.38;
     if (nearRight && currentLeaf < maxLeaf) drag = { dir: "next", startX: x, rect, page: pageEls[currentLeaf] };
     else if (nearLeft && currentLeaf > 0) drag = { dir: "prev", startX: x, rect, page: pageEls[currentLeaf - 1] };
     else return;
+    book.classList.add("turning");
+    drag.page.classList.add("is-turning");
     drag.page.style.transition = "none";
     drag.page.style.zIndex = 999;
   }
@@ -207,10 +271,10 @@
     let frac;
     if (drag.dir === "next") {
       frac = Math.min(Math.max((drag.startX - x) / drag.rect.width, 0), 1);
-      drag.page.style.transform = `rotateY(${-180 * frac}deg)`;
+      drag.page.style.transform = `translateZ(0px) rotateY(${-180 * frac}deg)`;
     } else {
       frac = Math.min(Math.max((x - drag.startX) / drag.rect.width, 0), 1);
-      drag.page.style.transform = `rotateY(${-180 + 180 * frac}deg)`;
+      drag.page.style.transform = `translateZ(0px) rotateY(${-180 + 180 * frac}deg)`;
     }
     drag.frac = frac;
     if (e.cancelable) e.preventDefault();
@@ -219,9 +283,16 @@
     if (!drag) return;
     const d = drag; drag = null;
     d.page.style.transition = "";
-    d.page.style.transform = "";
-    if ((d.frac || 0) > 0.3) { if (d.dir === "next") turnNext(); else turnPrev(); }
-    else updateChrome();
+    d.page.classList.remove("is-turning");
+    book.classList.remove("turning");
+    if ((d.frac || 0) > 0.3) {
+      // commit: clear inline transform so the animated turn takes over
+      d.page.style.transform = "";
+      if (d.dir === "next") turnNext(); else turnPrev();
+    } else {
+      d.page.style.transform = "";
+      updateChrome();
+    }
   }
   book.addEventListener("mousedown", pointerDown);
   window.addEventListener("mousemove", pointerMove);
@@ -229,6 +300,35 @@
   book.addEventListener("touchstart", pointerDown, { passive: true });
   book.addEventListener("touchmove", pointerMove, { passive: false });
   book.addEventListener("touchend", pointerUp);
+
+  // ── Hover loupe on plate images ────────────────────────────────
+  // A magnifier lens that follows the cursor so the dense plate text reads.
+  const ZOOM = 2.6;
+  function bindLoupe(plate) {
+    const wrap = plate.querySelector(".plate__img-wrap");
+    const img = plate.querySelector(".plate__img");
+    const loupe = plate.querySelector(".plate__loupe");
+    const src = plate.dataset.zoom;
+    loupe.style.backgroundImage = `url("${src}")`;
+
+    function move(e) {
+      if (animating || drag) { loupe.classList.remove("on"); return; }
+      const r = wrap.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      if (px < 0 || px > 1 || py < 0 || py > 1) { loupe.classList.remove("on"); return; }
+      const size = parseFloat(getComputedStyle(loupe).width);
+      loupe.style.left = `${e.clientX - r.left - size / 2}px`;
+      loupe.style.top = `${e.clientY - r.top - size / 2}px`;
+      loupe.style.backgroundSize = `${r.width * ZOOM}px ${r.height * ZOOM}px`;
+      loupe.style.backgroundPosition = `${px * 100}% ${py * 100}%`;
+      loupe.classList.add("on");
+    }
+    wrap.addEventListener("mousemove", move);
+    wrap.addEventListener("mouseenter", move);
+    wrap.addEventListener("mouseleave", () => loupe.classList.remove("on"));
+  }
+  book.querySelectorAll(".plate").forEach(bindLoupe);
 
   // ── Buttons & keyboard ──────────────────────────────────────────
   nextBtn.addEventListener("click", (e) => { e.stopPropagation(); turnNext(); });
@@ -251,22 +351,20 @@
   // ── Hint ────────────────────────────────────────────────────────
   let hintHidden = false;
   function hideHint() { if (!hintHidden) { hint.classList.add("hidden"); hintHidden = true; } }
-  setTimeout(hideHint, 6500);
+  setTimeout(hideHint, 7000);
 
   // ── Responsive sizing — make the book as large as possible ──────
   function sizeBook() {
     const ratio = 1492 / 1054; // h/w
     const mobile = window.innerWidth <= 820;
-    // reserve room for the side arrows on desktop (~150px) and vertical chrome
     const chromeV = mobile ? 150 : 120;
-    const sideReserve = mobile ? 24 : 170; // arrows sit outside the page on desktop
+    const sideReserve = mobile ? 24 : 180;
     const availH = window.innerHeight - chromeV;
     let w;
     if (mobile) {
       w = Math.min(window.innerWidth - sideReserve, 560);
     } else {
-      // two-page spread budget: active page + turned page on the left
-      w = Math.min((window.innerWidth - sideReserve) / 2, 560);
+      w = Math.min((window.innerWidth - sideReserve) / 2, 600);
     }
     if (w * ratio > availH) w = availH / ratio;
     w = Math.max(w, 240);
