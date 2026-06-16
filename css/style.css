@@ -113,7 +113,9 @@ body { position: relative; }
 /* when the book is closed (cover showing) or fully read (back showing),
    centre it fully so it reads as a shut book */
 .book.closed { margin-left: 0; }
-.book.at-back { margin-left: var(--page-w); }
+/* fully closed at the back: the back cover has flipped left of the spine, so
+   shift the book right by two pages to centre it — a mirror of .closed */
+.book.at-back { margin-left: calc(var(--page-w) * 2); }
 
 /* book shadow on the table */
 .book::after {

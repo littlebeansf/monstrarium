@@ -21,15 +21,21 @@
   faces.push({ type: "intro" });
   MONSTERS.forEach((m, i) => faces.push({ type: "plate", monster: m, index: i }));
   faces.push({ type: "colophon" });
-  faces.push({ type: "back" });
+  // The back cover must be the BACK face of the final leaf so that turning the
+  // last page CLOSES the book — a true mirror of the opening flip. We pad with
+  // a blank front so the back cover lands face-up on the left, covering the
+  // stack, exactly like the front cover sits closed on the right at the start.
+  if (faces.length % 2 !== 0) faces.push({ type: "blank" }); // keep colophon paired
+  faces.push({ type: "blank" }); // front of the closing leaf
+  faces.push({ type: "back" });  // back of the closing leaf (the closed back cover)
 
   // pair faces into physical leaves (2 faces per sheet)
   if (faces.length % 2 !== 0) faces.push({ type: "blank" });
   const leaves = [];
   for (let i = 0; i < faces.length; i += 2) leaves.push({ front: faces[i], back: faces[i + 1] });
   const totalLeaves = leaves.length;
-  const lastFaceBlank = faces[faces.length - 1].type === "blank";
-  const maxLeaf = lastFaceBlank ? totalLeaves - 1 : totalLeaves;
+  // The final leaf carries the back cover on its back face, so it DOES flip.
+  const maxLeaf = totalLeaves;
 
   function roman(n) {
     const map = [["M",1000],["CM",900],["D",500],["CD",400],["C",100],["XC",90],["L",50],["XL",40],["X",10],["IX",9],["V",5],["IV",4],["I",1]];
