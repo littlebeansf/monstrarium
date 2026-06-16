@@ -19,7 +19,14 @@
   const faces = [];
   faces.push({ type: "cover" });
   faces.push({ type: "intro" });
+  // A blank verso after the intro shifts the plates so that CONSECUTIVE
+  // entries land on the same spread: (0,1)(2,3)(4,5)… This is what places
+  // each pair of opposites (Pride/Humility, Greed/Generosity, …) side by side.
+  faces.push({ type: "blank" });
   MONSTERS.forEach((m, i) => faces.push({ type: "plate", monster: m, index: i }));
+  // If there is an odd number of plates, give the final solo plate a blank
+  // facing page so it is not stranded opposite the colophon.
+  if (MONSTERS.length % 2 !== 0) faces.push({ type: "blank" });
   faces.push({ type: "colophon" });
   // The back cover must be the BACK face of the final leaf so that turning the
   // last page CLOSES the book — a true mirror of the opening flip. We pad with
@@ -75,11 +82,14 @@
 
     if (face.type === "plate") {
       const m = face.monster;
-      const folio = `${roman(face.index + 1)} &middot; ${m.name} &middot; embodiment of ${m.subject}`;
+      // Mythic creatures aren't "embodiments" of a vice/feeling — read them naturally.
+      const lead = m.category === "myth" ? "" : "embodiment of ";
+      const descr = `${lead}${m.subject}`;
+      const folio = `${roman(face.index + 1)} &middot; ${m.name} &middot; ${descr}`;
       const src = `assets/plates/${m.id}.webp`;
       return `<div class="plate" data-zoom="${src}">
         <div class="plate__img-wrap">
-          <img class="plate__img" src="${src}" alt="${m.name}, ${m.title}, embodiment of ${m.subject}" draggable="false" />
+          <img class="plate__img" src="${src}" alt="${m.name}, ${m.title}, ${descr}" draggable="false" />
         </div>
         <div class="plate__folio">${folio}</div>
       </div>`;

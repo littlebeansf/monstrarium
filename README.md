@@ -25,27 +25,50 @@ flesh, presented as a full illustrated plate inside a book you can leaf through.
 
 ## The Plates
 
+The plates are ordered so that **opposites face each other across a single spread** —
+Pride faces Humility, Greed faces Generosity, Love faces Hate, Mania faces Depression,
+and so on. The closing plates gather a few mythic figures (a yokai, Ryomen Sukuna, the
+Leshy, the Kappa) that embody balance and boundaries.
+
 | № | Name | Representation |
 |---|------|----------------|
 | I | Vesperion | Pride |
-| II | Avaranthos | Greed |
-| III | Volurien | Lust |
-| IV | Invidura | Envy |
-| V | Voresculpt | Gluttony |
-| VI | Vharzul | Wrath |
-| VII | Sluth | Sloth |
-| VIII | Egotheion | Ego |
-| IX | Conscience | The Inner Witness |
-| X | Ikigai | Reason for Being |
-| XI | Anxietas | Anxiety |
-| XII | Occhianox | Paranoia |
-| XIII | Atroxium | Addiction |
-| XIV | Dualioris | Bipolarity |
-| XV | Phrenozia | Schizophrenia |
-| XVI | Postrima | Lingering Trauma |
-| XVII | Aracnophobia | Irrational Terror |
-| XVIII | Abyssor | Self-Undoing |
+| II | Humilioris | Humility |
+| III | Avaranthos | Greed |
+| IV | Magnanvia | Generosity |
+| V | Volurien | Lust |
+| VI | Austerochrys | Abstinence |
+| VII | Voresculpt | Gluttony |
+| VIII | Sobrielleth | Abstemiousness |
+| IX | Vharzul | Wrath |
+| X | Sluth | Sloth |
+| XI | Amorvessel | Love |
+| XII | Abhorrentia | Hate |
+| XIII | Mania | Unrestrained Exaltation |
+| XIV | Melanchion | Depression |
+| XV | Egotheion | Ego |
+| XVI | Conscience | the Inner Witness |
+| XVII | Invidura | Envy |
+| XVIII | Ikigai | Reason for Being |
 | XIX | Nostalgia | Longing for What Was |
+| XX | Weltschmerz | Existential Sorrow |
+| XXI | Anxietas | Anxiety |
+| XXII | Lachrymor | Sorrow |
+| XXIII | Occhianox | Paranoia |
+| XXIV | Atroxium | Addiction |
+| XXV | Dualioris | Bipolarity |
+| XXVI | Phrenozia | Schizophrenia |
+| XXVII | Postrima | Lingering Trauma |
+| XXVIII | Abyssor | Self-Undoing |
+| XXIX | Malanthrope | Body Dysmorphia |
+| XXX | Distortura | Alice in Wonderland Syndrome |
+| XXXI | Aracnophobia | Irrational Terror |
+| XXXII | Porothalys | Trypophobia |
+| XXXIII | Claustharen | Agoraphobia |
+| XXXIV | Yorigami | a Yokai of Borrowed Selves |
+| XXXV | Ryomen Sukuna | Imbalance |
+| XXXVI | Leshy | Wild Places and Forgotten Paths |
+| XXXVII | Kappalos | Boundaries |
 
 Plus the painted front and back cover.
 
