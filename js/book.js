@@ -298,11 +298,23 @@
     reader.classList.toggle("reader--left", !onLeftHalf);
 
     // scale the magnified plate to the panel height × zoom, width by image ratio,
-    // then centre the background on the point under the cursor
-    const bgH = reader.offsetHeight * ZOOM;
+    // then position it so the exact point under the cursor lands in the
+    // CENTRE of the reader panel. Percentage background-position mis-tracks at
+    // the edges, so we compute the offset in pixels instead.
+    const pw = reader.offsetWidth;
+    const ph = reader.offsetHeight;
+    const bgH = ph * ZOOM;
     const bgW = bgH * (r.width / r.height);
+    // x/y of the cursor point within the scaled background image (px)
+    const cx = px * bgW;
+    const cy = py * bgH;
+    // shift so that point sits at the panel's centre, clamped to image bounds
+    let posX = pw / 2 - cx;
+    let posY = ph / 2 - cy;
+    posX = Math.min(0, Math.max(pw - bgW, posX));
+    posY = Math.min(0, Math.max(ph - bgH, posY));
     reader.style.backgroundSize = `${bgW}px ${bgH}px`;
-    reader.style.backgroundPosition = `${px * 100}% ${py * 100}%`;
+    reader.style.backgroundPosition = `${posX}px ${posY}px`;
     reader.classList.add("on");
   }
 
