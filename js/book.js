@@ -157,7 +157,60 @@
   });
   const pageEls = Array.from(book.querySelectorAll(".page"));
 
-  // ── State ───────────────────────────────────────────────────────
+  // ── Page-jump dots ──────────────────────────────────
+  // A fixed "to cover" marker, one dot per reading spread (chapter openers
+  // shown as gilt diamonds), then a fixed "to back" marker. A spread at
+  // currentLeaf = c shows faces[2c-1] (left) + faces[2c] (right); c runs from
+  // 1 to maxLeaf-1. Closed cover is c=0, closed back cover is c=maxLeaf.
+  const pager = document.getElementById("pager");
+  const pagerButtons = []; // { leaf, el }
+  const SVG_COVER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 4 12l7 7"/><path d="M19 5l-7 7 7 7"/></svg>';
+  const SVG_BACK  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l7 7-7 7"/><path d="M5 5l7 7-7 7"/></svg>';
+
+  function makeDot(opts) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = opts.cls;
+    b.dataset.leaf = String(opts.leaf);
+    b.setAttribute("aria-label", opts.label);
+    if (opts.tip) b.setAttribute("data-label", opts.tip);
+    if (opts.html) b.innerHTML = opts.html;
+    b.addEventListener("click", (e) => { e.stopPropagation(); goToLeaf(opts.leaf); });
+    pager.appendChild(b);
+    pagerButtons.push({ leaf: opts.leaf, el: b });
+    return b;
+  }
+
+  function buildPager() {
+    if (!pager) return;
+    pager.innerHTML = "";
+    pagerButtons.length = 0;
+    // fixed start marker → closed cover
+    makeDot({ cls: "pager__end", leaf: 0, label: "Go to the cover", tip: "Cover", html: SVG_COVER });
+    const sepA = document.createElement("div"); sepA.className = "pager__sep"; pager.appendChild(sepA);
+    // one dot per reading spread
+    for (let c = 1; c <= maxLeaf - 1; c++) {
+      const left = faces[2 * c - 1];
+      if (left && left.type === "chapter") {
+        const ch = left.chapter;
+        makeDot({ cls: "pager__dot pager__dot--chapter", leaf: c,
+                  label: `Caput ${ch.caput} — ${ch.title}`, tip: `Caput ${ch.caput} · ${ch.title}` });
+      } else {
+        makeDot({ cls: "pager__dot", leaf: c, label: `Go to spread ${c}` });
+      }
+    }
+    const sepB = document.createElement("div"); sepB.className = "pager__sep"; pager.appendChild(sepB);
+    // fixed end marker → closed back cover
+    makeDot({ cls: "pager__end", leaf: maxLeaf, label: "Go to the back", tip: "Back", html: SVG_BACK });
+  }
+
+  function updatePagerActive() {
+    pagerButtons.forEach(({ leaf, el }) => el.classList.toggle("is-active", leaf === currentLeaf));
+  }
+
+  buildPager();
+
+  // ── State ────────────────────────────────────────────────────────────────────
   let currentLeaf = 0;   // number of leaves already flipped
   let animating = false;
 
@@ -194,6 +247,8 @@
     const atBack = currentLeaf >= maxLeaf;
     book.classList.toggle("closed", closed);
     book.classList.toggle("at-back", atBack);
+
+    updatePagerActive();
   }
 
   // ── Turn logic ──────────────────────────────────────────────────
@@ -245,6 +300,22 @@
       animating = false;
       updateChrome();
     }, TURN_MS);
+  }
+
+  // ── Direct jump to any leaf (used by the page-jump dots) ─────────
+  // For an adjacent step we reuse the animated turn so it feels continuous;
+  // for a longer jump we re-stack instantly (no z-fighting from many
+  // simultaneous 1s flips) and update the chrome.
+  function goToLeaf(target) {
+    if (animating) return;
+    target = Math.max(0, Math.min(maxLeaf, target));
+    if (target === currentLeaf) return;
+    if (target === currentLeaf + 1) { turnNext(); return; }
+    if (target === currentLeaf - 1) { turnPrev(); return; }
+    currentLeaf = target;
+    Atmos.sfx("rustle");
+    updateChrome();
+    hideHint();
   }
 
   // ── Click zones on the book (left half = prev, right half = next) ──

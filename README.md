@@ -14,6 +14,11 @@ flesh, presented as a full illustrated plate inside a book you can leaf through.
   be read without zooming.
 - **Side pagination** — the turn arrows flank the book left and right so the book can
   be as large as possible, tuned for a desktop reading experience.
+- **Page-jump dots** — a gilt navigator beneath the book with a fixed marker to leap
+  back to the cover, one dot per reading spread, the five chapter openers picked out as
+  gilt diamonds (hover for the *Caput* name), and a fixed marker to jump to the back
+  cover. The active spread is highlighted; on small screens only the end markers and
+  chapter diamonds remain.
 - **Generic foreword & afterword** — the opening and closing pages read as a living
   codex, independent of how many plates it holds.
 - **In-style closing ornament** — a drawn ring-and-compass mark in the same ink as the
@@ -105,7 +110,7 @@ index.html
 css/style.css      — parchment aesthetic, real cover art, 3D book stage, side pagination
 js/data.js         — monster names, titles, subjects + generic front/back matter
 js/audio.js        — procedural drone + page-rustle (Web Audio)
-js/book.js         — page building, 3D turn, drag-corner, side navigation
+js/book.js         — page building, 3D turn, drag-corner, side navigation, page-jump dots
 assets/book/       — real front (cover.webp) and back (back.webp) cover art
 assets/plates/     — optimised WebP plates
 ```

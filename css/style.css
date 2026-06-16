@@ -324,13 +324,101 @@ body { position: relative; }
 
 /* ── Hint ────────────────────────────────────────────────────── */
 .hint {
-  position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: 112px; left: 50%; transform: translateX(-50%);
   z-index: 35; font-style: italic; font-size: 13.5px; color: var(--parch-dark);
   letter-spacing: 0.04em;
   transition: opacity 700ms var(--ease-out);
   pointer-events: none;
 }
 .hint.hidden { opacity: 0; }
+
+/* ── Page-jump dots ──────────────────────────────────────────── */
+.pager {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  z-index: 36;
+  display: flex; align-items: center; justify-content: center;
+  gap: 9px;
+  max-width: min(92vw, 760px);
+  flex-wrap: wrap;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(28,18,10,0.72), rgba(16,10,6,0.78));
+  border: 1px solid rgba(201,161,74,0.22);
+  box-shadow: 0 6px 26px rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+}
+
+/* a single jump dot */
+.pager__dot {
+  flex: none;
+  width: 11px; height: 11px;
+  padding: 0; margin: 0;
+  border-radius: 50%;
+  background: rgba(203,176,131,0.28);
+  border: 1px solid rgba(201,161,74,0.35);
+  cursor: pointer;
+  position: relative;
+  transition: background 180ms var(--ease-out), border-color 180ms var(--ease-out),
+              transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+}
+.pager__dot:hover {
+  background: rgba(232,200,120,0.55);
+  border-color: var(--gilt);
+  transform: scale(1.25);
+}
+.pager__dot.is-active {
+  background: var(--gilt-lit);
+  border-color: var(--gilt-lit);
+  box-shadow: 0 0 9px rgba(232,200,120,0.7);
+}
+
+/* chapter-start dots read as small gilt diamonds */
+.pager__dot--chapter {
+  width: 13px; height: 13px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  background: rgba(201,161,74,0.4);
+  border-color: rgba(201,161,74,0.6);
+}
+.pager__dot--chapter:hover { transform: rotate(45deg) scale(1.22); }
+.pager__dot--chapter.is-active { transform: rotate(45deg); }
+
+/* the two fixed end markers (cover / back) — larger, with an icon */
+.pager__end {
+  flex: none;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  color: var(--parch);
+  background: linear-gradient(180deg, rgba(42,26,16,0.9), rgba(20,12,7,0.92));
+  border: 1px solid rgba(201,161,74,0.45);
+  cursor: pointer;
+  transition: color 180ms var(--ease-out), border-color 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+.pager__end:hover { color: var(--gilt-lit); border-color: var(--gilt); transform: scale(1.08); }
+.pager__end:active { transform: scale(0.96); }
+.pager__end.is-active { color: var(--gilt-lit); border-color: var(--gilt); box-shadow: 0 0 9px rgba(232,200,120,0.5); }
+.pager__end svg { width: 16px; height: 16px; display: block; }
+
+/* a thin gilt divider between the end markers and the dot run */
+.pager__sep { flex: none; width: 1px; height: 16px; background: rgba(201,161,74,0.28); }
+
+/* tooltip on hover, in the codex voice */
+.pager__dot[data-label]:hover::after,
+.pager__end[data-label]:hover::after {
+  content: attr(data-label);
+  position: absolute; bottom: calc(100% + 9px); left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--titling); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--parch-lit);
+  background: rgba(16,10,6,0.95);
+  border: 1px solid rgba(201,161,74,0.3);
+  padding: 4px 9px; border-radius: 5px;
+  pointer-events: none; z-index: 50;
+}
+.pager__dot--chapter[data-label]:hover::after { transform: translateX(-50%) rotate(-45deg); transform-origin: center; }
 
 /* ── Responsive ──────────────────────────────────────────────── */
 /* Tablet / phone: single centred page (no two-page offset) */
@@ -344,6 +432,11 @@ body { position: relative; }
   .hint { font-size: 12px; bottom: 96px; width: 84%; text-align: center; }
   .nav__arrow { width: 44px; height: 44px; }
   .reader { display: none; }
+  /* On small screens the full dot run won't fit — keep the end markers and
+     the chapter diamonds (the meaningful jumps) and hide the per-spread dots. */
+  .pager { bottom: 22px; gap: 7px; padding: 8px 13px; }
+  .pager__dot:not(.pager__dot--chapter) { display: none; }
+  .pager__sep { display: none; }
 }
 
 /* container query units for cover/intro scaling */
