@@ -15,29 +15,48 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ── Build the ordered list of faces ────────────────────────────
-  // front cover → opening page (generic intro) → plates → colophon → back cover
+  // front cover → opening page (intro) → [chapter divider → its plates]…
+  // → colophon → back cover.
+  //
+  // SPREAD GEOMETRY: faces are paired into leaves two-at-a-time, and a
+  // visible spread shows faces(2k+1) on the LEFT and faces(2k+2) on the
+  // RIGHT. So a face on an ODD index sits on the left page; an EVEN index
+  // sits on the right page. We use this to force every chapter divider
+  // onto a LEFT page, so it greets the reader as the chapter opens.
   const faces = [];
-  faces.push({ type: "cover" });
-  faces.push({ type: "intro" });
-  // A blank verso after the intro shifts the plates so that CONSECUTIVE
-  // entries land on the same spread: (0,1)(2,3)(4,5)… This is what places
-  // each pair of opposites (Pride/Humility, Greed/Generosity, …) side by side.
-  faces.push({ type: "blank" });
-  MONSTERS.forEach((m, i) => faces.push({ type: "plate", monster: m, index: i }));
-  // If there is an odd number of plates, give the final solo plate a blank
-  // facing page so it is not stranded opposite the colophon.
-  if (MONSTERS.length % 2 !== 0) faces.push({ type: "blank" });
-  faces.push({ type: "colophon" });
+  const pushFace = (f) => faces.push(f);
+  const padToLeft = () => { if (faces.length % 2 === 0) pushFace({ type: "blank" }); };  // next push lands on odd index (left)
+  const padToRight = () => { if (faces.length % 2 !== 0) pushFace({ type: "blank" }); }; // next push lands on even index (right)
+
+  pushFace({ type: "cover" });   // index 0 — closed cover sits on the right
+  pushFace({ type: "intro" });   // index 1 — opening page on the left of the first spread
+  padToRight();                  // keep the intro's facing page clear, then begin chapters
+
+  let plateNo = 0;               // running plate number across the whole book (folios I, II, III …)
+  (typeof CHAPTERS !== "undefined" ? CHAPTERS : []).forEach((ch) => {
+    if (ch.divider) {
+      padToLeft();               // divider must land on a LEFT page
+      pushFace({ type: "chapter", chapter: ch });
+    }
+    ch.monsters.forEach((m) => {
+      pushFace({ type: "plate", monster: m, index: plateNo });
+      plateNo++;
+    });
+  });
+
+  // Don't strand the colophon: make sure the last plate has a facing page.
+  if (faces.length % 2 !== 0) pushFace({ type: "blank" });
+  pushFace({ type: "colophon" });
   // The back cover must be the BACK face of the final leaf so that turning the
   // last page CLOSES the book — a true mirror of the opening flip. We pad with
   // a blank front so the back cover lands face-up on the left, covering the
   // stack, exactly like the front cover sits closed on the right at the start.
-  if (faces.length % 2 !== 0) faces.push({ type: "blank" }); // keep colophon paired
-  faces.push({ type: "blank" }); // front of the closing leaf
-  faces.push({ type: "back" });  // back of the closing leaf (the closed back cover)
+  if (faces.length % 2 !== 0) pushFace({ type: "blank" }); // keep colophon paired
+  pushFace({ type: "blank" }); // front of the closing leaf
+  pushFace({ type: "back" });  // back of the closing leaf (the closed back cover)
 
   // pair faces into physical leaves (2 faces per sheet)
-  if (faces.length % 2 !== 0) faces.push({ type: "blank" });
+  if (faces.length % 2 !== 0) pushFace({ type: "blank" });
   const leaves = [];
   for (let i = 0; i < faces.length; i += 2) leaves.push({ front: faces[i], back: faces[i + 1] });
   const totalLeaves = leaves.length;
@@ -62,6 +81,15 @@
     if (face.type === "back") {
       return `<div class="art-face art-face--back">
         <img class="art-img" src="assets/book/back.webp" alt="Monstrarium of Representation — back cover" />
+      </div>`;
+    }
+
+    if (face.type === "chapter") {
+      const ch = face.chapter;
+      // The divider art already carries its own "Caput" label, title and motto,
+      // so we render it full-bleed like a plate — no overlaid text needed.
+      return `<div class="art-face art-face--chapter">
+        <img class="art-img" src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
       </div>`;
     }
 

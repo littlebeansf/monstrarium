@@ -23,54 +23,71 @@ flesh, presented as a full illustrated plate inside a book you can leaf through.
 - **Drifting dust motes & candle-dark vignette** for mood.
 - **Accessible** — keyboard navigation, alt text, and `prefers-reduced-motion` support.
 
-## The Plates
+## Chapters & Plates
 
-The plates are ordered so that **opposites face each other across a single spread** —
-Pride faces Humility, Greed faces Generosity, Love faces Hate, Mania faces Depression,
-and so on. The closing plates gather a few mythic figures (a yokai, Ryomen Sukuna, the
-Leshy, the Kappa) that embody balance and boundaries.
+The codex is divided into illustrated **chapters** (Caput I, II, III…). Each chapter
+opens with its own full-page divider plate — which always lands on the LEFT of a spread
+so it greets you as the chapter begins — followed by the studies that share its nature.
+Plate folios are numbered continuously across the whole book (I–XXXVII).
 
+### Caput I · Phobia
 | № | Name | Representation |
 |---|------|----------------|
-| I | Vesperion | Pride |
-| II | Humilioris | Humility |
-| III | Avaranthos | Greed |
-| IV | Magnanvia | Generosity |
-| V | Volurien | Lust |
-| VI | Austerochrys | Abstinence |
-| VII | Voresculpt | Gluttony |
-| VIII | Sobrielleth | Abstemiousness |
-| IX | Vharzul | Wrath |
-| X | Sluth | Sloth |
-| XI | Amorvessel | Love |
-| XII | Abhorrentia | Hate |
-| XIII | Mania | Unrestrained Exaltation |
-| XIV | Melanchion | Depression |
-| XV | Egotheion | Ego |
-| XVI | Conscience | the Inner Witness |
-| XVII | Invidura | Envy |
-| XVIII | Ikigai | Reason for Being |
-| XIX | Nostalgia | Longing for What Was |
-| XX | Weltschmerz | Existential Sorrow |
-| XXI | Anxietas | Anxiety |
-| XXII | Lachrymor | Sorrow |
-| XXIII | Occhianox | Paranoia |
-| XXIV | Atroxium | Addiction |
-| XXV | Dualioris | Bipolarity |
-| XXVI | Phrenozia | Schizophrenia |
-| XXVII | Postrima | Lingering Trauma |
-| XXVIII | Abyssor | Self-Undoing |
-| XXIX | Malanthrope | Body Dysmorphia |
-| XXX | Distortura | Alice in Wonderland Syndrome |
-| XXXI | Aracnophobia | Irrational Terror |
-| XXXII | Porothalys | Trypophobia |
-| XXXIII | Claustharen | Agoraphobia |
-| XXXIV | Yorigami | a Yokai of Borrowed Selves |
-| XXXV | Ryomen Sukuna | Imbalance |
-| XXXVI | Leshy | Wild Places and Forgotten Paths |
-| XXXVII | Kappalos | Boundaries |
+| I | Aracnophobia | Irrational Terror |
+| II | Porothalys | Trypophobia |
+| III | Claustharen | Agoraphobia |
 
-Plus the painted front and back cover.
+### Caput II · Sins
+| № | Name | Representation |
+|---|------|----------------|
+| IV | Vesperion | Pride |
+| V | Humilioris | Humility |
+| VI | Avaranthos | Greed |
+| VII | Magnanvia | Generosity |
+| VIII | Volurien | Lust |
+| IX | Austerochrys | Abstinence |
+| X | Voresculpt | Gluttony |
+| XI | Sobrielleth | Abstemiousness |
+| XII | Vharzul | Wrath |
+| XIII | Sluth | Sloth |
+| XIV | Invidura | Envy |
+
+### Caput III · Disorders
+| № | Name | Representation |
+|---|------|----------------|
+| XV | Mania | Unrestrained Exaltation |
+| XVI | Melanchion | Depression |
+| XVII | Dualioris | Bipolarity |
+| XVIII | Phrenozia | Schizophrenia |
+| XIX | Occhianox | Paranoia |
+| XX | Atroxium | Addiction |
+| XXI | Anxietas | Anxiety |
+| XXII | Postrima | Lingering Trauma |
+| XXIII | Abyssor | Self-Undoing |
+| XXIV | Malanthrope | Body Dysmorphia |
+| XXV | Distortura | Alice in Wonderland Syndrome |
+
+### Caput IV · Mythos & Legends
+| № | Name | Representation |
+|---|------|----------------|
+| XXVI | Yorigami | a Yokai of Borrowed Selves |
+| XXVII | Ryomen Sukuna | Imbalance |
+| XXVIII | Leshy | Wild Places and Forgotten Paths |
+| XXIX | Kappalos | Boundaries |
+
+### Caput V · Emotions
+| № | Name | Representation |
+|---|------|----------------|
+| XXX | Amorvessel | Love |
+| XXXI | Abhorrentia | Hate |
+| XXXII | Egotheion | Ego |
+| XXXIII | Conscience | the Inner Witness |
+| XXXIV | Ikigai | Reason for Being |
+| XXXV | Nostalgia | Longing for What Was |
+| XXXVI | Weltschmerz | Existential Sorrow |
+| XXXVII | Lachrymor | Sorrow |
+
+Plus the painted front and back cover, and five chapter dividers.
 
 ## Run locally
 
