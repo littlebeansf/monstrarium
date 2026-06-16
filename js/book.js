@@ -8,8 +8,7 @@
   const book = document.getElementById("book");
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
-  const navTitle = document.getElementById("navTitle");
-  const navProgress = document.getElementById("navProgress");
+  const reader = document.getElementById("reader");
   const hint = document.getElementById("hint");
   const soundBtn = document.getElementById("soundBtn");
   const fsBtn = document.getElementById("fsBtn");
@@ -76,7 +75,6 @@
         <div class="plate__img-wrap">
           <img class="plate__img" src="${src}" alt="${m.name}, ${m.title}, embodiment of ${m.subject}" draggable="false" />
         </div>
-        <div class="plate__loupe" aria-hidden="true"></div>
         <div class="plate__folio">${folio}</div>
       </div>`;
     }
@@ -152,34 +150,6 @@
     const atBack = currentLeaf >= maxLeaf;
     book.classList.toggle("closed", closed);
     book.classList.toggle("at-back", atBack);
-
-    // Bottom meta describes the whole spread, never a single monster, so the
-    // two pages on screen are both honoured.
-    const leftFace = faces[currentLeaf * 2 - 1];   // verso (left page)
-    const rightFace = faces[currentLeaf * 2];      // recto (right page)
-    let label = "Monstrarium", prog = "of Representation";
-
-    if (closed) {
-      label = "Monstrarium"; prog = "of Representation";
-    } else if (atBack) {
-      label = "Finis"; prog = "Close the book";
-    } else {
-      const names = [];
-      [leftFace, rightFace].forEach(f => {
-        if (!f) return;
-        if (f.type === "plate") names.push(f.monster.name);
-        else if (f.type === "intro") names.push("Foreword");
-        else if (f.type === "colophon") names.push("Finis");
-      });
-      if (names.length) {
-        label = names.join("  &  ");
-        // count of plates shown so far for orientation
-        const lastPlate = [leftFace, rightFace].filter(f => f && f.type === "plate").pop();
-        prog = lastPlate ? `of ${MONSTERS.length} representations` : "";
-      }
-    }
-    navTitle.innerHTML = label;
-    navProgress.textContent = prog;
   }
 
   // ── Turn logic ──────────────────────────────────────────────────
@@ -301,34 +271,50 @@
   book.addEventListener("touchmove", pointerMove, { passive: false });
   book.addEventListener("touchend", pointerUp);
 
-  // ── Hover loupe on plate images ────────────────────────────────
-  // A magnifier lens that follows the cursor so the dense plate text reads.
-  const ZOOM = 2.6;
-  function bindLoupe(plate) {
-    const wrap = plate.querySelector(".plate__img-wrap");
-    const img = plate.querySelector(".plate__img");
-    const loupe = plate.querySelector(".plate__loupe");
-    const src = plate.dataset.zoom;
-    loupe.style.backgroundImage = `url("${src}")`;
+  // ── Reading magnifier ──────────────────────────────────────────
+  // A large panel anchored to the side opposite the cursor shows the area
+  // under the pointer at high zoom. Because the panel is independent of the
+  // cursor, every part of a plate — including the extreme left margin — is
+  // reachable and never hidden beneath the lens.
+  const ZOOM = 2.7;
+  let readerSrc = null;
 
-    function move(e) {
-      if (animating || drag) { loupe.classList.remove("on"); return; }
-      const r = wrap.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width;
-      const py = (e.clientY - r.top) / r.height;
-      if (px < 0 || px > 1 || py < 0 || py > 1) { loupe.classList.remove("on"); return; }
-      const size = parseFloat(getComputedStyle(loupe).width);
-      loupe.style.left = `${e.clientX - r.left - size / 2}px`;
-      loupe.style.top = `${e.clientY - r.top - size / 2}px`;
-      loupe.style.backgroundSize = `${r.width * ZOOM}px ${r.height * ZOOM}px`;
-      loupe.style.backgroundPosition = `${px * 100}% ${py * 100}%`;
-      loupe.classList.add("on");
-    }
-    wrap.addEventListener("mousemove", move);
-    wrap.addEventListener("mouseenter", move);
-    wrap.addEventListener("mouseleave", () => loupe.classList.remove("on"));
+  function hideReader() { reader.classList.remove("on"); reader.style.backgroundImage = ""; readerSrc = null; }
+
+  function onPlateMove(e) {
+    if (animating || drag) { hideReader(); return; }
+    const wrap = e.currentTarget;
+    const plate = wrap.closest(".plate");
+    const src = plate.dataset.zoom;
+    const r = wrap.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    if (px < 0 || px > 1 || py < 0 || py > 1) { hideReader(); return; }
+
+    if (src !== readerSrc) { reader.style.backgroundImage = `url("${src}")`; readerSrc = src; }
+    // panel jumps to whichever side gives the most room and avoids the cursor
+    const onLeftHalf = e.clientX < window.innerWidth / 2;
+    reader.classList.toggle("reader--right", onLeftHalf);
+    reader.classList.toggle("reader--left", !onLeftHalf);
+
+    // scale the magnified plate to the panel height × zoom, width by image ratio,
+    // then centre the background on the point under the cursor
+    const bgH = reader.offsetHeight * ZOOM;
+    const bgW = bgH * (r.width / r.height);
+    reader.style.backgroundSize = `${bgW}px ${bgH}px`;
+    reader.style.backgroundPosition = `${px * 100}% ${py * 100}%`;
+    reader.classList.add("on");
   }
-  book.querySelectorAll(".plate").forEach(bindLoupe);
+
+  function bindReader(plate) {
+    const wrap = plate.querySelector(".plate__img-wrap");
+    wrap.addEventListener("mousemove", onPlateMove);
+    wrap.addEventListener("mouseenter", onPlateMove);
+    wrap.addEventListener("mouseleave", hideReader);
+  }
+  book.querySelectorAll(".plate").forEach(bindReader);
+  // hide the reader whenever a turn begins
+  book.addEventListener("mousedown", hideReader);
 
   // ── Buttons & keyboard ──────────────────────────────────────────
   nextBtn.addEventListener("click", (e) => { e.stopPropagation(); turnNext(); });
