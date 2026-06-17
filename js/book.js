@@ -273,6 +273,15 @@
   }
 
   function desktopTurn(dir, target) {
+    // Decode the destination artwork BEFORE we build anything. Neighbouring
+    // spreads are pre-warmed (see warmNeighbours + the post-turn warming), so
+    // for a normal forward/back turn this resolves on the SAME frame and the
+    // swing starts with no perceptible lag. Only an un-warmed jump pays a few
+    // ms of decode — and that is far better than a brown flash.
+    preloadSpread(target).then(() => desktopTurnNow(dir, target));
+  }
+
+  function desktopTurnNow(dir, target) {
     // Determine which page rotates and on which hinge.
     // NEXT: the RIGHT page of the current spread swings to the LEFT (hinge
     //   = spine on its left edge). Outgoing face = pages[rightIndexOf(cur)];
@@ -301,8 +310,9 @@
       `<div class="flip__face flip__face--front">${renderInnerFor(frontIdx)}<div class="pg__spine"></div></div>` +
       `<div class="flip__face flip__face--back">${renderInnerFor(backIdx)}<div class="pg__spine pg__spine--r"></div></div>`;
 
-    // Reveal the destination spread UNDERNEATH first, then lay the flip page
-    // on top showing the outgoing side, then animate.
+    // Destination images are already decoded, so painting the bed now cannot
+    // flash. Reveal the destination spread UNDERNEATH, then lay the flip on
+    // top showing the outgoing side, then animate.
     spread = target;
     renderSpreadStaticOnly();        // paint the new resting spread beneath
     book.appendChild(flip);
@@ -323,9 +333,16 @@
       animating = false;
       renderSpread();    // full re-render binds loupe + final chrome
       hideHint();
+      warmNeighbours(target);   // keep the NEXT turn flash-free
     };
     flip.addEventListener("transitionend", done, { once: true });
     setTimeout(done, TURN_MS + 120); // safety net if transitionend is missed
+  }
+
+  // Decode the spreads on either side of `s` so the next turn is instant.
+  function warmNeighbours(s) {
+    if (s + 1 <= LAST_SPREAD) preloadSpread(s + 1);
+    if (s - 1 >= 0) preloadSpread(s - 1);
   }
 
   // Paint just the static left/right of the CURRENT spread (no loupe binding,
@@ -346,7 +363,54 @@
     return (idx >= 0 && idx < PAGE_COUNT) ? renderPage(pages[idx]) : `<div class="paper"></div>`;
   }
 
+  // ── Image preloading ────────────────────────────────────────────
+  // Return the artwork URL for a page index (null for text/blank pages).
+  function imgUrlFor(idx) {
+    if (idx < 0 || idx >= PAGE_COUNT) return null;
+    const p = pages[idx];
+    if (!p) return null;
+    if (p.type === "cover")   return "assets/book/cover.webp";
+    if (p.type === "back")    return "assets/book/back.webp";
+    if (p.type === "chapter") return p.chapter.divider;
+    if (p.type === "plate")   return `assets/plates/${p.monster.file}`;
+    return null;
+  }
+
+  const _decoded = new Set();  // URLs already decoded once
+  // Resolve when the image bitmap is ready to paint without a flash.
+  // Resolves immediately for cached/text pages; never rejects (we don't want
+  // a decode hiccup to stall a turn).
+  function preloadImg(url) {
+    if (!url || _decoded.has(url)) return Promise.resolve();
+    return new Promise((resolve) => {
+      const im = new Image();
+      im.src = url;
+      const ok = () => { _decoded.add(url); resolve(); };
+      if (im.decode) {
+        im.decode().then(ok).catch(ok);
+      } else {
+        im.onload = ok; im.onerror = ok;
+      }
+    });
+  }
+  // Preload every artwork image for a spread's two beds.
+  function preloadSpread(s) {
+    const urls = [];
+    if (s <= 0) urls.push(imgUrlFor(0));
+    else if (s >= LAST_SPREAD) urls.push(imgUrlFor(PAGE_COUNT - 1));
+    else { urls.push(imgUrlFor(leftIndexOf(s))); urls.push(imgUrlFor(rightIndexOf(s))); }
+    return Promise.all(urls.map(preloadImg));
+  }
+
   function mobileTurn(dir, targetPage) {
+    // Decode the incoming page first so the cross-fade reveals a finished
+    // bitmap, not a bare parchment panel. Pre-warmed neighbours make this
+    // resolve on the same frame in normal paging.
+    const url = imgUrlFor(targetPage);
+    preloadImg(url).then(() => mobileTurnNow(dir, targetPage));
+  }
+
+  function mobileTurnNow(dir, targetPage) {
     // Cross-fade + slight slide. One page out, one page in.
     const outEl = book.firstElementChild;
     mpage = targetPage;
@@ -368,6 +432,9 @@
       if (outEl && outEl.parentNode) outEl.remove();
       animating = false;
       hideHint();
+      // Warm the next/prev real pages for instant subsequent turns.
+      preloadImg(imgUrlFor(nextReal(mpage, +1)));
+      preloadImg(imgUrlFor(nextReal(mpage, -1)));
     }, TURN_MS);
   }
 
@@ -379,20 +446,29 @@
       // translate the spread target into a page and jump there
       const targetPage = spreadToPage(target);
       if (targetPage === mpage) return;
-      mpage = targetPage;
-      spread = pageToSpread(mpage);
-      Atmos && Atmos.sfx && Atmos.sfx("rustle");
-      renderSpread();
-      hideHint();
+      // Decode before painting so the jumped-to page never flashes parchment.
+      preloadImg(imgUrlFor(targetPage)).then(() => {
+        mpage = targetPage;
+        spread = pageToSpread(mpage);
+        Atmos && Atmos.sfx && Atmos.sfx("rustle");
+        renderSpread();
+        hideHint();
+        preloadImg(imgUrlFor(nextReal(mpage, +1)));
+        preloadImg(imgUrlFor(nextReal(mpage, -1)));
+      });
       return;
     }
     if (target === spread) return;
     if (target === spread + 1) { turn(1); return; }
     if (target === spread - 1) { turn(-1); return; }
-    spread = target;
-    Atmos && Atmos.sfx && Atmos.sfx("rustle");
-    renderSpread();
-    hideHint();
+    // Decode the destination spread before painting it for a flash-free jump.
+    preloadSpread(target).then(() => {
+      spread = target;
+      Atmos && Atmos.sfx && Atmos.sfx("rustle");
+      renderSpread();
+      hideHint();
+      warmNeighbours(target);
+    });
   }
 
   function turnNext() { turn(1); }
@@ -738,4 +814,11 @@
 
   // ── First paint ─────────────────────────────────────────────────
   renderSpread();
+  // Warm the cover's neighbour (intro spread / first page) so the very first
+  // turn is already flash-free.
+  if (isMobile()) {
+    preloadImg(imgUrlFor(nextReal(mpage, +1)));
+  } else {
+    warmNeighbours(spread);
+  }
 })();
