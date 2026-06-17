@@ -138,6 +138,16 @@ body { position: relative; }
   transform-origin: left center;
   transition: transform 1000ms var(--page-turn);
   cursor: default;
+}
+/* Promote ONLY the leaves near the current spread (set by JS via DOM
+   windowing) and the leaf actively turning. Promoting all 64 leaves with a
+   blanket will-change forced 64 full-page compositor layers onto the GPU at
+   once — fine in a shrunken DevTools viewport, but exhausting GPU memory at
+   full size (disappearing content, ghost transparencies, dead buttons) and
+   triggering out-of-memory tab reloads on phones. Scoping the promotion keeps
+   a small, constant layer budget while turns stay smooth. */
+.page.near,
+.page.is-turning {
   will-change: transform;
 }
 

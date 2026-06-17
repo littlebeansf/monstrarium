@@ -77,14 +77,20 @@
   function renderFace(face) {
     if (!face || face.type === "blank") return `<div class="paper"></div>`;
 
+    // Heavy full-bleed art (cover/back/dividers/plates) is mounted lazily via
+    // DOM windowing: we emit data-src here and only set the real src on the
+    // <img> when its leaf is near the current spread (see mountWindow). This
+    // caps the number of live, decoded, GPU-backed images to a small window
+    // instead of holding all ~114 full-res images at once — the fix for the
+    // desktop GPU exhaustion and the mobile out-of-memory reload loop.
     if (face.type === "cover") {
       return `<div class="art-face art-face--cover">
-        <img class="art-img" src="assets/book/cover.webp" alt="Monstrarium of Representation — front cover" />
+        <img class="art-img" data-src="assets/book/cover.webp" alt="Monstrarium of Representation — front cover" draggable="false" />
       </div>`;
     }
     if (face.type === "back") {
       return `<div class="art-face art-face--back">
-        <img class="art-img" src="assets/book/back.webp" alt="Monstrarium of Representation — back cover" />
+        <img class="art-img" data-src="assets/book/back.webp" alt="Monstrarium of Representation — back cover" draggable="false" />
       </div>`;
     }
 
@@ -93,7 +99,7 @@
       // The divider art already carries its own "Caput" label, title and motto,
       // so we render it full-bleed like a plate — no overlaid text needed.
       return `<div class="art-face art-face--chapter">
-        <img class="art-img" src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
+        <img class="art-img" data-src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
       </div>`;
     }
 
@@ -120,7 +126,7 @@
       const src = `assets/plates/${m.file}`;
       return `<div class="plate plate--full" data-zoom="${src}">
         <div class="plate__img-wrap">
-          <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" />
+          <img class="plate__img" data-src="${src}" alt="${m.name}" draggable="false" />
         </div>
       </div>`;
     }
@@ -158,6 +164,41 @@
     book.appendChild(page);
   });
   const pageEls = Array.from(book.querySelectorAll(".page"));
+
+  // ── DOM windowing — the core performance fix ────────────────────
+  // We never hold all ~114 full-res plate images live at once. Each heavy
+  // <img> carries its file in data-src; we set the real src only on leaves
+  // inside a sliding window around the current spread, and unset it (freeing
+  // the decoded bitmap + its compositor layer) once a leaf scrolls far out of
+  // view. We also promote ONLY the few leaves in/near the window to their own
+  // GPU layer via the .near class, instead of forcing all 64 leaves onto the
+  // compositor with a blanket will-change. Together these cap GPU memory and
+  // decoded-image memory to a small, constant budget regardless of book size.
+  //
+  // WINDOW must be wide enough that, mid-turn, the turning leaf and the leaf
+  // it reveals on either side are already decoded (no flash of blank parchment).
+  const WINDOW = 3;          // leaves of slack on each side of the current spread
+  // Each page element holds two faces (front + back). A leaf at index i becomes
+  // visible across the spreads currentLeaf = i and currentLeaf = i+1, so we key
+  // the window off proximity to currentLeaf.
+  function mountWindow() {
+    const lo = currentLeaf - WINDOW;
+    const hi = currentLeaf + WINDOW;
+    pageEls.forEach((p, i) => {
+      const near = i >= lo && i <= hi;
+      // promote only nearby leaves to their own compositor layer
+      p.classList.toggle("near", near);
+      // mount/unmount the heavy images for this leaf
+      p.querySelectorAll("img[data-src]").forEach((img) => {
+        if (near) {
+          if (img.getAttribute("src") !== img.dataset.src) img.src = img.dataset.src;
+        } else if (img.getAttribute("src")) {
+          // release the decoded bitmap so the browser can reclaim memory
+          img.removeAttribute("src");
+        }
+      });
+    });
+  }
 
   // ── Page-jump dots ──────────────────────────────────
   // A fixed "to cover" marker, one dot per reading spread (chapter openers
@@ -255,6 +296,7 @@
 
   function updateChrome() {
     applyResting();
+    mountWindow();
 
     prevBtn.disabled = currentLeaf === 0;
     nextBtn.disabled = currentLeaf >= maxLeaf;
