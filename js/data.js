@@ -215,7 +215,6 @@ const CHAPTERS = [
       { id: "greek-athena", name: "Athena", file: "greek-athena.webp" },
       { id: "greek-demeter", name: "Demeter", file: "greek-demeter.webp" },
       { id: "greek-dionysus", name: "Dionysus", file: "greek-dionysus.webp" },
-      { id: "greek-gryphus", name: "Gryphus", file: "greek-gryphus.webp" },
       { id: "greek-hades", name: "Hades", file: "greek-hades.webp" },
       { id: "greek-hephaestus", name: "Hephaestus", file: "greek-hephaestus.webp" },
       { id: "greek-hera", name: "Hera", file: "greek-hera.webp" },
@@ -316,6 +315,7 @@ const CHAPTERS = [
     divider: "assets/chapters/chapter-miscellaneous.webp",
     monsters: [
       { id: "miscellaneous-banshee", name: "Banshee", file: "miscellaneous-banshee.webp" },
+      { id: "miscellaneous-gryphus", name: "Gryphus", file: "miscellaneous-gryphus.webp" },
       { id: "miscellaneous-leprechaun", name: "Leprechaun", file: "miscellaneous-leprechaun.webp" },
       { id: "miscellaneous-nuckelavee", name: "Nuckelavee", file: "miscellaneous-nuckelavee.webp" },
       { id: "miscellaneous-apocalyps-riders", name: "The Four Riders of the Apocalypse", file: "miscellaneous-apocalyps-riders.webp" },
