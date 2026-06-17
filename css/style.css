@@ -90,80 +90,102 @@ body { position: relative; }
 .hud__btn:not([aria-pressed="true"]) .snd-on:nth-child(n+2) { opacity: 0.25; }
 .hud__label { display: inline; }
 
-/* ── Stage & book ────────────────────────────────────────────── */
+/* ── Stage & book ────────────────────────────────────────────────
+   WINDOWED 2-SPREAD ENGINE (v4). The book is a flex row holding only the
+   CURRENT spread's two pages (or one centred page on cover/back/mobile).
+   A single .flip element is added on top during a turn. No absolutely
+   stacked leaves, no margin-left hacks — the spread is genuinely centred
+   at all times, so it can never sit off-centre. */
 .stage {
   position: relative; z-index: 10;
   display: flex; align-items: center; justify-content: center;
-  gap: 30px;
   height: 100%;
-  perspective: 3000px;
+  perspective: 2600px;
   padding: 46px 16px 96px;
 }
 
 .book {
   position: relative;
-  width: var(--page-w);
+  display: flex; align-items: stretch; justify-content: center;
+  width: calc(var(--page-w) * 2);
   height: var(--page-h);
   transform-style: preserve-3d;
-  /* shift right by half a page so the spine sits near centre,
-     leaving room for the turned page to rest on the left without clipping */
-  margin-left: var(--page-w);
-  transition: margin-left 700ms var(--ease-in-out);
 }
-/* when the book is closed (cover showing) or fully read (back showing),
-   centre it fully so it reads as a shut book */
-.book.closed { margin-left: 0; }
-/* fully closed at the back: the back cover has flipped left of the spine, so
-   shift the book right by two pages to centre it — a mirror of .closed */
-.book.at-back { margin-left: calc(var(--page-w) * 2); }
+/* cover, back cover and mobile: a single centred page */
+.book.book--single { width: var(--page-w); }
 
 /* book shadow on the table */
 .book::after {
   content: "";
   position: absolute;
-  left: -8%; right: -8%;
+  left: -6%; right: -6%;
   bottom: -30px; height: 56px;
   background: radial-gradient(ellipse at center, rgba(0,0,0,0.75), transparent 72%);
   filter: blur(8px);
   z-index: -2;
 }
 
-/* ── Pages ───────────────────────────────────────────────────── */
-.page {
-  position: absolute;
-  top: 0; left: 0;
+/* ── Static pages of the current spread ───────────────────────── */
+.pg {
+  position: relative;
+  flex: none;
+  width: var(--page-w);
+  height: var(--page-h);
+}
+.pg__face {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  background: var(--parch);
+}
+.pg--left  .pg__face { border-radius: 3px 0 0 3px; }
+.pg--right .pg__face { border-radius: 0 3px 3px 0; }
+.pg--single .pg__face { border-radius: 4px; }
+
+/* spine shading on the inner edge of each static page */
+.pg__spine {
+  position: absolute; top: 0; bottom: 0; width: 13%;
+  pointer-events: none; z-index: 5;
+}
+.pg--left  .pg__spine { right: 0; background: linear-gradient(270deg, rgba(30,18,8,0.5), transparent); }
+.pg--right .pg__spine { left: 0;  background: linear-gradient(90deg,  rgba(30,18,8,0.5), transparent); }
+.pg--single .pg__spine { display: none; }
+.pg__spine--r { left: auto; right: 0; background: linear-gradient(270deg, rgba(30,18,8,0.5), transparent); }
+
+/* ── The single turning page ──────────────────────────────────── */
+/* Positioned over one half of the spread; only THIS element rotates, so
+   there are never competing 3D layers or backface compositing races. */
+.flip {
+  position: absolute; top: 0;
   width: var(--page-w);
   height: var(--page-h);
   transform-style: preserve-3d;
-  transform-origin: left center;
-  transition: transform 1000ms var(--page-turn);
-  cursor: default;
+  z-index: 40;
   will-change: transform;
 }
+/* NEXT: the right page swings left → hinge on its LEFT edge (the spine) */
+.flip--next { left: 50%; transform-origin: left center; }
+/* PREV: the left page swings right → hinge on its RIGHT edge (the spine) */
+.flip--prev { right: 50%; left: auto; transform-origin: right center; }
+/* on the single-page cover/back spreads the half sits centred */
+.book--single .flip--next { left: 0; }
+.book--single .flip--prev { right: 0; left: auto; }
 
-/* each page has two faces */
-.face {
+.flip__face {
   position: absolute; inset: 0;
+  overflow: hidden;
+  background: var(--parch);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  overflow: hidden;
-  border-radius: 3px 9px 9px 3px;
-  background: var(--parch);
 }
-.face--back {
-  transform: rotateY(180deg);
-  border-radius: 9px 3px 3px 9px;
+.flip__face--back { transform: rotateY(180deg); }
+/* a soft directional shadow that reads as the curling page catching light */
+.flip__face::before {
+  content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none;
+  opacity: 0; transition: opacity 200ms var(--ease-out);
 }
-
-/* directional shading that blooms while a leaf is mid-turn, giving the
-   curling page a sense of light and shadow without any coloured glow */
-.turn-shade {
-  position: absolute; inset: 0; z-index: 6; pointer-events: none;
-  opacity: 0; transition: opacity 240ms var(--ease-out);
-}
-.turn-shade--front { background: linear-gradient(100deg, rgba(0,0,0,0.0) 45%, rgba(0,0,0,0.32) 100%); }
-.turn-shade--back  { background: linear-gradient(260deg, rgba(0,0,0,0.0) 45%, rgba(0,0,0,0.32) 100%); }
-.page.is-turning .turn-shade { opacity: 1; }
+.flip__face--front::before { background: linear-gradient(100deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.28) 100%); }
+.flip__face--back::before  { background: linear-gradient(260deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.28) 100%); }
+.flip.is-turning .flip__face::before { opacity: 1; }
 
 /* paper texture base for content faces */
 .paper {
@@ -176,13 +198,18 @@ body { position: relative; }
     inset 0 0 60px rgba(60,40,18,0.5),
     inset 0 0 140px rgba(40,26,12,0.25);
 }
-/* spine shading on inner edge */
-.face .spine-shade {
-  position: absolute; top: 0; bottom: 0; width: 14%;
-  pointer-events: none; z-index: 5;
+
+/* ── Mobile single-page cross-fade transitions ────────────────── */
+.pg { transition: opacity 360ms var(--ease-out), transform 360ms var(--ease-out); }
+.pg--entering { opacity: 0; }
+.pg--entering-next { transform: translateX(8%); }
+.pg--entering-prev { transform: translateX(-8%); }
+.pg--leaving {
+  position: absolute; inset: 0; z-index: 30;
+  opacity: 0; pointer-events: none;
 }
-.face--front .spine-shade { left: 0; background: linear-gradient(90deg, rgba(30,18,8,0.55), transparent); }
-.face--back  .spine-shade { right: 0; background: linear-gradient(270deg, rgba(30,18,8,0.55), transparent); }
+.pg--leaving-next { transform: translateX(-8%); }
+.pg--leaving-prev { transform: translateX(8%); }
 
 /* ── COVER & BACK — real painted art, full bleed ─────────────── */
 .art-face {
@@ -656,10 +683,9 @@ body { position: relative; }
 /* ── Responsive ──────────────────────────────────────────────── */
 /* Tablet / phone: single centred page (no two-page offset) */
 @media (max-width: 820px) {
-  .stage { padding: 30px 8px 120px; perspective: 1800px; overflow: hidden; gap: 8px; }
-  /* keep the book centred — the turning page swings left over empty space
-     and is clipped by the stage, which reads as a page lifting away */
-  .book { margin-left: 0 !important; }
+  .stage { padding: 30px 8px 120px; perspective: 1800px; overflow: hidden; }
+  /* mobile shows ONE centred page; turns are a cross-fade, not a 3D swing */
+  .book, .book.book--single { width: var(--page-w); }
   .hud__label { display: none; }
   .hud__btn { padding: 8px 10px; }
   .hint { font-size: 12px; bottom: 96px; width: 84%; text-align: center; }
@@ -687,16 +713,16 @@ body { position: relative; }
 }
 
 /* container query units for cover/intro/colophon text scaling.
-   Scoped ONLY to text-bearing faces — NOT applied globally to every .face.
-   Putting container-type on plate faces interacted badly with the 3D page-turn
-   and percentage-height plate images, producing the intermittent vertical split. */
-.face:has(.intro), .face:has(.colophon) { container-type: inline-size; }
+   Scoped ONLY to text-bearing faces — NOT applied to plate faces, where
+   container-type interacted badly with the page geometry. */
+.pg__face:has(.intro), .pg__face:has(.colophon),
+.flip__face:has(.intro), .flip__face:has(.colophon) { container-type: inline-size; }
 
 @media (prefers-reduced-motion: reduce) {
-  .page { transition: transform 1ms linear; }
+  .flip { transition: transform 1ms linear !important; }
+  .pg { transition: none; }
   .dust { animation: none; }
-  .book { transition: none; }
-  .turn-shade { display: none; }
+  .flip__face::before { display: none; }
   .gallery { transition: opacity 1ms linear; }
   .gcard__frame, .gcard__img { transition: none; }
 }

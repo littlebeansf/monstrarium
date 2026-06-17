@@ -1,71 +1,87 @@
 /* ═══════════════════════════════════════════════════════════════
-   Monstrarium of Representation — book engine (v3)
-   Real cover & back art · two-page spread · clean page-turn ·
-   per-page folios · hover loupe on plates · proper open/close.
+   Monstrarium of Representation — book engine (v4, windowed)
+   ───────────────────────────────────────────────────────────────
+   A scalable two-page spread engine.
+
+   WHY THIS REWRITE: the old engine stacked EVERY physical leaf in the
+   DOM at once, each an absolutely-positioned, 3D-transformed element
+   with its own image and `will-change`. With ~100 plates that is ~60
+   GPU-promoted layers holding ~60 full-res images simultaneously —
+   which exhausts the compositor (white / half / mis-ordered pages) and
+   never scales. There were also z-index races between many leaves all
+   carrying a front+back face on a single shared spine.
+
+   THE NEW MODEL:
+   • The book is a flat array of single-sided PAGES (not front/back leaves).
+   • A "spread" is derived from ONE integer `spread`:
+       spread 0           → closed book, cover centred (single page).
+       spread 1 … last-1  → pages[2s-1] on the LEFT, pages[2s] on the RIGHT.
+       spread last        → back cover centred (single page).
+     Because the spread is always recomputed from one index, the page
+     ORDER can never drift.
+   • We only ever put the CURRENT spread's two pages in the DOM, plus —
+     during a turn — ONE flipping page on top. Max ~3 page nodes, max ~3
+     decoded images, at any instant. Adding 1000 pages costs nothing.
+   • Exactly one element rotates per turn → no z-fighting, no backface
+     compositing failures, no half-pages.
+
+   The page DESIGN (parchment, gilt, plates, intro/colophon, gallery,
+   loupe, pager, sound, HUD) is unchanged — only the turn MECHANISM and
+   the DOM windowing are new.
 ═══════════════════════════════════════════════════════════════ */
 
 (() => {
-  const book = document.getElementById("book");
+  const book    = document.getElementById("book");
+  const stage   = document.getElementById("stage");
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
-  const reader = document.getElementById("reader");
-  const hint = document.getElementById("hint");
+  const reader  = document.getElementById("reader");
+  const hint    = document.getElementById("hint");
   const soundBtn = document.getElementById("soundBtn");
-  const fsBtn = document.getElementById("fsBtn");
+  const fsBtn    = document.getElementById("fsBtn");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // ── Build the ordered list of faces ────────────────────────────
-  // front cover → opening page (intro) → [chapter divider → its plates]…
+  // ── Build the ordered list of single-sided PAGES ────────────────
+  // cover → intro → [chapter divider (LEFT) → its plates two-per-spread]…
   // → colophon → back cover.
   //
-  // SPREAD GEOMETRY: faces are paired into leaves two-at-a-time, and a
-  // visible spread shows faces(2k+1) on the LEFT and faces(2k+2) on the
-  // RIGHT. So a face on an ODD index sits on the left page; an EVEN index
-  // sits on the right page. We use this to force every chapter divider
-  // onto a LEFT page, so it greets the reader as the chapter opens.
-  const faces = [];
-  const pushFace = (f) => faces.push(f);
-  const padToLeft = () => { if (faces.length % 2 === 0) pushFace({ type: "blank" }); };  // next push lands on odd index (left)
-  const padToRight = () => { if (faces.length % 2 !== 0) pushFace({ type: "blank" }); }; // next push lands on even index (right)
+  // SPREAD GEOMETRY: page index 0 is the cover. Reading spreads pair
+  // pages (1,2), (3,4), (5,6)… so an ODD index sits on the LEFT, an EVEN
+  // index on the RIGHT. We pad with blanks so every chapter divider lands
+  // on an ODD (left) index and nothing important is stranded.
+  const pages = [];
+  const push = (p) => pages.push(p);
+  // ensure the NEXT pushed page lands on an odd (LEFT) index
+  const padToLeft  = () => { if (pages.length % 2 === 0) push({ type: "blank" }); };
 
-  pushFace({ type: "cover" });   // index 0 — closed cover sits on the right
-  pushFace({ type: "intro" });   // index 1 — opening page on the left of the first spread
-  padToRight();                  // keep the intro's facing page clear, then begin chapters
+  push({ type: "cover" });   // 0 — the closed cover (right-hand, single)
+  push({ type: "intro" });   // 1 — opening page, left of the first spread
 
-  let plateNo = 0;               // running plate number across the whole book (folios I, II, III …)
-  // While building, remember which face index each plate landed on, so the
-  // gallery can later jump straight to the spread that shows it.
-  const plateFaceIndex = {};     // monster.id -> face index
+  let plateNo = 0;
+  const plateFirstPage = {};  // monster.id -> the page index it occupies
   (typeof CHAPTERS !== "undefined" ? CHAPTERS : []).forEach((ch) => {
     if (ch.divider) {
-      padToLeft();               // divider must land on a LEFT page
-      pushFace({ type: "chapter", chapter: ch });
+      padToLeft();                           // divider on a LEFT page
+      push({ type: "chapter", chapter: ch });
     }
     ch.monsters.forEach((m) => {
-      plateFaceIndex[m.id] = faces.length; // index this face will occupy
-      pushFace({ type: "plate", monster: m, index: plateNo });
+      plateFirstPage[m.id] = pages.length;
+      push({ type: "plate", monster: m, index: plateNo });
       plateNo++;
     });
   });
 
-  // Don't strand the colophon: make sure the last plate has a facing page.
-  if (faces.length % 2 !== 0) pushFace({ type: "blank" });
-  pushFace({ type: "colophon" });
-  // The back cover must be the BACK face of the final leaf so that turning the
-  // last page CLOSES the book — a true mirror of the opening flip. We pad with
-  // a blank front so the back cover lands face-up on the left, covering the
-  // stack, exactly like the front cover sits closed on the right at the start.
-  if (faces.length % 2 !== 0) pushFace({ type: "blank" }); // keep colophon paired
-  pushFace({ type: "blank" }); // front of the closing leaf
-  pushFace({ type: "back" });  // back of the closing leaf (the closed back cover)
+  // Give the colophon a left page of its own spread, then the back cover
+  // gets its own final spread so the closing turn mirrors the opening one.
+  padToLeft();
+  push({ type: "colophon" });
+  if (pages.length % 2 !== 0) push({ type: "blank" }); // pair the colophon
+  push({ type: "back" });                              // back cover, centred single
 
-  // pair faces into physical leaves (2 faces per sheet)
-  if (faces.length % 2 !== 0) pushFace({ type: "blank" });
-  const leaves = [];
-  for (let i = 0; i < faces.length; i += 2) leaves.push({ front: faces[i], back: faces[i + 1] });
-  const totalLeaves = leaves.length;
-  // The final leaf carries the back cover on its back face, so it DOES flip.
-  const maxLeaf = totalLeaves;
+  const PAGE_COUNT = pages.length;
+  // spread index runs 0 (cover) … LAST (back). Reading spread s shows
+  // pages[2s-1] (left) and pages[2s] (right).
+  const LAST_SPREAD = Math.ceil((PAGE_COUNT - 1) / 2);
 
   function roman(n) {
     const map = [["M",1000],["CM",900],["D",500],["CD",400],["C",100],["XC",90],["L",50],["XL",40],["X",10],["IX",9],["V",5],["IV",4],["I",1]];
@@ -73,31 +89,27 @@
     return out;
   }
 
-  // ── Render a face's inner HTML ──────────────────────────────────
-  function renderFace(face) {
-    if (!face || face.type === "blank") return `<div class="paper"></div>`;
+  // ── Render a page's inner HTML ──────────────────────────────────
+  function renderPage(page) {
+    if (!page || page.type === "blank") return `<div class="paper"></div>`;
 
-    if (face.type === "cover") {
+    if (page.type === "cover") {
       return `<div class="art-face art-face--cover">
-        <img class="art-img" src="assets/book/cover.webp" alt="Monstrarium of Representation — front cover" />
+        <img class="art-img" src="assets/book/cover.webp" alt="Monstrarium of Representation — front cover" draggable="false" />
       </div>`;
     }
-    if (face.type === "back") {
+    if (page.type === "back") {
       return `<div class="art-face art-face--back">
-        <img class="art-img" src="assets/book/back.webp" alt="Monstrarium of Representation — back cover" />
+        <img class="art-img" src="assets/book/back.webp" alt="Monstrarium of Representation — back cover" draggable="false" />
       </div>`;
     }
-
-    if (face.type === "chapter") {
-      const ch = face.chapter;
-      // The divider art already carries its own "Caput" label, title and motto,
-      // so we render it full-bleed like a plate — no overlaid text needed.
+    if (page.type === "chapter") {
+      const ch = page.chapter;
       return `<div class="art-face art-face--chapter">
         <img class="art-img" src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
       </div>`;
     }
-
-    if (face.type === "intro") {
+    if (page.type === "intro") {
       const paras = FRONT_MATTER.paragraphs.map((p, i) =>
         i === 0 ? `<p><span class="drop">${p[0]}</span>${p.slice(1)}</p>` : `<p>${p}</p>`
       ).join("");
@@ -111,21 +123,16 @@
         <div class="intro-foot"><span class="orn">&#10070;</span>&nbsp;${FRONT_MATTER.foot}&nbsp;<span class="orn">&#10070;</span></div>
       </div>`;
     }
-
-    if (face.type === "plate") {
-      const m = face.monster;
-      // Every plate is a complete illustration carrying its own title and lore,
-      // so we render it full-bleed (no overlaid folio caption). The loupe still
-      // works via the data-zoom hook.
+    if (page.type === "plate") {
+      const m = page.monster;
       const src = `assets/plates/${m.file}`;
       return `<div class="plate plate--full" data-zoom="${src}">
         <div class="plate__img-wrap">
-          <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" />
+          <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" decoding="async" />
         </div>
       </div>`;
     }
-
-    if (face.type === "colophon") {
+    if (page.type === "colophon") {
       const paras = COLOPHON.paragraphs.map(p => `<p>${p}</p>`).join("");
       return `<div class="paper"></div><div class="page-pad colophon">
         <div class="colophon-mark" aria-hidden="true">
@@ -146,254 +153,290 @@
     return `<div class="paper"></div>`;
   }
 
-  // ── Build leaves into the DOM ───────────────────────────────────
-  leaves.forEach((leaf, idx) => {
-    const page = document.createElement("div");
-    page.className = "page";
-    page.dataset.leaf = idx;
-    page.innerHTML = `
-      <div class="face face--front">${renderFace(leaf.front)}<div class="spine-shade"></div><div class="turn-shade turn-shade--front"></div></div>
-      <div class="face face--back">${renderFace(leaf.back)}<div class="spine-shade"></div><div class="turn-shade turn-shade--back"></div></div>
-    `;
-    book.appendChild(page);
-  });
-  const pageEls = Array.from(book.querySelectorAll(".page"));
-
-  // ── Page-jump dots ──────────────────────────────────
-  // A fixed "to cover" marker, one dot per reading spread (chapter openers
-  // shown as gilt diamonds), then a fixed "to back" marker. A spread at
-  // currentLeaf = c shows faces[2c-1] (left) + faces[2c] (right); c runs from
-  // 1 to maxLeaf-1. Closed cover is c=0, closed back cover is c=maxLeaf.
-  const pager = document.getElementById("pager");
-  const pagerButtons = []; // { leaf, el, start, end }  (start/end = chapter span in leaves)
-  const SVG_COVER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 4 12l7 7"/><path d="M19 5l-7 7 7 7"/></svg>';
-  const SVG_BACK  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l7 7-7 7"/><path d="M5 5l7 7-7 7"/></svg>';
-
-  function makeDot(opts) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = opts.cls;
-    b.dataset.leaf = String(opts.leaf);
-    b.setAttribute("aria-label", opts.label);
-    if (opts.tip) b.setAttribute("data-label", opts.tip);
-    if (opts.html) b.innerHTML = opts.html;
-    b.addEventListener("click", (e) => { e.stopPropagation(); goToLeaf(opts.leaf); });
-    pager.appendChild(b);
-    pagerButtons.push({ leaf: opts.leaf, el: b, start: opts.start, end: opts.end });
-    return b;
+  // Build a positioned page node. side: "left" | "right".
+  function makePageEl(idx, side) {
+    const el = document.createElement("div");
+    el.className = `pg pg--${side}`;
+    el.dataset.idx = String(idx);
+    const inner = (idx >= 0 && idx < PAGE_COUNT) ? renderPage(pages[idx]) : `<div class="paper"></div>`;
+    el.innerHTML = `<div class="pg__face">${inner}<div class="pg__spine"></div></div>`;
+    return el;
   }
 
-  function buildPager() {
-    if (!pager) return;
-    pager.innerHTML = "";
-    pagerButtons.length = 0;
-    // Locate every chapter-cover spread (the currentLeaf where the divider is
-    // the left page), in reading order.
-    const chapterLeaves = [];
-    for (let c = 1; c <= maxLeaf - 1; c++) {
-      const left = faces[2 * c - 1];
-      if (left && left.type === "chapter") chapterLeaves.push({ leaf: c, ch: left.chapter });
-    }
-    // fixed start marker → closed cover
-    makeDot({ cls: "pager__end", leaf: 0, label: "Go to the cover", tip: "Cover", html: SVG_COVER, start: 0, end: 0 });
-    const sepA = document.createElement("div"); sepA.className = "pager__sep"; pager.appendChild(sepA);
-    // ONE gilt diamond per chapter; with ~100 plates a dot-per-spread run would
-    // be far too long, so only chapters are shown. Each dot's active span runs
-    // to just before the next chapter, so reading inside a chapter keeps it lit.
-    chapterLeaves.forEach((cl, i) => {
-      const next = chapterLeaves[i + 1];
-      const end = next ? next.leaf - 1 : maxLeaf - 1;
-      makeDot({ cls: "pager__dot pager__dot--chapter", leaf: cl.leaf,
-                label: `Caput ${cl.ch.caput} — ${cl.ch.title}`,
-                tip: `Caput ${cl.ch.caput} · ${cl.ch.title}`,
-                start: cl.leaf, end });
-    });
-    const sepB = document.createElement("div"); sepB.className = "pager__sep"; pager.appendChild(sepB);
-    // fixed end marker → closed back cover
-    makeDot({ cls: "pager__end", leaf: maxLeaf, label: "Go to the back", tip: "Back", html: SVG_BACK, start: maxLeaf, end: maxLeaf });
-  }
-
-  function updatePagerActive() {
-    pagerButtons.forEach((b) => {
-      // End markers light only on the exact closed cover/back; chapter dots
-      // light across their whole span so the current chapter stays indicated.
-      const within = (b.start != null && b.end != null)
-        ? (currentLeaf >= b.start && currentLeaf <= b.end)
-        : (currentLeaf === b.leaf);
-      b.el.classList.toggle("is-active", within);
-    });
-  }
-
-  buildPager();
-
-  // ── State ────────────────────────────────────────────────────────────────────
-  let currentLeaf = 0;   // number of leaves already flipped
+  // ── Spread state ───────────────────────────────────────────────
+  let spread = 0;          // 0 = closed cover; LAST_SPREAD = back cover
   let animating = false;
 
-  // Stack the leaves in depth so faces never share a plane (kills z-fighting
-  // that produced the "fanned pages" glitch mid-turn). Unturned leaves lean a
-  // hair toward the viewer on the right; turned leaves stack on the left.
-  const DEPTH = 0.6; // px per leaf
+  // MOBILE shows ONE page at a time, so it walks the flat page array directly
+  // (every page is reachable — no left-hand pages get skipped). We skip blank
+  // pad pages so mobile readers never land on an empty leaf.
+  let mpage = 0;           // current page index in mobile mode
+  function isBlank(i) { return !pages[i] || pages[i].type === "blank"; }
+  function nextReal(i, dir) {
+    let j = i + dir;
+    while (j > 0 && j < PAGE_COUNT - 1 && isBlank(j)) j += dir; // never strand on a blank (but cover/back are reachable)
+    return Math.max(0, Math.min(PAGE_COUNT - 1, j));
+  }
+  // keep the two models loosely in sync when switching orientation
+  function spreadToPage(s) {
+    if (s <= 0) return 0;
+    if (s >= LAST_SPREAD) return PAGE_COUNT - 1;
+    const li = leftIndexOf(s);
+    return isBlank(li) ? rightIndexOf(s) : li;
+  }
+  function pageToSpread(p) {
+    if (p <= 0) return 0;
+    if (p >= PAGE_COUNT - 1) return LAST_SPREAD;
+    return Math.max(1, Math.min(LAST_SPREAD - 1, Math.ceil(p / 2)));
+  }
 
-  function applyResting() {
-    pageEls.forEach((p, i) => {
-      const flipped = i < currentLeaf;
-      p.classList.toggle("flipped", flipped);
-      // depth: pages near the spine sit lowest; outer pages lift slightly.
-      // turned pages (left) and unturned (right) get separated z translation.
-      if (flipped) {
-        const d = (currentLeaf - i) * DEPTH;          // further-back turned pages sit deeper
-        p.style.zIndex = i;                            // earlier leaves below later turned ones
-        p.style.transform = `translateZ(${-d}px) rotateY(-180deg)`;
-      } else {
-        const d = (i - currentLeaf) * DEPTH;           // further-ahead pages sit deeper
-        p.style.zIndex = totalLeaves - i;              // top unturned leaf highest
-        p.style.transform = `translateZ(${-d}px) rotateY(0deg)`;
-      }
-    });
+  // Which page indices are showing as the static left & right of a spread.
+  function leftIndexOf(s)  { return s <= 0 ? -1 : 2 * s - 1; }
+  function rightIndexOf(s) {
+    if (s <= 0) return 0;                  // closed: cover sits on the (centred) right
+    if (s >= LAST_SPREAD) return -1;       // back cover handled as the left single
+    return 2 * s;
+  }
+  // The book is "single page" (centred, no spine offset) on the cover and
+  // the back-cover spreads, and ALWAYS single on mobile.
+  function isSinglePage(s) {
+    return s <= 0 || s >= LAST_SPREAD || isMobile();
+  }
+  function isMobile() { return window.innerWidth <= 820; }
+
+  // ── Render the current (static) spread ─────────────────────────
+  // Only the visible spread's pages live in the DOM. On mobile we show a
+  // single page (the right page of the spread, or the cover/back).
+  function renderSpread() {
+    book.innerHTML = "";
+    const single = isSinglePage(spread);
+    book.classList.toggle("book--single", single);
+
+    if (spread <= 0) {
+      // closed: cover, centred
+      book.appendChild(makePageEl(0, "single"));
+    } else if (spread >= LAST_SPREAD) {
+      // closed at back: back cover, centred
+      book.appendChild(makePageEl(PAGE_COUNT - 1, "single"));
+    } else if (isMobile()) {
+      // mobile: show the ONE current page (page-by-page model)
+      book.appendChild(makePageEl(mpage, "single"));
+    } else {
+      book.appendChild(makePageEl(leftIndexOf(spread), "left"));
+      book.appendChild(makePageEl(rightIndexOf(spread), "right"));
+    }
+    bindReaders();
+    updateChrome();
   }
 
   function updateChrome() {
-    applyResting();
-
-    prevBtn.disabled = currentLeaf === 0;
-    nextBtn.disabled = currentLeaf >= maxLeaf;
-
-    const closed = currentLeaf === 0;
-    const atBack = currentLeaf >= maxLeaf;
-    book.classList.toggle("closed", closed);
-    book.classList.toggle("at-back", atBack);
-
+    if (isMobile()) {
+      prevBtn.disabled = mpage <= 0;
+      nextBtn.disabled = mpage >= PAGE_COUNT - 1;
+      book.classList.toggle("closed", mpage <= 0);
+      book.classList.toggle("at-back", mpage >= PAGE_COUNT - 1);
+    } else {
+      prevBtn.disabled = spread <= 0;
+      nextBtn.disabled = spread >= LAST_SPREAD;
+      book.classList.toggle("closed", spread <= 0);
+      book.classList.toggle("at-back", spread >= LAST_SPREAD);
+    }
     updatePagerActive();
   }
 
-  // ── Turn logic ──────────────────────────────────────────────────
-  const TURN_MS = reduceMotion ? 20 : 1000;
+  // ── The turn ────────────────────────────────────────────────────
+  // Exactly ONE flipping page is added above the static spread. It has two
+  // faces: the OUTGOING side (what's currently visible on the side that
+  // turns) and the INCOMING side (revealed as it lands). Rotating just this
+  // one element means no z-index races and no backface failures.
+  const TURN_MS = reduceMotion ? 16 : 720;
 
-  function turnNext() {
-    if (animating || currentLeaf >= maxLeaf) return;
+  // On mobile we cross-fade single pages instead of a 3D swing over empty
+  // space (which looked like a page lifting into nothing).
+  function turn(dir) {
+    if (animating) return;
+
+    if (isMobile()) {
+      if (dir > 0 && mpage >= PAGE_COUNT - 1) return;
+      if (dir < 0 && mpage <= 0) return;
+      animating = true;
+      Atmos && Atmos.sfx && Atmos.sfx("rustle");
+      mobileTurn(dir, nextReal(mpage, dir));
+      return;
+    }
+
+    if (dir > 0 && spread >= LAST_SPREAD) return;
+    if (dir < 0 && spread <= 0) return;
     animating = true;
-    book.classList.add("turning");
-    const p = pageEls[currentLeaf];
-    p.classList.add("is-turning");
-    p.style.transition = "none";
-    p.style.zIndex = 999;
-    // start from rest then animate to flipped on next frame
+    Atmos && Atmos.sfx && Atmos.sfx("rustle");
+    desktopTurn(dir, spread + dir);
+  }
+
+  function desktopTurn(dir, target) {
+    // Determine which page rotates and on which hinge.
+    // NEXT: the RIGHT page of the current spread swings to the LEFT (hinge
+    //   = spine on its left edge). Outgoing face = pages[rightIndexOf(cur)];
+    //   incoming face (its back) = the LEFT page of the TARGET spread.
+    // PREV: the LEFT page of the current spread swings to the RIGHT (hinge
+    //   = spine on its right edge). Outgoing face = pages[leftIndexOf(cur)];
+    //   incoming face = the RIGHT page of the TARGET spread.
+    const single = isSinglePage(spread);
+    const targetSingle = isSinglePage(target);
+
+    const flip = document.createElement("div");
+    flip.className = "flip " + (dir > 0 ? "flip--next" : "flip--prev");
+
+    let frontIdx, backIdx;
+    if (dir > 0) {
+      // opening the cover (single → spread) OR normal next
+      frontIdx = single ? 0 : rightIndexOf(spread);
+      backIdx  = leftIndexOf(target);
+    } else {
+      // closing toward cover OR normal prev
+      frontIdx = single ? (PAGE_COUNT - 1) : leftIndexOf(spread);
+      backIdx  = rightIndexOf(target);
+    }
+
+    flip.innerHTML =
+      `<div class="flip__face flip__face--front">${renderInnerFor(frontIdx)}<div class="pg__spine"></div></div>` +
+      `<div class="flip__face flip__face--back">${renderInnerFor(backIdx)}<div class="pg__spine pg__spine--r"></div></div>`;
+
+    // Reveal the destination spread UNDERNEATH first, then lay the flip page
+    // on top showing the outgoing side, then animate.
+    spread = target;
+    renderSpreadStaticOnly();        // paint the new resting spread beneath
+    book.appendChild(flip);
+
+    // start position
+    flip.style.transition = "none";
+    flip.style.transform = (dir > 0) ? "rotateY(0deg)" : "rotateY(180deg)";
+    // force reflow then animate to the resting angle
+    void flip.offsetWidth;
     requestAnimationFrame(() => {
-      p.style.transition = "";
-      p.classList.add("flipped");
-      p.style.transform = `translateZ(0px) rotateY(-180deg)`;
+      flip.style.transition = `transform ${TURN_MS}ms var(--page-turn)`;
+      flip.classList.add("is-turning");
+      flip.style.transform = (dir > 0) ? "rotateY(-180deg)" : "rotateY(0deg)";
     });
-    Atmos.sfx("rustle");
-    setTimeout(() => {
-      currentLeaf++;
-      p.classList.remove("is-turning");
-      book.classList.remove("turning");
+
+    const done = () => {
+      flip.remove();
       animating = false;
-      updateChrome();
+      renderSpread();    // full re-render binds loupe + final chrome
+      hideHint();
+    };
+    flip.addEventListener("transitionend", done, { once: true });
+    setTimeout(done, TURN_MS + 120); // safety net if transitionend is missed
+  }
+
+  // Paint just the static left/right of the CURRENT spread (no loupe binding,
+  // no flip) — used as the bed under a turning page.
+  function renderSpreadStaticOnly() {
+    book.innerHTML = "";
+    const single = isSinglePage(spread);
+    book.classList.toggle("book--single", single);
+    if (spread <= 0) { book.appendChild(makePageEl(0, "single")); }
+    else if (spread >= LAST_SPREAD) { book.appendChild(makePageEl(PAGE_COUNT - 1, "single")); }
+    else {
+      book.appendChild(makePageEl(leftIndexOf(spread), "left"));
+      book.appendChild(makePageEl(rightIndexOf(spread), "right"));
+    }
+  }
+
+  function renderInnerFor(idx) {
+    return (idx >= 0 && idx < PAGE_COUNT) ? renderPage(pages[idx]) : `<div class="paper"></div>`;
+  }
+
+  function mobileTurn(dir, targetPage) {
+    // Cross-fade + slight slide. One page out, one page in.
+    const outEl = book.firstElementChild;
+    mpage = targetPage;
+    spread = pageToSpread(mpage); // keep pager + spread model in sync
+    renderSpread();              // paints the new single page + chrome
+    const inEl = book.firstElementChild;
+    if (outEl) {
+      // re-add the outgoing page on top to fade it out
+      outEl.classList.add("pg--leaving", dir > 0 ? "pg--leaving-next" : "pg--leaving-prev");
+      book.appendChild(outEl);
+    }
+    if (inEl) {
+      inEl.classList.add("pg--entering", dir > 0 ? "pg--entering-next" : "pg--entering-prev");
+      requestAnimationFrame(() => {
+        inEl.classList.remove("pg--entering", "pg--entering-next", "pg--entering-prev");
+      });
+    }
+    setTimeout(() => {
+      if (outEl && outEl.parentNode) outEl.remove();
+      animating = false;
       hideHint();
     }, TURN_MS);
   }
 
-  function turnPrev() {
-    if (animating || currentLeaf <= 0) return;
-    animating = true;
-    book.classList.add("turning");
-    const p = pageEls[currentLeaf - 1];
-    p.classList.add("is-turning");
-    p.style.transition = "none";
-    p.style.zIndex = 999;
-    requestAnimationFrame(() => {
-      p.style.transition = "";
-      p.classList.remove("flipped");
-      p.style.transform = `translateZ(0px) rotateY(0deg)`;
-    });
-    Atmos.sfx("rustle");
-    setTimeout(() => {
-      currentLeaf--;
-      p.classList.remove("is-turning");
-      book.classList.remove("turning");
-      animating = false;
-      updateChrome();
-    }, TURN_MS);
-  }
-
-  // ── Direct jump to any leaf (used by the page-jump dots) ─────────
-  // For an adjacent step we reuse the animated turn so it feels continuous;
-  // for a longer jump we re-stack instantly (no z-fighting from many
-  // simultaneous 1s flips) and update the chrome.
-  function goToLeaf(target) {
+  // ── Direct jump to any spread (page-jump dots / gallery) ─────────
+  function goToSpread(target) {
     if (animating) return;
-    target = Math.max(0, Math.min(maxLeaf, target));
-    if (target === currentLeaf) return;
-    if (target === currentLeaf + 1) { turnNext(); return; }
-    if (target === currentLeaf - 1) { turnPrev(); return; }
-    currentLeaf = target;
-    Atmos.sfx("rustle");
-    updateChrome();
+    target = Math.max(0, Math.min(LAST_SPREAD, target));
+    if (isMobile()) {
+      // translate the spread target into a page and jump there
+      const targetPage = spreadToPage(target);
+      if (targetPage === mpage) return;
+      mpage = targetPage;
+      spread = pageToSpread(mpage);
+      Atmos && Atmos.sfx && Atmos.sfx("rustle");
+      renderSpread();
+      hideHint();
+      return;
+    }
+    if (target === spread) return;
+    if (target === spread + 1) { turn(1); return; }
+    if (target === spread - 1) { turn(-1); return; }
+    spread = target;
+    Atmos && Atmos.sfx && Atmos.sfx("rustle");
+    renderSpread();
     hideHint();
   }
 
-  // ── Click zones on the book (left half = prev, right half = next) ──
+  function turnNext() { turn(1); }
+  function turnPrev() { turn(-1); }
+
+  // ── Click zones (left half = prev, right half = next) ────────────
   book.addEventListener("click", (e) => {
     if (animating) return;
-    // don't treat a loupe drag-release as a turn
     const rect = book.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    if (currentLeaf === 0) { turnNext(); return; }
-    if (currentLeaf >= maxLeaf) { turnPrev(); return; }
+    if (spread <= 0) { turnNext(); return; }
+    if (spread >= LAST_SPREAD) { turnPrev(); return; }
     if (x < rect.width * 0.42) turnPrev();
     else if (x > rect.width * 0.58) turnNext();
   });
 
-  // ── Drag-corner page peel ───────────────────────────────────────
+  // ── Drag-to-turn (peel) ─────────────────────────────────────────
+  // Lightweight: we only track direction + commit threshold; the actual
+  // swing is the standard animated turn. This keeps the gesture from
+  // racing the windowed re-render.
   let drag = null;
-  function getXY(e) {
+  function getX(e) {
     const t = e.touches ? e.touches[0] : e;
     const rect = book.getBoundingClientRect();
-    return { x: t.clientX - rect.left, y: t.clientY - rect.top, rect };
+    return { x: t.clientX - rect.left, rect };
   }
   function pointerDown(e) {
     if (animating) return;
-    const { x, rect } = getXY(e);
-    const nearRight = x > rect.width * 0.62;
-    const nearLeft = x < rect.width * 0.38;
-    if (nearRight && currentLeaf < maxLeaf) drag = { dir: "next", startX: x, rect, page: pageEls[currentLeaf] };
-    else if (nearLeft && currentLeaf > 0) drag = { dir: "prev", startX: x, rect, page: pageEls[currentLeaf - 1] };
-    else return;
-    book.classList.add("turning");
-    drag.page.classList.add("is-turning");
-    drag.page.style.transition = "none";
-    drag.page.style.zIndex = 999;
+    const { x, rect } = getX(e);
+    const nearRight = x > rect.width * 0.6;
+    const nearLeft  = x < rect.width * 0.4;
+    if (nearRight && spread < LAST_SPREAD) drag = { dir: 1, startX: x, w: rect.width, moved: 0 };
+    else if (nearLeft && spread > 0)       drag = { dir: -1, startX: x, w: rect.width, moved: 0 };
   }
   function pointerMove(e) {
     if (!drag) return;
-    const { x } = getXY(e);
-    let frac;
-    if (drag.dir === "next") {
-      frac = Math.min(Math.max((drag.startX - x) / drag.rect.width, 0), 1);
-      drag.page.style.transform = `translateZ(0px) rotateY(${-180 * frac}deg)`;
-    } else {
-      frac = Math.min(Math.max((x - drag.startX) / drag.rect.width, 0), 1);
-      drag.page.style.transform = `translateZ(0px) rotateY(${-180 + 180 * frac}deg)`;
-    }
-    drag.frac = frac;
-    if (e.cancelable) e.preventDefault();
+    const { x } = getX(e);
+    drag.moved = (drag.dir > 0) ? (drag.startX - x) : (x - drag.startX);
+    if (e.cancelable && Math.abs(drag.moved) > 6) e.preventDefault();
   }
   function pointerUp() {
     if (!drag) return;
     const d = drag; drag = null;
-    d.page.style.transition = "";
-    d.page.classList.remove("is-turning");
-    book.classList.remove("turning");
-    if ((d.frac || 0) > 0.3) {
-      // commit: clear inline transform so the animated turn takes over
-      d.page.style.transform = "";
-      if (d.dir === "next") turnNext(); else turnPrev();
-    } else {
-      d.page.style.transform = "";
-      updateChrome();
-    }
+    if (d.moved > d.w * 0.18) { (d.dir > 0) ? turnNext() : turnPrev(); }
   }
   book.addEventListener("mousedown", pointerDown);
   window.addEventListener("mousemove", pointerMove);
@@ -402,20 +445,16 @@
   book.addEventListener("touchmove", pointerMove, { passive: false });
   book.addEventListener("touchend", pointerUp);
 
-  // ── Reading magnifier ──────────────────────────────────────────
-  // A large panel anchored to the side opposite the cursor shows the area
-  // under the pointer at high zoom. Because the panel is independent of the
-  // cursor, every part of a plate — including the extreme left margin — is
-  // reachable and never hidden beneath the lens.
+  // ── Reading magnifier (loupe) ───────────────────────────────────
   const ZOOM = 2.7;
   let readerSrc = null;
-
   function hideReader() { reader.classList.remove("on"); reader.style.backgroundImage = ""; readerSrc = null; }
 
   function onPlateMove(e) {
-    if (animating || drag) { hideReader(); return; }
+    if (animating || drag || isMobile()) { hideReader(); return; }
     const wrap = e.currentTarget;
     const plate = wrap.closest(".plate");
+    if (!plate) return;
     const src = plate.dataset.zoom;
     const r = wrap.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
@@ -423,63 +462,98 @@
     if (px < 0 || px > 1 || py < 0 || py > 1) { hideReader(); return; }
 
     if (src !== readerSrc) { reader.style.backgroundImage = `url("${src}")`; readerSrc = src; }
-    // panel jumps to whichever side gives the most room and avoids the cursor
     const onLeftHalf = e.clientX < window.innerWidth / 2;
     reader.classList.toggle("reader--right", onLeftHalf);
     reader.classList.toggle("reader--left", !onLeftHalf);
 
-    // scale the magnified plate to the panel height × zoom, width by image ratio,
-    // then position it so the exact point under the cursor lands in the
-    // CENTRE of the reader panel. Percentage background-position mis-tracks at
-    // the edges, so we compute the offset in pixels instead.
-    const pw = reader.offsetWidth;
-    const ph = reader.offsetHeight;
+    const pw = reader.offsetWidth, ph = reader.offsetHeight;
     const bgH = ph * ZOOM;
     const bgW = bgH * (r.width / r.height);
-    // x/y of the cursor point within the scaled background image (px)
-    const cx = px * bgW;
-    const cy = py * bgH;
-    // shift so that point sits at the panel's centre, clamped to image bounds
-    let posX = pw / 2 - cx;
-    let posY = ph / 2 - cy;
+    const cx = px * bgW, cy = py * bgH;
+    let posX = pw / 2 - cx, posY = ph / 2 - cy;
     posX = Math.min(0, Math.max(pw - bgW, posX));
     posY = Math.min(0, Math.max(ph - bgH, posY));
     reader.style.backgroundSize = `${bgW}px ${bgH}px`;
     reader.style.backgroundPosition = `${posX}px ${posY}px`;
     reader.classList.add("on");
   }
-
-  function bindReader(plate) {
-    const wrap = plate.querySelector(".plate__img-wrap");
-    wrap.addEventListener("mousemove", onPlateMove);
-    wrap.addEventListener("mouseenter", onPlateMove);
-    wrap.addEventListener("mouseleave", hideReader);
+  function bindReaders() {
+    book.querySelectorAll(".plate").forEach((plate) => {
+      const wrap = plate.querySelector(".plate__img-wrap");
+      if (!wrap) return;
+      wrap.addEventListener("mousemove", onPlateMove);
+      wrap.addEventListener("mouseenter", onPlateMove);
+      wrap.addEventListener("mouseleave", hideReader);
+    });
   }
-  book.querySelectorAll(".plate").forEach(bindReader);
-  // hide the reader whenever a turn begins
   book.addEventListener("mousedown", hideReader);
 
   // ── Buttons & keyboard ──────────────────────────────────────────
   nextBtn.addEventListener("click", (e) => { e.stopPropagation(); turnNext(); });
   prevBtn.addEventListener("click", (e) => { e.stopPropagation(); turnPrev(); });
   window.addEventListener("keydown", (e) => {
-    // Escape closes the gallery if it is open
     if (e.key === "Escape" && galleryEl.classList.contains("on")) { closeGallery(); return; }
-    // ignore page-turn keys while the gallery is open
     if (galleryEl.classList.contains("on")) return;
     if (e.key === "ArrowRight" || e.key === "PageDown") turnNext();
     else if (e.key === "ArrowLeft" || e.key === "PageUp") turnPrev();
   });
 
-  // ── Gallery — every plate in one grand grid ─────────────────────
-  // The spread at currentLeaf = c shows faces[2c-1] (left) and faces[2c]
-  // (right). So a plate at face index f is visible at the spread
-  // c = ceil(f / 2). Clicking a thumbnail closes the gallery and turns the
-  // book to that spread.
-  function leafForFaceIndex(f) {
-    return Math.max(1, Math.min(maxLeaf - 1, Math.ceil(f / 2)));
-  }
+  // ── Page-jump dots ──────────────────────────────────────────────
+  const pager = document.getElementById("pager");
+  const pagerButtons = [];
+  const SVG_COVER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 4 12l7 7"/><path d="M19 5l-7 7 7 7"/></svg>';
+  const SVG_BACK  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l7 7-7 7"/><path d="M5 5l7 7-7 7"/></svg>';
 
+  function makeDot(opts) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = opts.cls;
+    b.dataset.spread = String(opts.spread);
+    b.setAttribute("aria-label", opts.label);
+    if (opts.tip) b.setAttribute("data-label", opts.tip);
+    if (opts.html) b.innerHTML = opts.html;
+    b.addEventListener("click", (e) => { e.stopPropagation(); goToSpread(opts.spread); });
+    pager.appendChild(b);
+    pagerButtons.push({ spread: opts.spread, el: b, start: opts.start, end: opts.end });
+    return b;
+  }
+  function spreadOfPage(idx) {
+    // reading spread that shows page idx on either side
+    return Math.max(1, Math.min(LAST_SPREAD - 1, Math.ceil(idx / 2)));
+  }
+  function buildPager() {
+    if (!pager) return;
+    pager.innerHTML = "";
+    pagerButtons.length = 0;
+    const chapterSpreads = [];
+    for (let s = 1; s <= LAST_SPREAD - 1; s++) {
+      const left = pages[leftIndexOf(s)];
+      if (left && left.type === "chapter") chapterSpreads.push({ spread: s, ch: left.chapter });
+    }
+    makeDot({ cls: "pager__end", spread: 0, label: "Go to the cover", tip: "Cover", html: SVG_COVER, start: 0, end: 0 });
+    const sepA = document.createElement("div"); sepA.className = "pager__sep"; pager.appendChild(sepA);
+    chapterSpreads.forEach((cs, i) => {
+      const next = chapterSpreads[i + 1];
+      const end = next ? next.spread - 1 : LAST_SPREAD - 1;
+      makeDot({ cls: "pager__dot pager__dot--chapter", spread: cs.spread,
+                label: `Caput ${cs.ch.caput} — ${cs.ch.title}`,
+                tip: `Caput ${cs.ch.caput} · ${cs.ch.title}`,
+                start: cs.spread, end });
+    });
+    const sepB = document.createElement("div"); sepB.className = "pager__sep"; pager.appendChild(sepB);
+    makeDot({ cls: "pager__end", spread: LAST_SPREAD, label: "Go to the back", tip: "Back", html: SVG_BACK, start: LAST_SPREAD, end: LAST_SPREAD });
+  }
+  function updatePagerActive() {
+    pagerButtons.forEach((b) => {
+      const within = (b.start != null && b.end != null)
+        ? (spread >= b.start && spread <= b.end)
+        : (spread === b.spread);
+      b.el.classList.toggle("is-active", within);
+    });
+  }
+  buildPager();
+
+  // ── Gallery ─────────────────────────────────────────────────────
   const galleryEl = document.getElementById("gallery");
   const galleryScroll = document.getElementById("galleryScroll");
   const galleryBtn = document.getElementById("galleryBtn");
@@ -489,7 +563,7 @@
   const galleryChips = document.getElementById("galleryChips");
   const galleryEmpty = document.getElementById("galleryEmpty");
   let galleryBuilt = false;
-  let activeChapter = "all"; // "all" or a chapter index (as string)
+  let activeChapter = "all";
   let searchTerm = "";
 
   function buildGallery() {
@@ -498,8 +572,8 @@
     const html = chapters.map((ch, ci) => {
       const items = ch.monsters.map((m) => {
         const src = `assets/plates/${m.file}`;
-        const leaf = leafForFaceIndex(plateFaceIndex[m.id]);
-        return `<button class="gcard" type="button" data-leaf="${leaf}" data-name="${(m.name || "").toLowerCase()}" data-chapter="${ci}" aria-label="Open ${m.name}">
+        const sp = spreadOfPage(plateFirstPage[m.id]);
+        return `<button class="gcard" type="button" data-spread="${sp}" data-name="${(m.name || "").toLowerCase()}" data-chapter="${ci}" aria-label="Open ${m.name}">
           <span class="gcard__frame">
             <img class="gcard__img" src="${src}" alt="${m.name}" loading="lazy" decoding="async" draggable="false" />
           </span>
@@ -517,19 +591,15 @@
     }).join("");
     galleryScroll.innerHTML = html;
     buildChips(chapters);
-    // wire each card to jump the book to its spread, then close
     galleryScroll.querySelectorAll(".gcard").forEach((card) => {
       card.addEventListener("click", () => {
-        const leaf = parseInt(card.dataset.leaf, 10);
+        const sp = parseInt(card.dataset.spread, 10);
         closeGallery();
-        // jump after the close transition starts so the book is visible
-        requestAnimationFrame(() => goToLeaf(leaf));
+        requestAnimationFrame(() => goToSpread(sp));
       });
     });
     galleryBuilt = true;
   }
-
-  // Build the chapter filter chips: an "All" chip plus one per chapter.
   function buildChips(chapters) {
     if (!galleryChips) return;
     const chips = [`<button class="gchip on" type="button" data-chapter="all" aria-pressed="true">All</button>`]
@@ -549,9 +619,6 @@
       });
     });
   }
-
-  // Show/hide cards by name match + active chapter; hide empty sections;
-  // show the empty-state when nothing matches.
   function applyGalleryFilter() {
     if (!galleryScroll) return;
     const term = searchTerm.trim().toLowerCase();
@@ -570,7 +637,6 @@
     });
     if (galleryEmpty) galleryEmpty.hidden = totalVisible !== 0;
   }
-
   if (gallerySearch) {
     gallerySearch.addEventListener("input", () => {
       searchTerm = gallerySearch.value || "";
@@ -587,7 +653,6 @@
       gallerySearch && gallerySearch.focus();
     });
   }
-
   function openGallery() {
     buildGallery();
     galleryEl.classList.add("on");
@@ -621,25 +686,36 @@
   function hideHint() { if (!hintHidden) { hint.classList.add("hidden"); hintHidden = true; } }
   setTimeout(hideHint, 7000);
 
-  // ── Responsive sizing — make the book as large as possible ──────
+  // ── Responsive sizing ───────────────────────────────────────────
   function sizeBook() {
-    const ratio = 1492 / 1054; // h/w
-    const mobile = window.innerWidth <= 820;
+    const ratio = 1492 / 1054;
+    const mobile = isMobile();
     const chromeV = mobile ? 150 : 120;
     const sideReserve = mobile ? 24 : 180;
     const availH = window.innerHeight - chromeV;
     let w;
-    if (mobile) {
-      w = Math.min(window.innerWidth - sideReserve, 560);
-    } else {
-      w = Math.min((window.innerWidth - sideReserve) / 2, 600);
-    }
+    if (mobile) w = Math.min(window.innerWidth - sideReserve, 560);
+    else        w = Math.min((window.innerWidth - sideReserve) / 2, 600);
     if (w * ratio > availH) w = availH / ratio;
     w = Math.max(w, 240);
     document.documentElement.style.setProperty("--page-w", `${Math.round(w)}px`);
     document.documentElement.style.setProperty("--page-h", `${Math.round(w * ratio)}px`);
   }
-  window.addEventListener("resize", sizeBook);
+
+  // Re-render on resize, and re-render when crossing the mobile/desktop line
+  // so the single/two-page layout switches cleanly.
+  let wasMobile = isMobile();
+  window.addEventListener("resize", () => {
+    sizeBook();
+    const nowMobile = isMobile();
+    if (nowMobile !== wasMobile) {
+      // sync the two navigation models across the orientation change
+      if (nowMobile) mpage = spreadToPage(spread);
+      else spread = pageToSpread(mpage);
+      wasMobile = nowMobile;
+      if (!animating) renderSpread();
+    }
+  });
   sizeBook();
 
   // ── Dust motes ──────────────────────────────────────────────────
@@ -660,5 +736,6 @@
     }
   }
 
-  updateChrome();
+  // ── First paint ─────────────────────────────────────────────────
+  renderSpread();
 })();
