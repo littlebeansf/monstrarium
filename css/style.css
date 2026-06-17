@@ -338,8 +338,8 @@ body { position: relative; }
   z-index: 36;
   display: flex; align-items: center; justify-content: center;
   gap: 9px;
-  max-width: min(92vw, 760px);
-  flex-wrap: wrap;
+  max-width: 94vw;
+  flex-wrap: nowrap;
   padding: 9px 16px;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(28,18,10,0.72), rgba(16,10,6,0.78));
@@ -372,16 +372,38 @@ body { position: relative; }
   box-shadow: 0 0 9px rgba(232,200,120,0.7);
 }
 
-/* chapter-start dots read as small gilt diamonds */
+/* chapter-start dots read as small gilt diamonds.
+   The host element stays UN-rotated (so the hover tooltip renders upright);
+   the diamond shape comes from a rotated inner ::before. */
 .pager__dot--chapter {
-  width: 13px; height: 13px;
-  border-radius: 2px;
-  transform: rotate(45deg);
-  background: rgba(201,161,74,0.4);
-  border-color: rgba(201,161,74,0.6);
+  width: 14px; height: 14px;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  transform: none;
 }
-.pager__dot--chapter:hover { transform: rotate(45deg) scale(1.22); }
-.pager__dot--chapter.is-active { transform: rotate(45deg); }
+.pager__dot--chapter::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 2px;
+  background: rgba(201,161,74,0.4);
+  border: 1px solid rgba(201,161,74,0.6);
+  transform: rotate(45deg);
+  transition: background 180ms var(--ease-out), border-color 180ms var(--ease-out),
+              transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+}
+.pager__dot--chapter:hover { transform: none; }
+.pager__dot--chapter:hover::before {
+  transform: rotate(45deg) scale(1.22);
+  background: rgba(232,200,120,0.6);
+  border-color: var(--gilt);
+}
+.pager__dot--chapter.is-active { transform: none; background: transparent; box-shadow: none; }
+.pager__dot--chapter.is-active::before {
+  background: var(--gilt-lit);
+  border-color: var(--gilt-lit);
+  box-shadow: 0 0 9px rgba(232,200,120,0.7);
+}
 
 /* the two fixed end markers (cover / back) — larger, with an icon */
 .pager__end {
@@ -418,7 +440,7 @@ body { position: relative; }
   padding: 4px 9px; border-radius: 5px;
   pointer-events: none; z-index: 50;
 }
-.pager__dot--chapter[data-label]:hover::after { transform: translateX(-50%) rotate(-45deg); transform-origin: center; }
+/* chapter tooltip now renders upright — the host is no longer rotated */
 
 /* ── Responsive ──────────────────────────────────────────────── */
 /* Tablet / phone: single centred page (no two-page offset) */
