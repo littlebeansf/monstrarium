@@ -33,12 +33,16 @@
   padToRight();                  // keep the intro's facing page clear, then begin chapters
 
   let plateNo = 0;               // running plate number across the whole book (folios I, II, III …)
+  // While building, remember which face index each plate landed on, so the
+  // gallery can later jump straight to the spread that shows it.
+  const plateFaceIndex = {};     // monster.id -> face index
   (typeof CHAPTERS !== "undefined" ? CHAPTERS : []).forEach((ch) => {
     if (ch.divider) {
       padToLeft();               // divider must land on a LEFT page
       pushFace({ type: "chapter", chapter: ch });
     }
     ch.monsters.forEach((m) => {
+      plateFaceIndex[m.id] = faces.length; // index this face will occupy
       pushFace({ type: "plate", monster: m, index: plateNo });
       plateNo++;
     });
@@ -459,9 +463,82 @@
   nextBtn.addEventListener("click", (e) => { e.stopPropagation(); turnNext(); });
   prevBtn.addEventListener("click", (e) => { e.stopPropagation(); turnPrev(); });
   window.addEventListener("keydown", (e) => {
+    // Escape closes the gallery if it is open
+    if (e.key === "Escape" && galleryEl.classList.contains("on")) { closeGallery(); return; }
+    // ignore page-turn keys while the gallery is open
+    if (galleryEl.classList.contains("on")) return;
     if (e.key === "ArrowRight" || e.key === "PageDown") turnNext();
     else if (e.key === "ArrowLeft" || e.key === "PageUp") turnPrev();
   });
+
+  // ── Gallery — every plate in one grand grid ─────────────────────
+  // The spread at currentLeaf = c shows faces[2c-1] (left) and faces[2c]
+  // (right). So a plate at face index f is visible at the spread
+  // c = ceil(f / 2). Clicking a thumbnail closes the gallery and turns the
+  // book to that spread.
+  function leafForFaceIndex(f) {
+    return Math.max(1, Math.min(maxLeaf - 1, Math.ceil(f / 2)));
+  }
+
+  const galleryEl = document.getElementById("gallery");
+  const galleryScroll = document.getElementById("galleryScroll");
+  const galleryBtn = document.getElementById("galleryBtn");
+  const galleryClose = document.getElementById("galleryClose");
+  let galleryBuilt = false;
+
+  function buildGallery() {
+    if (galleryBuilt || !galleryScroll) return;
+    const chapters = (typeof CHAPTERS !== "undefined" ? CHAPTERS : []);
+    const html = chapters.map((ch) => {
+      const items = ch.monsters.map((m) => {
+        const src = `assets/plates/${m.file}`;
+        const leaf = leafForFaceIndex(plateFaceIndex[m.id]);
+        return `<button class="gcard" type="button" data-leaf="${leaf}" aria-label="Open ${m.name}">
+          <span class="gcard__frame">
+            <img class="gcard__img" src="${src}" alt="${m.name}" loading="lazy" decoding="async" draggable="false" />
+          </span>
+          <span class="gcard__name">${m.name}</span>
+        </button>`;
+      }).join("");
+      return `<section class="gsection">
+        <header class="gsection__head">
+          <span class="gsection__caput">Caput ${ch.caput}</span>
+          <span class="gsection__title">${ch.title}</span>
+          <span class="gsection__rule"></span>
+        </header>
+        <div class="ggrid">${items}</div>
+      </section>`;
+    }).join("");
+    galleryScroll.innerHTML = html;
+    // wire each card to jump the book to its spread, then close
+    galleryScroll.querySelectorAll(".gcard").forEach((card) => {
+      card.addEventListener("click", () => {
+        const leaf = parseInt(card.dataset.leaf, 10);
+        closeGallery();
+        // jump after the close transition starts so the book is visible
+        requestAnimationFrame(() => goToLeaf(leaf));
+      });
+    });
+    galleryBuilt = true;
+  }
+
+  function openGallery() {
+    buildGallery();
+    galleryEl.classList.add("on");
+    galleryEl.setAttribute("aria-hidden", "false");
+    document.body.classList.add("gallery-open");
+    hideHint();
+  }
+  function closeGallery() {
+    galleryEl.classList.remove("on");
+    galleryEl.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("gallery-open");
+  }
+  function toggleGallery() {
+    if (galleryEl.classList.contains("on")) closeGallery(); else openGallery();
+  }
+  if (galleryBtn) galleryBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleGallery(); });
+  if (galleryClose) galleryClose.addEventListener("click", (e) => { e.stopPropagation(); closeGallery(); });
 
   // ── Sound + fullscreen ──────────────────────────────────────────
   soundBtn.addEventListener("click", () => {
