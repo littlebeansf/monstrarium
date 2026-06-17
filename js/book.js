@@ -110,16 +110,14 @@
 
     if (face.type === "plate") {
       const m = face.monster;
-      // Mythic creatures aren't "embodiments" of a vice/feeling — read them naturally.
-      const lead = m.category === "myth" ? "" : "embodiment of ";
-      const descr = `${lead}${m.subject}`;
-      const folio = `${roman(face.index + 1)} &middot; ${m.name} &middot; ${descr}`;
-      const src = `assets/plates/${m.id}.webp`;
-      return `<div class="plate" data-zoom="${src}">
+      // Every plate is a complete illustration carrying its own title and lore,
+      // so we render it full-bleed (no overlaid folio caption). The loupe still
+      // works via the data-zoom hook.
+      const src = `assets/plates/${m.file}`;
+      return `<div class="plate plate--full" data-zoom="${src}">
         <div class="plate__img-wrap">
-          <img class="plate__img" src="${src}" alt="${m.name}, ${m.title}, ${descr}" draggable="false" />
+          <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" />
         </div>
-        <div class="plate__folio">${folio}</div>
       </div>`;
     }
 
@@ -163,7 +161,7 @@
   // currentLeaf = c shows faces[2c-1] (left) + faces[2c] (right); c runs from
   // 1 to maxLeaf-1. Closed cover is c=0, closed back cover is c=maxLeaf.
   const pager = document.getElementById("pager");
-  const pagerButtons = []; // { leaf, el }
+  const pagerButtons = []; // { leaf, el, start, end }  (start/end = chapter span in leaves)
   const SVG_COVER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 4 12l7 7"/><path d="M19 5l-7 7 7 7"/></svg>';
   const SVG_BACK  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5l7 7-7 7"/><path d="M5 5l7 7-7 7"/></svg>';
 
@@ -177,7 +175,7 @@
     if (opts.html) b.innerHTML = opts.html;
     b.addEventListener("click", (e) => { e.stopPropagation(); goToLeaf(opts.leaf); });
     pager.appendChild(b);
-    pagerButtons.push({ leaf: opts.leaf, el: b });
+    pagerButtons.push({ leaf: opts.leaf, el: b, start: opts.start, end: opts.end });
     return b;
   }
 
@@ -185,27 +183,41 @@
     if (!pager) return;
     pager.innerHTML = "";
     pagerButtons.length = 0;
-    // fixed start marker → closed cover
-    makeDot({ cls: "pager__end", leaf: 0, label: "Go to the cover", tip: "Cover", html: SVG_COVER });
-    const sepA = document.createElement("div"); sepA.className = "pager__sep"; pager.appendChild(sepA);
-    // one dot per reading spread
+    // Locate every chapter-cover spread (the currentLeaf where the divider is
+    // the left page), in reading order.
+    const chapterLeaves = [];
     for (let c = 1; c <= maxLeaf - 1; c++) {
       const left = faces[2 * c - 1];
-      if (left && left.type === "chapter") {
-        const ch = left.chapter;
-        makeDot({ cls: "pager__dot pager__dot--chapter", leaf: c,
-                  label: `Caput ${ch.caput} — ${ch.title}`, tip: `Caput ${ch.caput} · ${ch.title}` });
-      } else {
-        makeDot({ cls: "pager__dot", leaf: c, label: `Go to spread ${c}` });
-      }
+      if (left && left.type === "chapter") chapterLeaves.push({ leaf: c, ch: left.chapter });
     }
+    // fixed start marker → closed cover
+    makeDot({ cls: "pager__end", leaf: 0, label: "Go to the cover", tip: "Cover", html: SVG_COVER, start: 0, end: 0 });
+    const sepA = document.createElement("div"); sepA.className = "pager__sep"; pager.appendChild(sepA);
+    // ONE gilt diamond per chapter; with ~100 plates a dot-per-spread run would
+    // be far too long, so only chapters are shown. Each dot's active span runs
+    // to just before the next chapter, so reading inside a chapter keeps it lit.
+    chapterLeaves.forEach((cl, i) => {
+      const next = chapterLeaves[i + 1];
+      const end = next ? next.leaf - 1 : maxLeaf - 1;
+      makeDot({ cls: "pager__dot pager__dot--chapter", leaf: cl.leaf,
+                label: `Caput ${cl.ch.caput} — ${cl.ch.title}`,
+                tip: `Caput ${cl.ch.caput} · ${cl.ch.title}`,
+                start: cl.leaf, end });
+    });
     const sepB = document.createElement("div"); sepB.className = "pager__sep"; pager.appendChild(sepB);
     // fixed end marker → closed back cover
-    makeDot({ cls: "pager__end", leaf: maxLeaf, label: "Go to the back", tip: "Back", html: SVG_BACK });
+    makeDot({ cls: "pager__end", leaf: maxLeaf, label: "Go to the back", tip: "Back", html: SVG_BACK, start: maxLeaf, end: maxLeaf });
   }
 
   function updatePagerActive() {
-    pagerButtons.forEach(({ leaf, el }) => el.classList.toggle("is-active", leaf === currentLeaf));
+    pagerButtons.forEach((b) => {
+      // End markers light only on the exact closed cover/back; chapter dots
+      // light across their whole span so the current chapter stays indicated.
+      const within = (b.start != null && b.end != null)
+        ? (currentLeaf >= b.start && currentLeaf <= b.end)
+        : (currentLeaf === b.leaf);
+      b.el.classList.toggle("is-active", within);
+    });
   }
 
   buildPager();
