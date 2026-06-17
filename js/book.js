@@ -118,10 +118,6 @@
       // so we render it full-bleed (no overlaid folio caption). The loupe still
       // works via the data-zoom hook.
       const src = `assets/plates/${m.file}`;
-      // Load plates eagerly: all 64 leaves stack at the same coordinates, so the
-      // browser's lazy-load heuristic is unreliable and would defer plates that
-      // then flash/glitch as a page rotates into view. Eager + sync decode keeps
-      // turns clean. (Compositing wins live in CSS: scoped will-change + contain.)
       return `<div class="plate plate--full" data-zoom="${src}">
         <div class="plate__img-wrap">
           <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" />
@@ -239,30 +235,21 @@
   // hair toward the viewer on the right; turned leaves stack on the left.
   const DEPTH = 0.6; // px per leaf
 
-  // The resting depth for a leaf at index i given the current spread.
-  function restingDepth(i) {
-    return (i < currentLeaf ? (currentLeaf - i) : (i - currentLeaf)) * DEPTH;
-  }
-
   function applyResting() {
     pageEls.forEach((p, i) => {
       const flipped = i < currentLeaf;
       p.classList.toggle("flipped", flipped);
-      const d = restingDepth(i);
       // depth: pages near the spine sit lowest; outer pages lift slightly.
       // turned pages (left) and unturned (right) get separated z translation.
       if (flipped) {
+        const d = (currentLeaf - i) * DEPTH;          // further-back turned pages sit deeper
         p.style.zIndex = i;                            // earlier leaves below later turned ones
         p.style.transform = `translateZ(${-d}px) rotateY(-180deg)`;
       } else {
+        const d = (i - currentLeaf) * DEPTH;           // further-ahead pages sit deeper
         p.style.zIndex = totalLeaves - i;              // top unturned leaf highest
         p.style.transform = `translateZ(${-d}px) rotateY(0deg)`;
       }
-      // Keep a stable GPU layer only on the two leaves flanking the spine
-      // (the visible left + right pages). Their promotion never changes during
-      // a turn, so the compositor never tears a layer down mid-settle.
-      const visible = i === currentLeaf || i === currentLeaf - 1;
-      p.classList.toggle("is-promoted", visible);
     });
   }
 
@@ -287,19 +274,15 @@
     if (animating || currentLeaf >= maxLeaf) return;
     animating = true;
     book.classList.add("turning");
-    const idx = currentLeaf;
-    const p = pageEls[idx];
-    p.classList.add("is-turning", "is-promoted");
+    const p = pageEls[currentLeaf];
+    p.classList.add("is-turning");
     p.style.transition = "none";
     p.style.zIndex = 999;
-    // Animate to the EXACT resting transform this leaf will hold once flipped
-    // (depth 1*DEPTH back). Ending on the resting value means no translateZ snap
-    // at settle — the previous 0.6px jump + layer teardown caused a left-page flash.
-    const endZ = -DEPTH;
+    // start from rest then animate to flipped on next frame
     requestAnimationFrame(() => {
       p.style.transition = "";
       p.classList.add("flipped");
-      p.style.transform = `translateZ(${endZ}px) rotateY(-180deg)`;
+      p.style.transform = `translateZ(0px) rotateY(-180deg)`;
     });
     Atmos.sfx("rustle");
     setTimeout(() => {
@@ -317,10 +300,9 @@
     animating = true;
     book.classList.add("turning");
     const p = pageEls[currentLeaf - 1];
-    p.classList.add("is-turning", "is-promoted");
+    p.classList.add("is-turning");
     p.style.transition = "none";
     p.style.zIndex = 999;
-    // Ends at translateZ(0) = the resting depth of the top unturned leaf, so no snap.
     requestAnimationFrame(() => {
       p.style.transition = "";
       p.classList.remove("flipped");
@@ -380,7 +362,7 @@
     else if (nearLeft && currentLeaf > 0) drag = { dir: "prev", startX: x, rect, page: pageEls[currentLeaf - 1] };
     else return;
     book.classList.add("turning");
-    drag.page.classList.add("is-turning", "is-promoted");
+    drag.page.classList.add("is-turning");
     drag.page.style.transition = "none";
     drag.page.style.zIndex = 999;
   }
