@@ -120,7 +120,7 @@
       const src = `assets/plates/${m.file}`;
       return `<div class="plate plate--full" data-zoom="${src}">
         <div class="plate__img-wrap">
-          <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" />
+          <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" loading="lazy" decoding="async" />
         </div>
       </div>`;
     }
@@ -253,8 +253,30 @@
     });
   }
 
+  // Eagerly decode the plates on the current spread and its immediate
+  // neighbours so turns into them are instant, while distant plates stay
+  // lazy. We bump priority by forcing decode + fetchpriority on a small
+  // window of leaves around the current one.
+  function prioritizePlates() {
+    const lo = Math.max(0, currentLeaf - 1);
+    const hi = Math.min(pageEls.length - 1, currentLeaf + 1);
+    for (let i = 0; i < pageEls.length; i++) {
+      const near = i >= lo && i <= hi;
+      pageEls[i].querySelectorAll(".plate__img").forEach((img) => {
+        if (near) {
+          img.setAttribute("loading", "eager");
+          img.setAttribute("fetchpriority", "high");
+          if (img.decode) img.decode().catch(() => {});
+        } else {
+          img.setAttribute("fetchpriority", "low");
+        }
+      });
+    }
+  }
+
   function updateChrome() {
     applyResting();
+    prioritizePlates();
 
     prevBtn.disabled = currentLeaf === 0;
     nextBtn.disabled = currentLeaf >= maxLeaf;
