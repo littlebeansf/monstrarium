@@ -138,10 +138,12 @@ body { position: relative; }
   transform-origin: left center;
   transition: transform 1000ms var(--page-turn);
   cursor: default;
-  /* will-change is applied ONLY to the actively-turning leaf (.is-turning)
-     so the compositor promotes ~1 layer at a time instead of all 64 at once. */
 }
-.page.is-turning { will-change: transform; }
+/* Promote ONLY the two currently-visible resting leaves + the turning leaf.
+   This set is stable across a turn (the new leaf is promoted BEFORE it starts
+   and stays promoted AFTER it settles), so the GPU layer is never torn down
+   mid-settle — which was causing a one-frame repaint flash on the left page. */
+.page.is-promoted { will-change: transform; }
 
 /* each page has two faces */
 .face {
@@ -151,8 +153,6 @@ body { position: relative; }
   overflow: hidden;
   border-radius: 3px 9px 9px 3px;
   background: var(--parch);
-  /* isolate each face's paint so a turning leaf doesn't repaint neighbours */
-  contain: layout paint;
 }
 .face--back {
   transform: rotateY(180deg);
