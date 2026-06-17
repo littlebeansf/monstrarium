@@ -8,10 +8,32 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@500;600;700&family=UnifrakturMaguntia&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=20260618d" />
+<link rel="stylesheet" href="css/style.css?v=20260618e" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23120d08'/%3E%3Cpath d='M16 4 L20 12 L28 12 L21 18 L24 27 L16 21 L8 27 L11 18 L4 12 L12 12 Z' fill='none' stroke='%23c9a14a' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='15' r='3' fill='%23c9a14a'/%3E%3C/svg%3E" />
 </head>
-<body>
+<body class="is-loading">
+
+<!-- ════════════════════════════════════════════════════════════════
+     Full-page animated loading screen. Shows the seven enthroned
+     figures behind a slow Ken-Burns drift, the codex title, and a
+     gilt progress shimmer. Dismissed by book.js once the cover plate
+     has decoded and the first spread has painted — then it dissolves.
+  ════════════════════════════════════════════════════════════════ -->
+<div class="loadscreen" id="loadscreen" role="status" aria-live="polite" aria-label="Loading the Monstrarium">
+  <div class="loadscreen__art" aria-hidden="true"></div>
+  <div class="loadscreen__veil" aria-hidden="true"></div>
+  <div class="loadscreen__frame" aria-hidden="true"></div>
+  <div class="loadscreen__inner">
+    <div class="loadscreen__mark" aria-hidden="true">
+      <svg viewBox="0 0 64 64" width="58" height="58"><path d="M32 6 L40 24 L60 24 L44 37 L50 58 L32 45 L14 58 L20 37 L4 24 L24 24 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="32" cy="30" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="32" cy="30" r="1.8" fill="currentColor"/></svg>
+    </div>
+    <h1 class="loadscreen__title">Monstrarium</h1>
+    <div class="loadscreen__sub">of Representation</div>
+    <div class="loadscreen__rule" aria-hidden="true"><span></span><i>&#10022;</i><span></span></div>
+    <div class="loadscreen__bar" aria-hidden="true"><div class="loadscreen__fill" id="loadFill"></div></div>
+    <div class="loadscreen__motto">Ignota non est inexistens</div>
+  </div>
+</div>
 
 <!-- Ambient vignette + dust -->
 <div class="ambient" aria-hidden="true">
@@ -107,8 +129,8 @@
   } catch (e) { /* no-op */ }
 })();
 </script>
-<script src="js/data.js?v=20260618d"></script>
-<script src="js/audio.js?v=20260618d"></script>
-<script src="js/book.js?v=20260618d"></script>
+<script src="js/data.js?v=20260618e"></script>
+<script src="js/audio.js?v=20260618e"></script>
+<script src="js/book.js?v=20260618e"></script>
 </body>
 </html>

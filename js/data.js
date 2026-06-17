@@ -217,10 +217,13 @@ const CHAPTERS = [
       { id: "greek-demeter", name: "Demeter", file: "greek-demeter.webp" },
       { id: "greek-dionysus", name: "Dionysus", file: "greek-dionysus.webp" },
       { id: "greek-hades", name: "Hades", file: "greek-hades.webp" },
+      { id: "greek-harpies", name: "Harpies", file: "greek-harpies.webp" },
       { id: "greek-hephaestus", name: "Hephaestus", file: "greek-hephaestus.webp" },
       { id: "greek-hera", name: "Hera", file: "greek-hera.webp" },
       { id: "greek-hermes", name: "Hermes", file: "greek-hermes.webp" },
+      { id: "greek-hydra", name: "Hydra", file: "greek-hydra.webp" },
       { id: "greek-poseidon", name: "Poseidon", file: "greek-poseidon.webp" },
+      { id: "greek-typhon", name: "Typhon", file: "greek-typhon.webp" },
       { id: "greek-zeus", name: "Zeus", file: "greek-zeus.webp" }
     ]
   },
@@ -239,11 +242,14 @@ const CHAPTERS = [
       { id: "japanese-jinmenju", name: "Jinmenju", file: "japanese-jinmenju.webp" },
       { id: "japanese-kappa", name: "Kappa", file: "japanese-kappa.webp" },
       { id: "japanese-kitsune", name: "Kitsune", file: "japanese-kitsune.webp" },
+      { id: "japanese-namazu", name: "Namazu", file: "japanese-namazu.webp" },
       { id: "japanese-nurikabe", name: "Nurikabe", file: "japanese-nurikabe.webp" },
+      { id: "japanese-omukade", name: "Omukade", file: "japanese-omukade.webp" },
       { id: "japanese-ryomensukuna", name: "Ryomen Sukuna", file: "japanese-ryomensukuna.webp" },
       { id: "japanese-sarugami", name: "Sarugami", file: "japanese-sarugami.webp" },
       { id: "japanese-shikigami", name: "Shikigami", file: "japanese-shikigami.webp" },
       { id: "japanese-tengen", name: "Tengen", file: "japanese-tengen.webp" },
+      { id: "japanese-yatagarasu", name: "Yatagarasu", file: "japanese-yatagarasu.webp" },
       { id: "japanese-yokai", name: "Yokai", file: "japanese-yokai.webp" }
     ]
   },
@@ -255,8 +261,13 @@ const CHAPTERS = [
     monsters: [
       { id: "egyptian-amun", name: "Amun", file: "egyptian-amun.webp" },
       { id: "egyptian-anubi", name: "Anubis", file: "egyptian-anubi.webp" },
+      { id: "egyptian-hathor", name: "Hathor", file: "egyptian-hathor.webp" },
       { id: "egyptian-horus", name: "Horus", file: "egyptian-horus.webp" },
-      { id: "egyptian-ra", name: "Ra", file: "egyptian-ra.webp" }
+      { id: "egyptian-isis", name: "Isis", file: "egyptian-isis.webp" },
+      { id: "egyptian-osiris", name: "Osiris", file: "egyptian-osiris.webp" },
+      { id: "egyptian-ra", name: "Ra", file: "egyptian-ra.webp" },
+      { id: "egyptian-set", name: "Set", file: "egyptian-set.webp" },
+      { id: "egyptian-thoth", name: "Thoth", file: "egyptian-thoth.webp" }
     ]
   },
   {
@@ -273,11 +284,19 @@ const CHAPTERS = [
       { id: "nordic-dagr", name: "Dagr", file: "nordic-dagr.webp" },
       { id: "nordic-eir", name: "Eir", file: "nordic-eir.webp" },
       { id: "nordic-freyja", name: "Freyja", file: "nordic-freyja.webp" },
+      { id: "nordic-freyr", name: "Freyr", file: "nordic-freyr.webp" },
+      { id: "nordic-frigg", name: "Frigg", file: "nordic-frigg.webp" },
+      { id: "nordic-heimdall", name: "Heimdall", file: "nordic-heimdall.webp" },
+      { id: "nordic-hel", name: "Hel", file: "nordic-hel.webp" },
+      { id: "nordic-huldra", name: "Huldra", file: "nordic-huldra.webp" },
+      { id: "nordic-idunn", name: "Idunn", file: "nordic-idunn.webp" },
       { id: "nordic-jormungandr", name: "Jörmungandr", file: "nordic-jormungandr.webp" },
       { id: "nordic-loki", name: "Loki", file: "nordic-loki.webp" },
+      { id: "nordic-njord", name: "Njord", file: "nordic-njord.webp" },
       { id: "nordic-odin", name: "Odin", file: "nordic-odin.webp" },
       { id: "nordic-ragnarok", name: "Ragnarök", file: "nordic-ragnarok.webp" },
       { id: "nordic-thor", name: "Thor", file: "nordic-thor.webp" },
+      { id: "nordic-tyr", name: "Tyr", file: "nordic-tyr.webp" },
       { id: "nordic-yggdrasil", name: "Yggdrasil", file: "nordic-yggdrasil.webp" }
     ]
   },
@@ -287,8 +306,14 @@ const CHAPTERS = [
     slug: "indian",
     divider: "assets/chapters/chapter-indian.webp",
     monsters: [
+      { id: "indian-brahma", name: "Brahma", file: "indian-brahma.webp" },
+      { id: "indian-durga-kali", name: "Durga & Kali", file: "indian-durga-kali.webp" },
       { id: "indian-ganesha", name: "Ganesha", file: "indian-ganesha.webp" },
       { id: "indian-hanuman", name: "Hanuman", file: "indian-hanuman.webp" },
+      { id: "indian-lakshmi", name: "Lakshmi", file: "indian-lakshmi.webp" },
+      { id: "indian-murugan", name: "Murugan", file: "indian-murugan.webp" },
+      { id: "indian-parvati", name: "Parvati", file: "indian-parvati.webp" },
+      { id: "indian-sarasvati", name: "Sarasvati", file: "indian-sarasvati.webp" },
       { id: "indian-shiva", name: "Shiva", file: "indian-shiva.webp" },
       { id: "indian-vishnu", name: "Vishnu", file: "indian-vishnu.webp" }
     ]
@@ -314,12 +339,20 @@ const CHAPTERS = [
     slug: "miscellaneous",
     divider: "assets/chapters/chapter-miscellaneous.webp",
     monsters: [
+      { id: "miscellaneous-azeban", name: "Azeban", file: "miscellaneous-azeban.webp" },
+      { id: "miscellaneous-badb", name: "Badb", file: "miscellaneous-badb.webp" },
       { id: "miscellaneous-banshee", name: "Banshee", file: "miscellaneous-banshee.webp" },
+      { id: "miscellaneous-cinnamon-bird", name: "Cinnamon Bird", file: "miscellaneous-cinnamon-bird.webp" },
       { id: "miscellaneous-gryphus", name: "Gryphus", file: "miscellaneous-gryphus.webp" },
+      { id: "miscellaneous-jingwei", name: "Jingwei", file: "miscellaneous-jingwei.webp" },
+      { id: "miscellaneous-kelpie", name: "Kelpie", file: "miscellaneous-kelpie.webp" },
+      { id: "miscellaneous-kumiho", name: "Kumiho", file: "miscellaneous-kumiho.webp" },
       { id: "miscellaneous-leprechaun", name: "Leprechaun", file: "miscellaneous-leprechaun.webp" },
       { id: "miscellaneous-nuckelavee", name: "Nuckelavee", file: "miscellaneous-nuckelavee.webp" },
       { id: "miscellaneous-apocalyps-riders", name: "The Four Riders of the Apocalypse", file: "miscellaneous-apocalyps-riders.webp" },
-      { id: "miscellaneous-wendigo", name: "Wendigo", file: "miscellaneous-wendigo.webp" }
+      { id: "miscellaneous-unicorn", name: "Unicorn", file: "miscellaneous-unicorn.webp" },
+      { id: "miscellaneous-wendigo", name: "Wendigo", file: "miscellaneous-wendigo.webp" },
+      { id: "miscellaneous-wuchowsen", name: "Wuchowsen", file: "miscellaneous-wuchowsen.webp" }
     ]
   }
 ];

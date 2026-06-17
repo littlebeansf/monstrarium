@@ -821,4 +821,38 @@
   } else {
     warmNeighbours(spread);
   }
+
+  // ── Dismiss the loading screen ──────────────────────────────────
+  // The overture stays until the cover plate has actually decoded and the
+  // first spread has painted — so the book is revealed finished, never as a
+  // bare parchment panel. A small minimum dwell keeps the overture from
+  // flickering past on fast connections.
+  (function dismissLoader() {
+    const screen = document.getElementById("loadscreen");
+    if (!screen) { document.body.classList.remove("is-loading"); return; }
+    const MIN_DWELL = reduceMotion ? 200 : 1100; // ms — let the overture breathe
+    const FADE_MS   = reduceMotion ? 220 : 950;  // matches CSS transition
+    const start = performance.now();
+    const coverUrl = imgUrlFor(0);
+
+    const finish = () => {
+      const elapsed = performance.now() - start;
+      const wait = Math.max(0, MIN_DWELL - elapsed);
+      setTimeout(() => {
+        // Two frames so the just-decoded cover is composited before we fade.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          screen.classList.add("is-done");
+          document.body.classList.remove("is-loading");
+          setTimeout(() => { if (screen.parentNode) screen.remove(); }, FADE_MS + 60);
+        }));
+      }, wait);
+    };
+
+    // Resolve on cover decode; never hang — hard cap so a slow/failed image
+    // can't trap the visitor behind the overlay.
+    let done = false;
+    const once = () => { if (done) return; done = true; finish(); };
+    Promise.resolve(preloadImg(coverUrl)).then(once);
+    setTimeout(once, 6000); // safety ceiling
+  })();
 })();
