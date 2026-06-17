@@ -276,21 +276,29 @@
   // hair toward the viewer on the right; turned leaves stack on the left.
   const DEPTH = 0.6; // px per leaf
 
+  // Compute the resting transform + z-index for leaf i at a given currentLeaf,
+  // WITHOUT touching the DOM. The turn animation reuses this so a leaf lands on
+  // EXACTLY its resting depth — no post-turn re-stack snap (the old "shake" on
+  // the page that had just settled).
+  function restingFor(i, cur) {
+    const flipped = i < cur;
+    if (flipped) {
+      const d = (cur - i) * DEPTH;
+      return { flipped, z: i, transform: `translateZ(${-d}px) rotateY(-180deg)` };
+    }
+    const d = (i - cur) * DEPTH;
+    return { flipped, z: totalLeaves - i, transform: `translateZ(${-d}px) rotateY(0deg)` };
+  }
+
   function applyResting() {
     pageEls.forEach((p, i) => {
-      const flipped = i < currentLeaf;
-      p.classList.toggle("flipped", flipped);
-      // depth: pages near the spine sit lowest; outer pages lift slightly.
-      // turned pages (left) and unturned (right) get separated z translation.
-      if (flipped) {
-        const d = (currentLeaf - i) * DEPTH;          // further-back turned pages sit deeper
-        p.style.zIndex = i;                            // earlier leaves below later turned ones
-        p.style.transform = `translateZ(${-d}px) rotateY(-180deg)`;
-      } else {
-        const d = (i - currentLeaf) * DEPTH;           // further-ahead pages sit deeper
-        p.style.zIndex = totalLeaves - i;              // top unturned leaf highest
-        p.style.transform = `translateZ(${-d}px) rotateY(0deg)`;
-      }
+      // The leaf currently mid-turn owns its own transform/z; leave it alone so
+      // we never yank it while it is animating or the instant it settles.
+      if (p.classList.contains("is-turning")) return;
+      const r = restingFor(i, currentLeaf);
+      p.classList.toggle("flipped", r.flipped);
+      p.style.zIndex = r.z;
+      p.style.transform = r.transform;
     });
   }
 
@@ -316,23 +324,31 @@
     if (animating || currentLeaf >= maxLeaf) return;
     animating = true;
     book.classList.add("turning");
-    const p = pageEls[currentLeaf];
+    const idx = currentLeaf;
+    const p = pageEls[idx];
+    const next = currentLeaf + 1;
+    // Where this leaf will REST once turned (its depth at the new currentLeaf).
+    const dest = restingFor(idx, next).transform;
     p.classList.add("is-turning");
     p.style.transition = "none";
     p.style.zIndex = 999;
-    // start from rest then animate to flipped on next frame
+    // start from rest then animate straight to the resting flipped depth, so
+    // there is no post-settle snap.
     requestAnimationFrame(() => {
       p.style.transition = "";
       p.classList.add("flipped");
-      p.style.transform = `translateZ(0px) rotateY(-180deg)`;
+      p.style.transform = dest;
     });
     Atmos.sfx("rustle");
     setTimeout(() => {
       currentLeaf++;
+      // restack everyone else first (this leaf is skipped while is-turning),
+      // then release it — it is already on its resting transform, so nothing moves.
+      updateChrome();
+      p.style.zIndex = restingFor(idx, currentLeaf).z;
       p.classList.remove("is-turning");
       book.classList.remove("turning");
       animating = false;
-      updateChrome();
       hideHint();
     }, TURN_MS);
   }
@@ -341,22 +357,27 @@
     if (animating || currentLeaf <= 0) return;
     animating = true;
     book.classList.add("turning");
-    const p = pageEls[currentLeaf - 1];
+    const idx = currentLeaf - 1;
+    const p = pageEls[idx];
+    const prev = currentLeaf - 1;
+    // Where this leaf rests once turned back (un-flipped) at the new currentLeaf.
+    const dest = restingFor(idx, prev).transform;
     p.classList.add("is-turning");
     p.style.transition = "none";
     p.style.zIndex = 999;
     requestAnimationFrame(() => {
       p.style.transition = "";
       p.classList.remove("flipped");
-      p.style.transform = `translateZ(0px) rotateY(0deg)`;
+      p.style.transform = dest;
     });
     Atmos.sfx("rustle");
     setTimeout(() => {
       currentLeaf--;
+      updateChrome();
+      p.style.zIndex = restingFor(idx, currentLeaf).z;
       p.classList.remove("is-turning");
       book.classList.remove("turning");
       animating = false;
-      updateChrome();
     }, TURN_MS);
   }
 
@@ -702,5 +723,54 @@
     }
   }
 
-  updateChrome();
+  // ── Preload every plate, then reveal ────────────────────────────
+  // We warm the browser image cache for ALL art up front (behind the loading
+  // veil). DOM windowing still controls how many images are mounted/composited
+  // at once, but because every file is already decoded in cache, when a turn
+  // mounts a nearby leaf's <img> it is an instant cache hit — no decode work,
+  // no flash, no shake. A longer one-time load buys perfectly smooth turns.
+  function collectImageUrls() {
+    const urls = new Set(["assets/book/cover.webp", "assets/book/back.webp"]);
+    (typeof CHAPTERS !== "undefined" ? CHAPTERS : []).forEach((ch) => {
+      if (ch.divider) urls.add(ch.divider);
+      ch.monsters.forEach((m) => urls.add(`assets/plates/${m.file}`));
+    });
+    return [...urls];
+  }
+
+  function preloadAll(urls, onProgress) {
+    let done = 0;
+    const total = urls.length || 1;
+    return Promise.all(urls.map((u) => new Promise((resolve) => {
+      const img = new Image();
+      const finish = () => { done++; onProgress(done / total); resolve(); };
+      // decode() guarantees the bitmap is ready, not just the bytes; fall back
+      // to load/error events for older browsers.
+      img.onload = () => { (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(finish); };
+      img.onerror = finish;
+      img.src = u;
+    })));
+  }
+
+  function revealBook() {
+    updateChrome();
+    const loader = document.getElementById("loader");
+    if (loader) {
+      // one more frame so the first spread has painted under the veil
+      requestAnimationFrame(() => requestAnimationFrame(() => loader.classList.add("done")));
+    }
+  }
+
+  (function init() {
+    // Build the first window's transforms immediately so the (hidden) book is
+    // laid out, then preload everything before lifting the veil.
+    updateChrome();
+    const loaderFill = document.getElementById("loaderFill");
+    const urls = collectImageUrls();
+    // Safety: never trap the reader behind the veil if a file stalls.
+    const safety = setTimeout(revealBook, 12000);
+    preloadAll(urls, (frac) => {
+      if (loaderFill) loaderFill.style.width = Math.round(frac * 100) + "%";
+    }).then(() => { clearTimeout(safety); revealBook(); });
+  })();
 })();

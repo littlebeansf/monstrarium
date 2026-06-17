@@ -67,6 +67,65 @@ body { position: relative; }
   100% { transform: translateY(-110vh) translateX(40px); opacity: 0; }
 }
 
+/* ── Loading veil ───────────────────────────────────────────────
+   Covers the room until every plate is preloaded & decoded. Fades out
+   once the book is ready, so the first paint — and every page-turn after —
+   is decode-free and smooth. */
+.loader {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 30%, #241a10 0%, var(--room-2) 44%, var(--room) 100%);
+  transition: opacity 700ms var(--ease-out), visibility 0s linear 700ms;
+}
+.loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader__mark { width: 96px; height: 96px; }
+.loader__mark svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.loader__ring { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; opacity: 0.35; }
+.loader__ring--thin { stroke-width: 0.9; opacity: 0.22; }
+.loader__star { fill: none; stroke: var(--gilt); stroke-width: 1.4; opacity: 0.85; }
+.loader__spin {
+  fill: none; stroke: var(--gilt-lit); stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 60 270;
+  transform-origin: 60px 60px;
+  animation: loaderSpin 1.2s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(232,200,120,0.5));
+}
+@keyframes loaderSpin { to { transform: rotate(360deg); } }
+.loader__title {
+  font-family: var(--black-letter);
+  font-size: clamp(34px, 7vw, 56px);
+  color: var(--gilt-lit);
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.7);
+  margin-top: 6px;
+}
+.loader__text {
+  font-family: var(--serif); font-style: italic;
+  font-size: clamp(14px, 3.6vw, 18px);
+  color: var(--parch-dark); letter-spacing: 0.03em;
+}
+.loader__bar {
+  width: min(260px, 60vw); height: 3px;
+  background: rgba(201,161,74,0.18);
+  border-radius: 999px; overflow: hidden;
+  margin-top: 4px;
+}
+.loader__fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--gilt), var(--gilt-lit));
+  border-radius: 999px;
+  transition: width 220ms var(--ease-out);
+  box-shadow: 0 0 8px rgba(232,200,120,0.6);
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader__spin { animation: none; stroke-dasharray: none; }
+  .loader { transition: opacity 1ms linear; }
+}
+
 /* ── HUD ─────────────────────────────────────────────────────── */
 .hud {
   position: fixed; top: 18px; right: 20px;
