@@ -210,6 +210,7 @@ const CHAPTERS = [
     slug: "greek",
     divider: "assets/chapters/chapter-greek.webp",
     monsters: [
+      // — Gods (Olympians & deities) —
       { id: "greek-aphrodite", name: "Aphrodite", file: "greek-aphrodite.webp" },
       { id: "greek-apollo", name: "Apollo", file: "greek-apollo.webp" },
       { id: "greek-artemis", name: "Artemis", file: "greek-artemis.webp" },
@@ -217,14 +218,15 @@ const CHAPTERS = [
       { id: "greek-demeter", name: "Demeter", file: "greek-demeter.webp" },
       { id: "greek-dionysus", name: "Dionysus", file: "greek-dionysus.webp" },
       { id: "greek-hades", name: "Hades", file: "greek-hades.webp" },
-      { id: "greek-harpies", name: "Harpies", file: "greek-harpies.webp" },
       { id: "greek-hephaestus", name: "Hephaestus", file: "greek-hephaestus.webp" },
       { id: "greek-hera", name: "Hera", file: "greek-hera.webp" },
       { id: "greek-hermes", name: "Hermes", file: "greek-hermes.webp" },
-      { id: "greek-hydra", name: "Hydra", file: "greek-hydra.webp" },
       { id: "greek-poseidon", name: "Poseidon", file: "greek-poseidon.webp" },
-      { id: "greek-typhon", name: "Typhon", file: "greek-typhon.webp" },
-      { id: "greek-zeus", name: "Zeus", file: "greek-zeus.webp" }
+      { id: "greek-zeus", name: "Zeus", file: "greek-zeus.webp" },
+      // — Monsters & creatures —
+      { id: "greek-harpies", name: "Harpies", file: "greek-harpies.webp" },
+      { id: "greek-hydra", name: "Hydra", file: "greek-hydra.webp" },
+      { id: "greek-typhon", name: "Typhon", file: "greek-typhon.webp" }
     ]
   },
   {
@@ -276,11 +278,9 @@ const CHAPTERS = [
     slug: "nordic",
     divider: "assets/chapters/chapter-nordic.webp",
     monsters: [
-      { id: "nordic-andhrimnir", name: "Andhrímnir", file: "nordic-andhrimnir.webp" },
-      { id: "nordic-audumbla", name: "Audumbla", file: "nordic-audumbla.webp" },
+      // — Gods (Aesir & Vanir) —
       { id: "nordic-baldur", name: "Baldur", file: "nordic-baldur.webp" },
       { id: "nordic-bragi", name: "Bragi", file: "nordic-bragi.webp" },
-      { id: "nordic-buri", name: "Buri", file: "nordic-buri.webp" },
       { id: "nordic-dagr", name: "Dagr", file: "nordic-dagr.webp" },
       { id: "nordic-eir", name: "Eir", file: "nordic-eir.webp" },
       { id: "nordic-freyja", name: "Freyja", file: "nordic-freyja.webp" },
@@ -288,15 +288,20 @@ const CHAPTERS = [
       { id: "nordic-frigg", name: "Frigg", file: "nordic-frigg.webp" },
       { id: "nordic-heimdall", name: "Heimdall", file: "nordic-heimdall.webp" },
       { id: "nordic-hel", name: "Hel", file: "nordic-hel.webp" },
-      { id: "nordic-huldra", name: "Huldra", file: "nordic-huldra.webp" },
       { id: "nordic-idunn", name: "Idunn", file: "nordic-idunn.webp" },
-      { id: "nordic-jormungandr", name: "Jörmungandr", file: "nordic-jormungandr.webp" },
       { id: "nordic-loki", name: "Loki", file: "nordic-loki.webp" },
       { id: "nordic-njord", name: "Njord", file: "nordic-njord.webp" },
       { id: "nordic-odin", name: "Odin", file: "nordic-odin.webp" },
-      { id: "nordic-ragnarok", name: "Ragnarök", file: "nordic-ragnarok.webp" },
       { id: "nordic-thor", name: "Thor", file: "nordic-thor.webp" },
       { id: "nordic-tyr", name: "Tyr", file: "nordic-tyr.webp" },
+      // — Beings & creatures —
+      { id: "nordic-andhrimnir", name: "Andhrímnir", file: "nordic-andhrimnir.webp" },
+      { id: "nordic-audumbla", name: "Audumbla", file: "nordic-audumbla.webp" },
+      { id: "nordic-buri", name: "Buri", file: "nordic-buri.webp" },
+      { id: "nordic-huldra", name: "Huldra", file: "nordic-huldra.webp" },
+      { id: "nordic-jormungandr", name: "Jörmungandr", file: "nordic-jormungandr.webp" },
+      // — Cosmic & events —
+      { id: "nordic-ragnarok", name: "Ragnarök", file: "nordic-ragnarok.webp" },
       { id: "nordic-yggdrasil", name: "Yggdrasil", file: "nordic-yggdrasil.webp" }
     ]
   },
