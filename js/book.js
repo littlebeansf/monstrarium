@@ -77,20 +77,14 @@
   function renderFace(face) {
     if (!face || face.type === "blank") return `<div class="paper"></div>`;
 
-    // Heavy full-bleed art (cover/back/dividers/plates) is mounted lazily via
-    // DOM windowing: we emit data-src here and only set the real src on the
-    // <img> when its leaf is near the current spread (see mountWindow). This
-    // caps the number of live, decoded, GPU-backed images to a small window
-    // instead of holding all ~114 full-res images at once — the fix for the
-    // desktop GPU exhaustion and the mobile out-of-memory reload loop.
     if (face.type === "cover") {
       return `<div class="art-face art-face--cover">
-        <img class="art-img" data-src="assets/book/cover.webp" alt="Monstrarium of Representation — front cover" draggable="false" />
+        <img class="art-img" src="assets/book/cover.webp" alt="Monstrarium of Representation — front cover" />
       </div>`;
     }
     if (face.type === "back") {
       return `<div class="art-face art-face--back">
-        <img class="art-img" data-src="assets/book/back.webp" alt="Monstrarium of Representation — back cover" draggable="false" />
+        <img class="art-img" src="assets/book/back.webp" alt="Monstrarium of Representation — back cover" />
       </div>`;
     }
 
@@ -99,7 +93,7 @@
       // The divider art already carries its own "Caput" label, title and motto,
       // so we render it full-bleed like a plate — no overlaid text needed.
       return `<div class="art-face art-face--chapter">
-        <img class="art-img" data-src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
+        <img class="art-img" src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
       </div>`;
     }
 
@@ -126,7 +120,7 @@
       const src = `assets/plates/${m.file}`;
       return `<div class="plate plate--full" data-zoom="${src}">
         <div class="plate__img-wrap">
-          <img class="plate__img" data-src="${src}" alt="${m.name}" draggable="false" />
+          <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" />
         </div>
       </div>`;
     }
@@ -164,41 +158,6 @@
     book.appendChild(page);
   });
   const pageEls = Array.from(book.querySelectorAll(".page"));
-
-  // ── DOM windowing — the core performance fix ────────────────────
-  // We never hold all ~114 full-res plate images live at once. Each heavy
-  // <img> carries its file in data-src; we set the real src only on leaves
-  // inside a sliding window around the current spread, and unset it (freeing
-  // the decoded bitmap + its compositor layer) once a leaf scrolls far out of
-  // view. We also promote ONLY the few leaves in/near the window to their own
-  // GPU layer via the .near class, instead of forcing all 64 leaves onto the
-  // compositor with a blanket will-change. Together these cap GPU memory and
-  // decoded-image memory to a small, constant budget regardless of book size.
-  //
-  // WINDOW must be wide enough that, mid-turn, the turning leaf and the leaf
-  // it reveals on either side are already decoded (no flash of blank parchment).
-  const WINDOW = 3;          // leaves of slack on each side of the current spread
-  // Each page element holds two faces (front + back). A leaf at index i becomes
-  // visible across the spreads currentLeaf = i and currentLeaf = i+1, so we key
-  // the window off proximity to currentLeaf.
-  function mountWindow() {
-    const lo = currentLeaf - WINDOW;
-    const hi = currentLeaf + WINDOW;
-    pageEls.forEach((p, i) => {
-      const near = i >= lo && i <= hi;
-      // promote only nearby leaves to their own compositor layer
-      p.classList.toggle("near", near);
-      // mount/unmount the heavy images for this leaf
-      p.querySelectorAll("img[data-src]").forEach((img) => {
-        if (near) {
-          if (img.getAttribute("src") !== img.dataset.src) img.src = img.dataset.src;
-        } else if (img.getAttribute("src")) {
-          // release the decoded bitmap so the browser can reclaim memory
-          img.removeAttribute("src");
-        }
-      });
-    });
-  }
 
   // ── Page-jump dots ──────────────────────────────────
   // A fixed "to cover" marker, one dot per reading spread (chapter openers
@@ -276,35 +235,26 @@
   // hair toward the viewer on the right; turned leaves stack on the left.
   const DEPTH = 0.6; // px per leaf
 
-  // Compute the resting transform + z-index for leaf i at a given currentLeaf,
-  // WITHOUT touching the DOM. The turn animation reuses this so a leaf lands on
-  // EXACTLY its resting depth — no post-turn re-stack snap (the old "shake" on
-  // the page that had just settled).
-  function restingFor(i, cur) {
-    const flipped = i < cur;
-    if (flipped) {
-      const d = (cur - i) * DEPTH;
-      return { flipped, z: i, transform: `translateZ(${-d}px) rotateY(-180deg)` };
-    }
-    const d = (i - cur) * DEPTH;
-    return { flipped, z: totalLeaves - i, transform: `translateZ(${-d}px) rotateY(0deg)` };
-  }
-
   function applyResting() {
     pageEls.forEach((p, i) => {
-      // The leaf currently mid-turn owns its own transform/z; leave it alone so
-      // we never yank it while it is animating or the instant it settles.
-      if (p.classList.contains("is-turning")) return;
-      const r = restingFor(i, currentLeaf);
-      p.classList.toggle("flipped", r.flipped);
-      p.style.zIndex = r.z;
-      p.style.transform = r.transform;
+      const flipped = i < currentLeaf;
+      p.classList.toggle("flipped", flipped);
+      // depth: pages near the spine sit lowest; outer pages lift slightly.
+      // turned pages (left) and unturned (right) get separated z translation.
+      if (flipped) {
+        const d = (currentLeaf - i) * DEPTH;          // further-back turned pages sit deeper
+        p.style.zIndex = i;                            // earlier leaves below later turned ones
+        p.style.transform = `translateZ(${-d}px) rotateY(-180deg)`;
+      } else {
+        const d = (i - currentLeaf) * DEPTH;           // further-ahead pages sit deeper
+        p.style.zIndex = totalLeaves - i;              // top unturned leaf highest
+        p.style.transform = `translateZ(${-d}px) rotateY(0deg)`;
+      }
     });
   }
 
   function updateChrome() {
     applyResting();
-    mountWindow();
 
     prevBtn.disabled = currentLeaf === 0;
     nextBtn.disabled = currentLeaf >= maxLeaf;
@@ -324,31 +274,23 @@
     if (animating || currentLeaf >= maxLeaf) return;
     animating = true;
     book.classList.add("turning");
-    const idx = currentLeaf;
-    const p = pageEls[idx];
-    const next = currentLeaf + 1;
-    // Where this leaf will REST once turned (its depth at the new currentLeaf).
-    const dest = restingFor(idx, next).transform;
+    const p = pageEls[currentLeaf];
     p.classList.add("is-turning");
     p.style.transition = "none";
     p.style.zIndex = 999;
-    // start from rest then animate straight to the resting flipped depth, so
-    // there is no post-settle snap.
+    // start from rest then animate to flipped on next frame
     requestAnimationFrame(() => {
       p.style.transition = "";
       p.classList.add("flipped");
-      p.style.transform = dest;
+      p.style.transform = `translateZ(0px) rotateY(-180deg)`;
     });
     Atmos.sfx("rustle");
     setTimeout(() => {
       currentLeaf++;
-      // restack everyone else first (this leaf is skipped while is-turning),
-      // then release it — it is already on its resting transform, so nothing moves.
-      updateChrome();
-      p.style.zIndex = restingFor(idx, currentLeaf).z;
       p.classList.remove("is-turning");
       book.classList.remove("turning");
       animating = false;
+      updateChrome();
       hideHint();
     }, TURN_MS);
   }
@@ -357,27 +299,22 @@
     if (animating || currentLeaf <= 0) return;
     animating = true;
     book.classList.add("turning");
-    const idx = currentLeaf - 1;
-    const p = pageEls[idx];
-    const prev = currentLeaf - 1;
-    // Where this leaf rests once turned back (un-flipped) at the new currentLeaf.
-    const dest = restingFor(idx, prev).transform;
+    const p = pageEls[currentLeaf - 1];
     p.classList.add("is-turning");
     p.style.transition = "none";
     p.style.zIndex = 999;
     requestAnimationFrame(() => {
       p.style.transition = "";
       p.classList.remove("flipped");
-      p.style.transform = dest;
+      p.style.transform = `translateZ(0px) rotateY(0deg)`;
     });
     Atmos.sfx("rustle");
     setTimeout(() => {
       currentLeaf--;
-      updateChrome();
-      p.style.zIndex = restingFor(idx, currentLeaf).z;
       p.classList.remove("is-turning");
       book.classList.remove("turning");
       animating = false;
+      updateChrome();
     }, TURN_MS);
   }
 
@@ -723,54 +660,5 @@
     }
   }
 
-  // ── Preload every plate, then reveal ────────────────────────────
-  // We warm the browser image cache for ALL art up front (behind the loading
-  // veil). DOM windowing still controls how many images are mounted/composited
-  // at once, but because every file is already decoded in cache, when a turn
-  // mounts a nearby leaf's <img> it is an instant cache hit — no decode work,
-  // no flash, no shake. A longer one-time load buys perfectly smooth turns.
-  function collectImageUrls() {
-    const urls = new Set(["assets/book/cover.webp", "assets/book/back.webp"]);
-    (typeof CHAPTERS !== "undefined" ? CHAPTERS : []).forEach((ch) => {
-      if (ch.divider) urls.add(ch.divider);
-      ch.monsters.forEach((m) => urls.add(`assets/plates/${m.file}`));
-    });
-    return [...urls];
-  }
-
-  function preloadAll(urls, onProgress) {
-    let done = 0;
-    const total = urls.length || 1;
-    return Promise.all(urls.map((u) => new Promise((resolve) => {
-      const img = new Image();
-      const finish = () => { done++; onProgress(done / total); resolve(); };
-      // decode() guarantees the bitmap is ready, not just the bytes; fall back
-      // to load/error events for older browsers.
-      img.onload = () => { (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(finish); };
-      img.onerror = finish;
-      img.src = u;
-    })));
-  }
-
-  function revealBook() {
-    updateChrome();
-    const loader = document.getElementById("loader");
-    if (loader) {
-      // one more frame so the first spread has painted under the veil
-      requestAnimationFrame(() => requestAnimationFrame(() => loader.classList.add("done")));
-    }
-  }
-
-  (function init() {
-    // Build the first window's transforms immediately so the (hidden) book is
-    // laid out, then preload everything before lifting the veil.
-    updateChrome();
-    const loaderFill = document.getElementById("loaderFill");
-    const urls = collectImageUrls();
-    // Safety: never trap the reader behind the veil if a file stalls.
-    const safety = setTimeout(revealBook, 12000);
-    preloadAll(urls, (frac) => {
-      if (loaderFill) loaderFill.style.width = Math.round(frac * 100) + "%";
-    }).then(() => { clearTimeout(safety); revealBook(); });
-  })();
+  updateChrome();
 })();
