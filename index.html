@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@500;600;700&family=UnifrakturMaguntia&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=20260617d" />
+<link rel="stylesheet" href="css/style.css?v=20260617e" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23120d08'/%3E%3Cpath d='M16 4 L20 12 L28 12 L21 18 L24 27 L16 21 L8 27 L11 18 L4 12 L12 12 Z' fill='none' stroke='%23c9a14a' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='15' r='3' fill='%23c9a14a'/%3E%3C/svg%3E" />
 </head>
 <body>
@@ -58,12 +58,25 @@
      Click any plate to close the gallery and open the book to that page. -->
 <div class="gallery" id="gallery" aria-hidden="true" role="dialog" aria-label="Gallery of all plates">
   <div class="gallery__bar">
-    <div class="gallery__title">The Compleat Bestiary</div>
-    <button class="gallery__close" id="galleryClose" type="button" aria-label="Close gallery">
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
-    </button>
+    <div class="gallery__barhead">
+      <div class="gallery__title">The Compleat Bestiary</div>
+      <button class="gallery__close" id="galleryClose" type="button" aria-label="Close gallery">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="gallery__tools">
+      <div class="gallery__search">
+        <svg class="gallery__searchicon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+        <input class="gallery__input" id="gallerySearch" type="search" placeholder="Search the bestiary…" aria-label="Search plates by name" autocomplete="off" spellcheck="false" />
+        <button class="gallery__clear" id="gallerySearchClear" type="button" aria-label="Clear search" hidden>
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="gallery__chips" id="galleryChips" role="group" aria-label="Filter by chapter"><!-- chips injected by JS --></div>
+    </div>
   </div>
   <div class="gallery__scroll" id="galleryScroll"><!-- grid injected by JS --></div>
+  <div class="gallery__empty" id="galleryEmpty" hidden>No creatures answer to that name.</div>
 </div>
 
 <!-- Page-jump dots: a fixed marker to the cover, one dot per spread
@@ -94,8 +107,8 @@
   } catch (e) { /* no-op */ }
 })();
 </script>
-<script src="js/data.js?v=20260617d"></script>
-<script src="js/audio.js?v=20260617d"></script>
-<script src="js/book.js?v=20260617d"></script>
+<script src="js/data.js?v=20260617e"></script>
+<script src="js/audio.js?v=20260617e"></script>
+<script src="js/book.js?v=20260617e"></script>
 </body>
 </html>

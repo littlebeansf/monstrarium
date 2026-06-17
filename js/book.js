@@ -484,23 +484,29 @@
   const galleryScroll = document.getElementById("galleryScroll");
   const galleryBtn = document.getElementById("galleryBtn");
   const galleryClose = document.getElementById("galleryClose");
+  const gallerySearch = document.getElementById("gallerySearch");
+  const gallerySearchClear = document.getElementById("gallerySearchClear");
+  const galleryChips = document.getElementById("galleryChips");
+  const galleryEmpty = document.getElementById("galleryEmpty");
   let galleryBuilt = false;
+  let activeChapter = "all"; // "all" or a chapter index (as string)
+  let searchTerm = "";
 
   function buildGallery() {
     if (galleryBuilt || !galleryScroll) return;
     const chapters = (typeof CHAPTERS !== "undefined" ? CHAPTERS : []);
-    const html = chapters.map((ch) => {
+    const html = chapters.map((ch, ci) => {
       const items = ch.monsters.map((m) => {
         const src = `assets/plates/${m.file}`;
         const leaf = leafForFaceIndex(plateFaceIndex[m.id]);
-        return `<button class="gcard" type="button" data-leaf="${leaf}" aria-label="Open ${m.name}">
+        return `<button class="gcard" type="button" data-leaf="${leaf}" data-name="${(m.name || "").toLowerCase()}" data-chapter="${ci}" aria-label="Open ${m.name}">
           <span class="gcard__frame">
             <img class="gcard__img" src="${src}" alt="${m.name}" loading="lazy" decoding="async" draggable="false" />
           </span>
           <span class="gcard__name">${m.name}</span>
         </button>`;
       }).join("");
-      return `<section class="gsection">
+      return `<section class="gsection" data-chapter="${ci}">
         <header class="gsection__head">
           <span class="gsection__caput">Caput ${ch.caput}</span>
           <span class="gsection__title">${ch.title}</span>
@@ -510,6 +516,7 @@
       </section>`;
     }).join("");
     galleryScroll.innerHTML = html;
+    buildChips(chapters);
     // wire each card to jump the book to its spread, then close
     galleryScroll.querySelectorAll(".gcard").forEach((card) => {
       card.addEventListener("click", () => {
@@ -520,6 +527,65 @@
       });
     });
     galleryBuilt = true;
+  }
+
+  // Build the chapter filter chips: an "All" chip plus one per chapter.
+  function buildChips(chapters) {
+    if (!galleryChips) return;
+    const chips = [`<button class="gchip on" type="button" data-chapter="all" aria-pressed="true">All</button>`]
+      .concat(chapters.map((ch, ci) =>
+        `<button class="gchip" type="button" data-chapter="${ci}" aria-pressed="false">${ch.title}</button>`
+      ));
+    galleryChips.innerHTML = chips.join("");
+    galleryChips.querySelectorAll(".gchip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        activeChapter = chip.dataset.chapter;
+        galleryChips.querySelectorAll(".gchip").forEach((c) => {
+          const on = c === chip;
+          c.classList.toggle("on", on);
+          c.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        applyGalleryFilter();
+      });
+    });
+  }
+
+  // Show/hide cards by name match + active chapter; hide empty sections;
+  // show the empty-state when nothing matches.
+  function applyGalleryFilter() {
+    if (!galleryScroll) return;
+    const term = searchTerm.trim().toLowerCase();
+    let totalVisible = 0;
+    galleryScroll.querySelectorAll(".gsection").forEach((section) => {
+      const inChapter = activeChapter === "all" || section.dataset.chapter === activeChapter;
+      let sectionVisible = 0;
+      section.querySelectorAll(".gcard").forEach((card) => {
+        const nameMatch = !term || (card.dataset.name || "").indexOf(term) !== -1;
+        const show = inChapter && nameMatch;
+        card.hidden = !show;
+        if (show) sectionVisible++;
+      });
+      section.hidden = sectionVisible === 0;
+      totalVisible += sectionVisible;
+    });
+    if (galleryEmpty) galleryEmpty.hidden = totalVisible !== 0;
+  }
+
+  if (gallerySearch) {
+    gallerySearch.addEventListener("input", () => {
+      searchTerm = gallerySearch.value || "";
+      if (gallerySearchClear) gallerySearchClear.hidden = searchTerm.length === 0;
+      applyGalleryFilter();
+    });
+  }
+  if (gallerySearchClear) {
+    gallerySearchClear.addEventListener("click", () => {
+      searchTerm = "";
+      if (gallerySearch) gallerySearch.value = "";
+      gallerySearchClear.hidden = true;
+      applyGalleryFilter();
+      gallerySearch && gallerySearch.focus();
+    });
   }
 
   function openGallery() {
