@@ -248,15 +248,24 @@ body { position: relative; }
 /* shared rule used by colophon */
 .intro-rule { width: 64px; height: 2px; background: var(--ink-soft); opacity: 0.55; margin: 14px auto 18px; }
 
-/* PLATE PAGE — one full painted plate per leaf */
-.plate { position: absolute; inset: 0; height: 100%; }
+/* PLATE PAGE — one full painted plate per leaf.
+   The image is anchored with position:absolute; inset:0 (NOT a flex child with
+   percentage height) so it always fills the face. This avoids an intermittent
+   layout race — seen in Chromium/Brave during the 3D page-turn — where a
+   percentage-height image inside a flex box could resolve against a momentarily
+   un-sized container and collapse, leaving the plate split with a blank band. */
+.plate { position: absolute; inset: 0; }
 .plate__img-wrap {
   position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
   background: #241a10;
   cursor: zoom-in;
 }
-.plate__img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
+.plate__img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  user-select: none; -webkit-user-drag: none;
+}
 
 /* reading magnifier — a tall panel anchored to a side, showing the spot
    under the cursor at high zoom so every line of the plate is legible */
@@ -461,8 +470,11 @@ body { position: relative; }
   .pager__sep { display: none; }
 }
 
-/* container query units for cover/intro scaling */
-.book, .face { container-type: inline-size; }
+/* container query units for cover/intro/colophon text scaling.
+   Scoped ONLY to text-bearing faces — NOT applied globally to every .face.
+   Putting container-type on plate faces interacted badly with the 3D page-turn
+   and percentage-height plate images, producing the intermittent vertical split. */
+.face:has(.intro), .face:has(.colophon) { container-type: inline-size; }
 
 @media (prefers-reduced-motion: reduce) {
   .page { transition: transform 1ms linear; }
