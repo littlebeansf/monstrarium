@@ -218,7 +218,12 @@
   // Only the visible spread's pages live in the DOM. On mobile we show a
   // single page (the right page of the spread, or the cover/back).
   function renderSpread(opts) {
-    const animate = !reduceMotion && opts && opts.animate;
+    // opts.animate may be: false/undefined (no entrance — resize/rebind),
+    // "turn" (sequential page turn: the destination was already shown as the
+    // static bed under the flip, so only the chapter flourish layers on top —
+    // NO fade-from-zero, which used to flicker), or "jump" (pager/gallery jump:
+    // content is genuinely new, so a gentle settle is welcome).
+    const animate = reduceMotion ? false : (opts && opts.animate);
     book.innerHTML = "";
     const single = isSinglePage(spread);
     book.classList.toggle("book--single", single);
@@ -237,21 +242,26 @@
       book.appendChild(makePageEl(rightIndexOf(spread), "right"));
     }
     bindReaders();
-    if (animate) applyArrivalAnimations();
+    if (animate) applyArrivalAnimations(animate);
     updateChrome();
   }
 
   // Tag the freshly-painted faces so their CSS entrance keyframes fire once.
   // A face that holds a chapter divider gets the richer "arrive" flourish;
   // every other resting face gets the gentle settle. Pure CSS thereafter.
-  function applyArrivalAnimations() {
+  function applyArrivalAnimations(mode) {
     const mobile = isMobile();
     book.querySelectorAll(".pg").forEach((pg) => {
       const isChapter = !!pg.querySelector(".art-face--chapter");
+      // The chapter flourish (ken-burns + gilt sheen) layers on top of art
+      // that is already visible, so it is safe on every arrival.
       if (isChapter) pg.classList.add("pg--chapter-arrive");
-      // On mobile the page already arrives via its own cross-fade, so the
-      // extra settle would double up — reserve settle for the desktop spread.
-      else if (!mobile) pg.classList.add("pg--settle");
+      // The gentle settle fades a face in from zero opacity — only valid when
+      // the content is genuinely new to the screen (a jump). After a sequential
+      // turn the destination was already painted beneath the flip, so settling
+      // would re-fade visible content and read as a flicker. Desktop only;
+      // mobile pages arrive via their own cross-fade.
+      else if (mode === "jump" && !mobile) pg.classList.add("pg--settle");
     });
   }
 
@@ -357,7 +367,14 @@
     const done = () => {
       flip.remove();
       animating = false;
-      renderSpread({ animate: true });    // full re-render binds loupe + final chrome
+      // Reuse the static bed that was painted under the flip instead of wiping
+      // and rebuilding it. A full re-render would blank #book for one frame
+      // (the brief "reappear" the destination images showed). Here the correct
+      // spread is already on screen, decoded — we only attach the loupe, run the
+      // chapter flourish, and refresh chrome. No destroy, no empty frame.
+      bindReaders();
+      if (!reduceMotion) applyArrivalAnimations("turn");
+      updateChrome();
       hideHint();
       warmNeighbours(target);   // keep the NEXT turn flash-free
     };
@@ -479,7 +496,7 @@
         mpage = targetPage;
         spread = pageToSpread(mpage);
         Atmos && Atmos.sfx && Atmos.sfx("rustle");
-        renderSpread({ animate: true });
+        renderSpread({ animate: "turn" });
         hideHint();
         preloadImg(imgUrlFor(nextReal(mpage, +1)));
         preloadImg(imgUrlFor(nextReal(mpage, -1)));
@@ -493,7 +510,7 @@
     preloadSpread(target).then(() => {
       spread = target;
       Atmos && Atmos.sfx && Atmos.sfx("rustle");
-      renderSpread({ animate: true });
+      renderSpread({ animate: "jump" });
       hideHint();
       warmNeighbours(target);
     });

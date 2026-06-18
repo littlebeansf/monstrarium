@@ -247,8 +247,10 @@ body { position: relative; }
    push and a single gilt sheen that sweeps across the parchment, marking
    the threshold into a new caput. Runs once on arrival, then rests. */
 @keyframes chapter-rise {
-  from { opacity: 0; transform: scale(1.055); }
-  to   { opacity: 1; transform: scale(1); }
+  /* never starts invisible — the art is already on screen beneath the turn,
+     so we only add a slow ken-burns settle, no opacity pop (which flickered). */
+  from { transform: scale(1.05); }
+  to   { transform: scale(1); }
 }
 @keyframes chapter-sheen {
   0%   { opacity: 0; transform: translateX(-120%) skewX(-12deg); }
