@@ -139,6 +139,7 @@
       return `<div class="plate plate--full" data-zoom="${src}">
         <div class="plate__img-wrap">
           <img class="plate__img" src="${src}" alt="${m.name}" draggable="false" decoding="async" />
+          <div class="plate__folio"><span class="plate__folio-text">${m.name}</span></div>
         </div>
       </div>`;
     }
@@ -569,7 +570,7 @@
   // ── Reading magnifier (loupe) ───────────────────────────────────
   const ZOOM = 2.7;
   let readerSrc = null;
-  function hideReader() { reader.classList.remove("on"); reader.style.backgroundImage = ""; readerSrc = null; }
+  function hideReader() { reader.classList.remove("on"); book.classList.remove("loupe-on"); reader.style.backgroundImage = ""; readerSrc = null; }
 
   function onPlateMove(e) {
     if (animating || drag || isMobile()) { hideReader(); return; }
@@ -600,6 +601,7 @@
     reader.style.backgroundSize = `${bgW}px ${bgH}px`;
     reader.style.backgroundPosition = `${posX}px ${posY}px`;
     reader.classList.add("on");
+    book.classList.add("loupe-on");
   }
   function bindReaders() {
     // Plates expose a dedicated .plate__img-wrap; full-bleed art pages (cover,
