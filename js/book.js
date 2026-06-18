@@ -619,6 +619,21 @@
   }
   book.addEventListener("mousedown", hideReader);
 
+  // ── Casual save-deterrent (JS half) ─────────────────────────────
+  // CSS already blocks native drag, selection, and the iOS long-press
+  // callout. Here we suppress the right-click "Save image as…" menu and any
+  // programmatic drag that starts on artwork. Scoped to illustrated images
+  // and their frames so the rest of the page keeps a normal context menu.
+  // This is friction for the 99%, not protection against DevTools/screens.
+  const ART_SELECTOR = ".art-img, .plate__img, .gcard__img, .art-face, .plate, .plate__img-wrap, .gcard__frame, .reader";
+  document.addEventListener("contextmenu", (e) => {
+    if (e.target.closest && e.target.closest(ART_SELECTOR)) e.preventDefault();
+  });
+  document.addEventListener("dragstart", (e) => {
+    const t = e.target;
+    if (t && (t.tagName === "IMG" || (t.closest && t.closest(ART_SELECTOR)))) e.preventDefault();
+  });
+
   // ── Buttons & keyboard ──────────────────────────────────────────
   nextBtn.addEventListener("click", (e) => { e.stopPropagation(); turnNext(); });
   prevBtn.addEventListener("click", (e) => { e.stopPropagation(); turnPrev(); });

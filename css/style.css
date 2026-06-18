@@ -342,6 +342,24 @@ body { position: relative; }
   user-select: none; -webkit-user-drag: none;
 }
 
+/* ── Casual save-deterrent ─────────────────────────────────────────
+   Every illustrated image refuses native drag, text-selection, and the
+   iOS long-press "Save Image" callout. This stops the 99% (drag-to-
+   desktop, right-click → Save, long-press → Save). It does NOT defend
+   against DevTools or screenshots — by design, that's out of scope. */
+.art-img,
+.plate__img,
+.gcard__img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none; /* clicks/hovers fall through to the page/card surface,
+                           which is where every handler already lives */
+}
+
 /* reading magnifier — a tall panel anchored to a side, showing the spot
    under the cursor at high zoom so every line of the plate is legible */
 .reader {
