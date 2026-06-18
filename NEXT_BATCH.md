@@ -1,6 +1,6 @@
 # Monstrarium — Next Batch (Image Creation List)
 
-**Goal:** Grow the codex from **207 → 400** plates (**+193 new images**).
+**Goal:** Grow the codex from **207 → 420** plates (**+213 new images**).
 
 This file is a planning checklist of monsters/gods/concepts to illustrate next.
 No code has been changed — these are not yet in `js/data.js`.
@@ -8,8 +8,8 @@ No code has been changed — these are not yet in `js/data.js`.
 | Status | Count |
 |---|---|
 | Current plates | 207 |
-| Additions in this batch | **+193** |
-| Target total | **400** |
+| Additions in this batch | **+213** |
+| Target total | **420** |
 
 > Sort rules reminder: In **mythology** chapters, sort **gods first**, then **monsters/creatures/folklore**. For **Nordic**: three groups → gods → beings/creatures → cosmic/events. Single-type chapters stay purely alphabetical.
 
@@ -240,6 +240,28 @@ No code has been changed — these are not yet in `js/data.js`.
 11. Sirin (dark prophetic bird-woman)
 12. Gamayun (prophetic bird)
 
+## XV — Miscellanea (+20, the most bizarre) → 23 → 43
+1. Mongolian Death Worm (Olgoi-Khorkhoi — intestine-shaped desert worm that spits acid)
+2. Bonnacon (bull-beast that defends itself with caustic flaming dung)
+3. Sheep-Eating Plant of Death (Carnivorous tree / Madagascar man-eating tree)
+4. Vegetable Lamb of Tartary (plant that grows live sheep as its fruit)
+5. Hoop Snake (snake that bites its own tail and rolls like a wheel)
+6. Jackalope (horned rabbit)
+7. Wolpertinger (Bavarian winged horned rabbit chimera)
+8. Squonk (so ugly it weeps constantly and dissolves into tears)
+9. Hidebehind (always hides behind trees, never seen)
+10. Hodag (frog-headed, dinosaur-spined lumberjack beast)
+11. Tatzelwurm (Alpine cat-faced serpent)
+12. Akkorokamui (giant red octopus god)
+13. Ahuizotl (Aztec dog-monkey with a hand on its tail)
+14. Bake-zōri (haunted straw sandal that runs around the house)
+15. Penanggalan (flying detached head trailing its entrails)
+16. Manananggal (self-severing winged vampire torso)
+17. Sigbin (backward-walking goat that sucks blood from shadows)
+18. Bunyip (Australian swamp horror)
+19. Cockatrice (rooster-serpent that kills with a glance)
+20. Catoblepas (downward-staring buffalo whose gaze/breath is deadly)
+
 ---
 
 ## Chapter Count Summary
@@ -260,5 +282,5 @@ No code has been changed — these are not yet in `js/data.js`.
 | XII — Nordic Mythology | 22 | +20 | 42 |
 | XIII — Indian Mythology | 10 | +8 | 18 |
 | XIV — Slavic Folklore | 7 | +12 | 19 |
-| XV — Miscellanea | 23 | — | 23 |
-| **TOTAL** | **207** | **+193** | **400** |
+| XV — Miscellanea | 23 | +20 | 43 |
+| **TOTAL** | **207** | **+213** | **420** |
