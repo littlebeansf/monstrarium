@@ -1,267 +1,245 @@
 # Monstrarium — Next Batch (Image Creation List)
 
-**Goal:** Grow the codex from **207 → 420** plates (**+213 new images**).
+**Goal:** Grow the codex from **313 → 500** plates (**+187 new images**), balanced as evenly as the existing distribution allows.
 
-> **PROGRESS (2026-06-18):** A batch of **+106 plates** has been added and is now live — the codex stands at **313 / 420**. Remaining to reach 420: **+107**. The items below that are now in the book: most Phobias, Afflictions, several Delusions, a few Passions/Sorrows, many Japanese Yokai, all listed Slavic, Indra (Indian), Valkyries + new Huldra art (Nordic), Leviathan + Baal (Vices), and a large Miscellanea group (incl. Akkorokamui, Pazuzu, Annunaki, Ghoul, Goblins). Still outstanding: all Greek, all Egyptian, The Self additions, and the remaining named items per chapter.
+This file lists only what is **still to be created** — everything already in the book has been removed, and nothing below duplicates an existing plate.
 
-This file is a planning checklist of monsters/gods/concepts to illustrate next.
+> **Balancing note:** Four chapters are already larger than a perfectly even 500 ÷ 15 ≈ 33 (Phobias 40, Delusions & Disorders 46, Japanese Yokai 39, Miscellanea 43). Because plates are only ever added, never removed, those four stay as-is and receive **0** additions. Every other chapter is raised to **30–31**, which is the flattest possible profile at 500 total.
 
 | Status | Count |
 |---|---|
 | Current plates | **313** |
-| Remaining additions | **+107** |
-| Target total | **420** |
+| Additions in this batch | **+187** |
+| Target total | **500** |
 
 > Sort rules reminder: In **mythology** chapters, sort **gods first**, then **monsters/creatures/folklore**. For **Nordic**: three groups → gods → beings/creatures → cosmic/events. Single-type chapters stay purely alphabetical.
 
 ---
 
-## I — Phobias (+19) → 19 → 38
-1. Acrophobia (heights)
-2. Claustrophobia (enclosed spaces)
-3. Trypanophobia (needles)
-4. Glossophobia (public speaking)
-5. Emetophobia (vomiting)
-6. Astraphobia (thunder/lightning)
-7. Coulrophobia (clowns)
-8. Pyrophobia (fire)
-9. Hemophobia (blood)
-10. Ophidiophobia (snakes)
-11. Aerophobia (flying)
-12. Mysophobia (germs/contamination)
-13. Necrophobia (death/dead things)
-14. Xenophobia (strangers)
-15. Pogonophobia (beards)
-16. Cynophobia (dogs)
-17. Entomophobia (insects)
-18. Nyctophobia (alt. dark) — OR swap for Bathophobia (depths)
-19. Megalophobia (large objects)
+## I — Phobias (+0) → 40 (already above average — no additions)
 
-## II — Afflictions (+18) → 7 → 25
-1. OCD (Obsessive-Compulsive Disorder)
-2. Panic Disorder
-3. Insomnia
-4. Anorexia
-5. Bulimia
-6. ADHD
-7. Catatonia
-8. Hypochondria
-9. Agoraphobia (as affliction)
-10. Dysthymia (persistent depressive disorder)
-11. Seasonal Affective Disorder
-12. Narcolepsy
-13. Kleptomania
-14. Pyromania
-15. Trichotillomania (hair-pulling)
-16. Dermatillomania (skin-picking)
-17. Onychophagia (nail-biting)
-18. Somatization Disorder
+## II — Afflictions (+7) → 24 → 31
+1. Bruxism (teeth grinding)
+2. Hoarding Disorder
+3. Misokinesia (aversion to others' movement)
+4. Orthorexia (obsession with "clean" eating)
+5. Pica (eating non-food)
+6. Restless Legs Syndrome
+7. Selective Mutism
 
-## III — Delusions & Disorders (+15) → 37 → 52
-1. Folie à Deux (shared delusion)
-2. Erotomania (De Clérambault's Syndrome)
-3. Grandiose Delusion
-4. Persecutory Delusion
-5. Anton Syndrome (denial of blindness)
-6. Charles Bonnet Syndrome (visual hallucinations)
-7. Foreign Accent Syndrome
-8. Reduplicative Paramnesia
-9. Mirror-Touch Synesthesia
-10. Jamais Vu
-11. Apotemnophilia
-12. Diogenes Syndrome
-13. Stendhal Syndrome
-14. Jerusalem Syndrome
-15. Truman Show Delusion
+## III — Delusions & Disorders (+0) → 46 (already above average — no additions)
 
-## IV — Passions (+12) → 6 → 18
-1. Lust
-2. Rage / Fury
-3. Ecstasy
-4. Devotion
-5. Ambition
-6. Vengeance
-7. Longing
-8. Euphoria
-9. Passion (zeal)
-10. Temptation
-11. Pride (as passion)
-12. Yearning
+## IV — Passions (+22) → 9 → 31
+1. Bloodlust
+2. Curiosity
+3. Devotion
+4. Elation
+5. Euphoria
+6. Fanaticism
+7. Fervor
+8. Fury / Rage
+9. Infatuation
+10. Longing
+11. Lust (the passion)
+12. Passion (zeal)
+13. Pride (the passion)
+14. Temptation
+15. Thrill
+16. Vengeance
+17. Wanderlust
+18. Wrath-Passion
+19. Yearning
+20. Zeal
+21. Avarice (craving)
+22. Rapture
 
-## V — Sorrows (+6) → 6 → 12
-1. Despair
-2. Melancholy
-3. Heartbreak
-4. Mourning
-5. Anguish
-6. Homesickness (Saudade)
+## V — Sorrows (+22) → 8 → 30
+1. Abandonment
+2. Anguish
+3. Bitterness
+4. Despair
+5. Disappointment
+6. Disillusionment
+7. Emptiness
+8. Grief-Eternal
+9. Guilt
+10. Heartbreak
+11. Helplessness
+12. Homesickness (Saudade)
+13. Hopelessness
+14. Longing-Sorrow
+15. Melancholy
+16. Mourning
+17. Numbness
+18. Remorse
+19. Resentment
+20. Sorrow-Quiet
+21. Wistfulness
+22. Yearning-Sorrow
 
-## VI — The Self (+12) → 11 → 23
-1. Memory
-2. Soul
-3. Persona
-4. Doppelgänger
-5. Inner Child
-6. Shadow (the Jungian shadow self)
-7. Willpower
+## VI — The Self (+19) → 11 → 30
+1. Acceptance
+2. Awakening
+3. Becoming
+4. Detachment
+5. Doppelgänger
+6. Doubt
+7. Inner Child
 8. Intuition
-9. Mortality
-10. Awakening
-11. Reflection
-12. Solitude
+9. Memory
+10. Mortality
+11. Persona
+12. Pride-of-Self
+13. Reflection
+14. Self-Sabotage
+15. Shadow (the Jungian shadow self)
+16. Solitude
+17. Soul
+18. Transformation
+19. Willpower
 
-## IX — Greek Mythology (+20) → 15 → 35
+## VII — Vices (+21) → 9 → 30
+1. Apathy (acedia)
+2. Arrogance
+3. Betrayal
+4. Cowardice
+5. Cruelty
+6. Deceit
+7. Despair (as vice)
+8. Dishonesty
+9. Hypocrisy
+10. Indolence
+11. Ingratitude
+12. Jealousy (as vice)
+13. Malice
+14. Resentment (as vice)
+15. Selfishness
+16. Spite
+17. Tyranny
+18. Vanity
+19. Vindictiveness
+20. Wastefulness
+21. Wickedness
+
+## VIII — Virtues (+22) → 8 → 30
+1. Charity
+2. Compassion
+3. Courage
+4. Discipline
+5. Empathy
+6. Faith
+7. Fidelity
+8. Forgiveness
+9. Fortitude
+10. Gratitude
+11. Honesty
+12. Honor
+13. Hope
+14. Integrity
+15. Justice
+16. Loyalty
+17. Mercy
+18. Prudence
+19. Resilience
+20. Tolerance
+21. Trust
+22. Wisdom
+
+## IX — Greek Mythology (+15) → 15 → 30
 **Gods/Titans (sort first):**
 1. Cronus
-2. Persephone
-3. Hecate
-4. Nyx
-5. Pan
-6. Gaia
-7. Helios
-8. Eros
-9. Nemesis
-10. Hestia
+2. Eros
+3. Gaia
+4. Hecate
+5. Helios
+6. Nyx
+7. Pan
+8. Persephone
 **Creatures (sort after gods):**
-11. Medusa
-12. Cerberus
+9. Cerberus
+10. Chimera
+11. Cyclops
+12. Medusa
 13. Minotaur
-14. Chimera
-15. Pegasus
-16. Cyclops
-17. Sirens
-18. Sphinx
-19. Centaur
-20. Scylla
+14. Pegasus
+15. Sphinx
+
+## X — Japanese Yokai (+0) → 39 (already above average — no additions)
 
 ## XI — Egyptian Mythology (+21) → 9 → 30
 **Gods (sort first):**
-1. Bastet
-2. Sekhmet
-3. Sobek
+1. Atum
+2. Bastet
+3. Bes
 4. Geb
-5. Nut
-6. Nephthys
-7. Khonsu
-8. Khnum
-9. Ptah
-10. Maat
-11. Mut
-12. Tefnut
-13. Shu
-14. Atum
-15. Nun
-16. Bes
+5. Khnum
+6. Khonsu
+7. Maat
+8. Mut
+9. Nephthys
+10. Nun
+11. Nut
+12. Ptah
+13. Sekhmet
+14. Serqet
+15. Shu
+16. Sobek
 17. Taweret
-18. Serqet
+18. Tefnut
 19. Wadjet
 **Creatures (sort after gods):**
 20. Ammit (the devourer)
 21. Apophis (the chaos serpent)
 
-## X — Japanese Yokai (+30, most funny/bizarre) → 20 → 50
-1. Shirime (eye in the buttocks)
-2. Ashiarai Yashiki (giant foot demanding to be washed)
-3. Betobeto-san (invisible footstep follower)
-4. Nopperabō (faceless ghost)
-5. Tofu-Kozō (boy who just carries tofu)
-6. Kasa-obake (one-legged hopping umbrella)
-7. Chōchin-obake (haunted lantern with a tongue)
-8. Akashita (hairy clawed cloud-face)
-9. Baku (dream-eating tapir)
-10. Ittan-momen (flying strip of cloth)
-11. Rokurokubi (stretchy-neck woman)
-12. Futakuchi-onna (mouth on the back of the head)
-13. Kuchisake-onna (slit-mouthed woman)
-14. Tsukumogami (objects alive after 100 years)
-15. Tanuki (shapeshifting raccoon-dog)
-16. Nurarihyon (uninvited "supreme leader" who sips your tea)
-17. Amikiri (net-cutting shrimp-crab thing)
-18. Keukegen (tiny disease-bringing hairball)
-19. Tesso (rat-swarm monk)
-20. Ushi-oni (ox-headed demon)
-21. Jorōgumo (spider woman)
-22. Yuki-onna (snow woman)
-23. Mokumokuren (eyes appearing in paper walls)
-24. Tenjōname (ceiling-licker)
-25. Aka Manto (red-cloak bathroom spirit)
-26. Hitotsume-kozō (one-eyed little monk)
-27. Kerakera-onna (giant cackling woman)
-28. Wanyūdō (flaming ox-cart wheel with a face)
-29. Yamabiko (echo-causing mountain beast)
-30. Sazae-oni (shellfish that turns into a woman)
-
-## XII — Nordic Mythology (+20) → 22 → 42
+## XII — Nordic Mythology (+7) → 23 → 30
 **Gods (sort first):**
-1. Sif
-2. Vidar
-3. Vali
-4. Forseti
-5. Ull
-6. Nanna
-7. Skadi
-8. Aegir
-9. Ran
-10. Mimir
+1. Aegir
+2. Mimir
+3. Sif
+4. Skadi
+5. Vidar
 **Beings/creatures (sort second):**
-11. Fenrir
-12. Sleipnir
-13. Nidhogg
-14. Fafnir
-15. Draugr
-16. Valkyries
-17. Norns
-18. Surtr
-**Cosmic/events (sort last):**
-19. Bifröst
-20. Ginnungagap
+6. Fenrir
+7. Sleipnir
 
-## XIII — Indian Mythology (+8) → 10 → 18
+## XIII — Indian Mythology (+19) → 11 → 30
 **Gods (sort first):**
-1. Indra
-2. Agni
-3. Varuna
-4. Yama
-5. Kartikeya (if distinct from Murugan — else swap for Surya)
-6. Surya
-7. Saraswati's mount Hamsa — OR Garuda
-8. Kubera
+1. Agni
+2. Chandra
+3. Indrani
+4. Kali (distinct study)
+5. Kartikeya
+6. Kubera
+7. Rama
+8. Saraswati's Hamsa
+9. Surya
+10. Varuna
+11. Vayu
+12. Yama
+**Creatures (sort after gods):**
+13. Garuda
+14. Makara
+15. Naga
+16. Rakshasa
+17. Sharabha
+18. Vetala
+19. Yakshini
 
-## XIV — Slavic Folklore (+12) → 7 → 19
-1. Vodyanoy (water drowner)
-2. Kikimora (household nightmare spirit)
-3. Zmey (multi-headed dragon)
-4. Vampir (the Slavic vampire)
-5. Vila (forest/cloud nymph)
-6. Polevik (field spirit)
-7. Poludnitsa (Lady Midday)
-8. Chort (minor devil)
-9. Koschei the Deathless
-10. Alkonost (paradise bird-woman)
-11. Sirin (dark prophetic bird-woman)
-12. Gamayun (prophetic bird)
+## XIV — Slavic Folklore (+12) → 18 → 30
+1. Aspid (winged serpent)
+2. Drekavac (the screamer)
+3. Firebird (Zhar-Ptitsa)
+4. Lihoradka (fever sisters)
+5. Ovinnik (threshing-barn spirit)
+6. Psoglav (dog-headed demon)
+7. Simargl (winged guardian hound)
+8. Upyr (Slavic undead)
+9. Vampir (the Slavic vampire)
+10. Vodník (water sprite)
+11. Volkodlak (werewolf)
+12. Zduhać (storm-fighting spirit)
 
-## XV — Miscellanea (+20, the most bizarre) → 23 → 43
-1. Mongolian Death Worm (Olgoi-Khorkhoi — intestine-shaped desert worm that spits acid)
-2. Bonnacon (bull-beast that defends itself with caustic flaming dung)
-3. Sheep-Eating Plant of Death (Carnivorous tree / Madagascar man-eating tree)
-4. Vegetable Lamb of Tartary (plant that grows live sheep as its fruit)
-5. Hoop Snake (snake that bites its own tail and rolls like a wheel)
-6. Jackalope (horned rabbit)
-7. Wolpertinger (Bavarian winged horned rabbit chimera)
-8. Squonk (so ugly it weeps constantly and dissolves into tears)
-9. Hidebehind (always hides behind trees, never seen)
-10. Hodag (frog-headed, dinosaur-spined lumberjack beast)
-11. Tatzelwurm (Alpine cat-faced serpent)
-12. Akkorokamui (giant red octopus god)
-13. Ahuizotl (Aztec dog-monkey with a hand on its tail)
-14. Bake-zōri (haunted straw sandal that runs around the house)
-15. Penanggalan (flying detached head trailing its entrails)
-16. Manananggal (self-severing winged vampire torso)
-17. Sigbin (backward-walking goat that sucks blood from shadows)
-18. Bunyip (Australian swamp horror)
-19. Cockatrice (rooster-serpent that kills with a glance)
-20. Catoblepas (downward-staring buffalo whose gaze/breath is deadly)
+## XV — Miscellanea (+0) → 43 (already above average — no additions)
 
 ---
 
@@ -269,19 +247,19 @@ This file is a planning checklist of monsters/gods/concepts to illustrate next.
 
 | Chapter | Current | Additions | New Total |
 |---|---|---|---|
-| I — Phobias | 19 | +19 | 38 |
-| II — Afflictions | 7 | +18 | 25 |
-| III — Delusions & Disorders | 37 | +15 | 52 |
-| IV — Passions | 6 | +12 | 18 |
-| V — Sorrows | 6 | +6 | 12 |
-| VI — The Self | 11 | +12 | 23 |
-| VII — Vices | 7 | — | 7 |
-| VIII — Virtues | 8 | — | 8 |
-| IX — Greek Mythology | 15 | +20 | 35 |
-| X — Japanese Yokai | 20 | +30 | 50 |
+| I — Phobias | 40 | +0 | 40 |
+| II — Afflictions | 24 | +7 | 31 |
+| III — Delusions & Disorders | 46 | +0 | 46 |
+| IV — Passions | 9 | +22 | 31 |
+| V — Sorrows | 8 | +22 | 30 |
+| VI — The Self | 11 | +19 | 30 |
+| VII — Vices | 9 | +21 | 30 |
+| VIII — Virtues | 8 | +22 | 30 |
+| IX — Greek Mythology | 15 | +15 | 30 |
+| X — Japanese Yokai | 39 | +0 | 39 |
 | XI — Egyptian Mythology | 9 | +21 | 30 |
-| XII — Nordic Mythology | 22 | +20 | 42 |
-| XIII — Indian Mythology | 10 | +8 | 18 |
-| XIV — Slavic Folklore | 7 | +12 | 19 |
-| XV — Miscellanea | 23 | +20 | 43 |
-| **TOTAL** | **207** | **+213** | **420** |
+| XII — Nordic Mythology | 23 | +7 | 30 |
+| XIII — Indian Mythology | 11 | +19 | 30 |
+| XIV — Slavic Folklore | 18 | +12 | 30 |
+| XV — Miscellanea | 43 | +0 | 43 |
+| **TOTAL** | **313** | **+187** | **500** |
