@@ -2,13 +2,14 @@
 
 **Goal:** Grow the codex from **207 → 420** plates (**+213 new images**).
 
+> **PROGRESS (2026-06-18):** A batch of **+106 plates** has been added and is now live — the codex stands at **313 / 420**. Remaining to reach 420: **+107**. The items below that are now in the book: most Phobias, Afflictions, several Delusions, a few Passions/Sorrows, many Japanese Yokai, all listed Slavic, Indra (Indian), Valkyries + new Huldra art (Nordic), Leviathan + Baal (Vices), and a large Miscellanea group (incl. Akkorokamui, Pazuzu, Annunaki, Ghoul, Goblins). Still outstanding: all Greek, all Egyptian, The Self additions, and the remaining named items per chapter.
+
 This file is a planning checklist of monsters/gods/concepts to illustrate next.
-No code has been changed — these are not yet in `js/data.js`.
 
 | Status | Count |
 |---|---|
-| Current plates | 207 |
-| Additions in this batch | **+213** |
+| Current plates | **313** |
+| Remaining additions | **+107** |
 | Target total | **420** |
 
 > Sort rules reminder: In **mythology** chapters, sort **gods first**, then **monsters/creatures/folklore**. For **Nordic**: three groups → gods → beings/creatures → cosmic/events. Single-type chapters stay purely alphabetical.
