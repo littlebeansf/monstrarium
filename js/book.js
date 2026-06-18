@@ -54,8 +54,9 @@
   // ensure the NEXT pushed page lands on an odd (LEFT) index
   const padToLeft  = () => { if (pages.length % 2 === 0) push({ type: "blank" }); };
 
-  push({ type: "cover" });   // 0 — the closed cover (right-hand, single)
-  push({ type: "intro" });   // 1 — opening page, left of the first spread
+  push({ type: "cover" });        // 0 — the closed cover (right-hand, single)
+  push({ type: "intro-left" });   // 1 — intro page art, LEFT of the first spread
+  push({ type: "intro-right" });  // 2 — intro page art, RIGHT of the first spread
 
   let plateNo = 0;
   const plateFirstPage = {};  // monster.id -> the page index it occupies
@@ -107,6 +108,15 @@
       const ch = page.chapter;
       return `<div class="art-face art-face--chapter">
         <img class="art-img" src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
+      </div>`;
+    }
+    if (page.type === "intro-left" || page.type === "intro-right") {
+      const src = page.type === "intro-left" ? "assets/book/intro00.webp" : "assets/book/intro11.webp";
+      const alt = page.type === "intro-left"
+        ? "Monstrarium of Representation — introduction"
+        : "Monstrarium of Representation — author's note";
+      return `<div class="art-face art-face--intro">
+        <img class="art-img" src="${src}" alt="${alt}" draggable="false" />
       </div>`;
     }
     if (page.type === "intro") {
@@ -369,9 +379,11 @@
     if (idx < 0 || idx >= PAGE_COUNT) return null;
     const p = pages[idx];
     if (!p) return null;
-    if (p.type === "cover")   return "assets/book/cover.webp";
-    if (p.type === "back")    return "assets/book/back.webp";
-    if (p.type === "chapter") return p.chapter.divider;
+    if (p.type === "cover")       return "assets/book/cover.webp";
+    if (p.type === "back")        return "assets/book/back.webp";
+    if (p.type === "intro-left")  return "assets/book/intro00.webp";
+    if (p.type === "intro-right") return "assets/book/intro11.webp";
+    if (p.type === "chapter")     return p.chapter.divider;
     if (p.type === "plate")   return `assets/plates/${p.monster.file}`;
     return null;
   }
