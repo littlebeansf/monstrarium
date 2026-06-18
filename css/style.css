@@ -228,6 +228,52 @@ body { position: relative; }
   content: ""; position: absolute; inset: 0; pointer-events: none;
   box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
 }
+/* every illustrated page now invites the reading loupe */
+.art-face[data-zoom] { cursor: zoom-in; }
+
+/* ── Gentle page-settle: when a resting spread paints, its faces breathe
+   in — a hair of scale and a soft fade, GPU-only (transform/opacity), so
+   the book always feels like it just came to rest rather than snapping. */
+@keyframes page-settle {
+  from { opacity: 0; transform: scale(1.012); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.pg--settle .pg__face {
+  will-change: transform, opacity;
+  animation: page-settle 620ms var(--ease-out) both;
+}
+
+/* ── Chapter arrival: the divider plate drifts in with a slow ken-burns
+   push and a single gilt sheen that sweeps across the parchment, marking
+   the threshold into a new caput. Runs once on arrival, then rests. */
+@keyframes chapter-rise {
+  from { opacity: 0; transform: scale(1.055); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes chapter-sheen {
+  0%   { opacity: 0; transform: translateX(-120%) skewX(-12deg); }
+  18%  { opacity: 0.5; }
+  60%  { opacity: 0.32; }
+  100% { opacity: 0; transform: translateX(120%) skewX(-12deg); }
+}
+.pg--chapter-arrive .art-face--chapter .art-img {
+  animation: chapter-rise 1400ms var(--ease-out) both;
+  transform-origin: 50% 46%;
+}
+.pg--chapter-arrive .art-face--chapter::before {
+  content: ""; position: absolute; top: -10%; bottom: -10%;
+  left: 0; width: 42%; z-index: 3; pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(232,200,120,0.0) 30%,
+    rgba(232,200,120,0.38) 50%,
+    rgba(255,244,214,0.55) 56%,
+    rgba(232,200,120,0.30) 62%,
+    transparent 100%);
+  mix-blend-mode: screen;
+  animation: chapter-sheen 1700ms var(--ease-in-out) 220ms both;
+}
 
 /* ── Content pages (intro / plates / colophon) ───────────────── */
 .page-pad {
@@ -898,4 +944,8 @@ body.is-loading { overflow: hidden; }
   .loadscreen__mark { animation: none; opacity: 0.9; }
   .loadscreen__fill { animation-duration: 1.1s; }
   .loadscreen { transition: opacity 200ms linear, visibility 0s linear 200ms; }
+  /* Page entrance flourishes: hold the final frame, no motion. */
+  .pg--settle .pg__face,
+  .pg--chapter-arrive .art-face--chapter .art-img { animation: none; }
+  .pg--chapter-arrive .art-face--chapter::before { display: none; }
 }

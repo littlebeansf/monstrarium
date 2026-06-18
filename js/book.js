@@ -95,18 +95,18 @@
     if (!page || page.type === "blank") return `<div class="paper"></div>`;
 
     if (page.type === "cover") {
-      return `<div class="art-face art-face--cover">
+      return `<div class="art-face art-face--cover" data-zoom="assets/book/cover.webp">
         <img class="art-img" src="assets/book/cover.webp" alt="Monstrarium of Representation — front cover" draggable="false" />
       </div>`;
     }
     if (page.type === "back") {
-      return `<div class="art-face art-face--back">
+      return `<div class="art-face art-face--back" data-zoom="assets/book/back.webp">
         <img class="art-img" src="assets/book/back.webp" alt="Monstrarium of Representation — back cover" draggable="false" />
       </div>`;
     }
     if (page.type === "chapter") {
       const ch = page.chapter;
-      return `<div class="art-face art-face--chapter">
+      return `<div class="art-face art-face--chapter" data-zoom="${ch.divider}">
         <img class="art-img" src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
       </div>`;
     }
@@ -115,7 +115,7 @@
       const alt = page.type === "intro-left"
         ? "Monstrarium of Representation — introduction"
         : "Monstrarium of Representation — author's note";
-      return `<div class="art-face art-face--intro">
+      return `<div class="art-face art-face--intro" data-zoom="${src}">
         <img class="art-img" src="${src}" alt="${alt}" draggable="false" />
       </div>`;
     }
@@ -217,7 +217,8 @@
   // ── Render the current (static) spread ─────────────────────────
   // Only the visible spread's pages live in the DOM. On mobile we show a
   // single page (the right page of the spread, or the cover/back).
-  function renderSpread() {
+  function renderSpread(opts) {
+    const animate = !reduceMotion && opts && opts.animate;
     book.innerHTML = "";
     const single = isSinglePage(spread);
     book.classList.toggle("book--single", single);
@@ -236,7 +237,22 @@
       book.appendChild(makePageEl(rightIndexOf(spread), "right"));
     }
     bindReaders();
+    if (animate) applyArrivalAnimations();
     updateChrome();
+  }
+
+  // Tag the freshly-painted faces so their CSS entrance keyframes fire once.
+  // A face that holds a chapter divider gets the richer "arrive" flourish;
+  // every other resting face gets the gentle settle. Pure CSS thereafter.
+  function applyArrivalAnimations() {
+    const mobile = isMobile();
+    book.querySelectorAll(".pg").forEach((pg) => {
+      const isChapter = !!pg.querySelector(".art-face--chapter");
+      if (isChapter) pg.classList.add("pg--chapter-arrive");
+      // On mobile the page already arrives via its own cross-fade, so the
+      // extra settle would double up — reserve settle for the desktop spread.
+      else if (!mobile) pg.classList.add("pg--settle");
+    });
   }
 
   function updateChrome() {
@@ -341,7 +357,7 @@
     const done = () => {
       flip.remove();
       animating = false;
-      renderSpread();    // full re-render binds loupe + final chrome
+      renderSpread({ animate: true });    // full re-render binds loupe + final chrome
       hideHint();
       warmNeighbours(target);   // keep the NEXT turn flash-free
     };
@@ -463,7 +479,7 @@
         mpage = targetPage;
         spread = pageToSpread(mpage);
         Atmos && Atmos.sfx && Atmos.sfx("rustle");
-        renderSpread();
+        renderSpread({ animate: true });
         hideHint();
         preloadImg(imgUrlFor(nextReal(mpage, +1)));
         preloadImg(imgUrlFor(nextReal(mpage, -1)));
@@ -477,7 +493,7 @@
     preloadSpread(target).then(() => {
       spread = target;
       Atmos && Atmos.sfx && Atmos.sfx("rustle");
-      renderSpread();
+      renderSpread({ animate: true });
       hideHint();
       warmNeighbours(target);
     });
@@ -541,9 +557,12 @@
   function onPlateMove(e) {
     if (animating || drag || isMobile()) { hideReader(); return; }
     const wrap = e.currentTarget;
-    const plate = wrap.closest(".plate");
-    if (!plate) return;
-    const src = plate.dataset.zoom;
+    // the element that carries the artwork URL: a .plate (plates) or an
+    // .art-face (cover / chapter dividers / intro pages). Generalised so the
+    // reading loupe works on EVERY illustrated page, not only plates.
+    const host = wrap.closest("[data-zoom]");
+    if (!host) return;
+    const src = host.dataset.zoom;
     const r = wrap.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
@@ -566,9 +585,16 @@
     reader.classList.add("on");
   }
   function bindReaders() {
+    // Plates expose a dedicated .plate__img-wrap; full-bleed art pages (cover,
+    // chapter dividers, intro) are themselves the hover surface. Bind the loupe
+    // to whichever the page provides so zoom is available everywhere.
+    const hits = [];
     book.querySelectorAll(".plate").forEach((plate) => {
       const wrap = plate.querySelector(".plate__img-wrap");
-      if (!wrap) return;
+      if (wrap) hits.push(wrap);
+    });
+    book.querySelectorAll(".art-face[data-zoom]").forEach((face) => hits.push(face));
+    hits.forEach((wrap) => {
       wrap.addEventListener("mousemove", onPlateMove);
       wrap.addEventListener("mouseenter", onPlateMove);
       wrap.addEventListener("mouseleave", hideReader);
