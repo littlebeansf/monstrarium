@@ -1,16 +1,21 @@
 # Monstrarium — Next Batch (Image Creation List)
 
-**Goal:** Grow the codex from **313 → 500** plates (**+187 new images**), balanced as evenly as the existing distribution allows.
+**Goal:** Grow the codex from **313 → 600** plates (**+287 new images**), in two parts:
 
-This file lists only what is **still to be created** — everything already in the book has been removed, and nothing below duplicates an existing plate.
+- **Part A — Balanced fill to 500** (+187): raises the smaller chapters as evenly as the existing distribution allows.
+- **Part B — Insane Miscellanea +100** (→ 600): one hundred of the wildest folklore, legends, and cryptids from around the world, all added to Miscellanea.
 
-> **Balancing note:** Four chapters are already larger than a perfectly even 500 ÷ 15 ≈ 33 (Phobias 40, Delusions & Disorders 46, Japanese Yokai 39, Miscellanea 43). Because plates are only ever added, never removed, those four stay as-is and receive **0** additions. Every other chapter is raised to **30–31**, which is the flattest possible profile at 500 total.
+This file lists only what is **still to be created** — everything already in the book has been removed, and nothing below duplicates an existing plate or any other planned entry.
+
+> **Balancing note (Part A):** Four chapters are already larger than a perfectly even 500 ÷ 15 ≈ 33 (Phobias 40, Delusions & Disorders 46, Japanese Yokai 39, Miscellanea 46). Because plates are only ever added, never removed, those four stay as-is in Part A and receive **0** additions there. Every other chapter is raised to **30–31**, the flattest possible profile at 500.
 
 | Status | Count |
 |---|---|
 | Current plates | **313** |
-| Additions in this batch | **+187** |
-| Target total | **500** |
+| Part A additions (→ 500) | **+187** |
+| Part B additions (Miscellanea, → 600) | **+100** |
+| **Total additions** | **+287** |
+| **Target total** | **600** |
 
 > Sort rules reminder: In **mythology** chapters, sort **gods first**, then **monsters/creatures/folklore**. For **Nordic**: three groups → gods → beings/creatures → cosmic/events. Single-type chapters stay purely alphabetical.
 
@@ -239,7 +244,116 @@ This file lists only what is **still to be created** — everything already in t
 11. Volkodlak (werewolf)
 12. Zduhać (storm-fighting spirit)
 
-## XV — Miscellanea (+0) → 43 (already above average — no additions)
+## XV — Miscellanea (Part A: +0) → 46 (already above average — no Part A additions)
+
+---
+
+## PART B — Insane Miscellanea (+100) → 46 → 146
+
+One hundred of the most unhinged monsters, folklore, legends, and cryptids from every corner of the world — sea horrors, cursed werebeasts, dream-eaters, sky-titans, and modern cryptid sightings. All go to **Miscellanea**, sorted alphabetically (Miscellanea is a single-type, purely alphabetical chapter). None duplicate an existing plate or any Part A entry.
+
+Slugs will follow the convention `miscellaneous-<kebab-name>.webp` (e.g. `miscellaneous-jersey-devil.webp`).
+
+1. Adze — firefly-shaped vampire spirit of West Africa that possesses its host
+2. Ahool — giant bat-cryptid of Java with a child-sized wingspan
+3. Amarok — gigantic lone wolf of Inuit legend that devours night-hunters
+4. Amphisbaena — two-headed serpent with a head at each end, born of Medusa's blood
+5. Aswang — shape-shifting Filipino ghoul that feasts on the unborn
+6. Baku — dream-eating chimera of tapir, elephant and tiger that devours nightmares
+7. Barghest — monstrous spectral black dog of northern England, an omen of death
+8. Beast of Gevaudan — man-eating wolf-creature that terrorized 18th-century France
+9. Black Annis — blue-faced cave hag of Leicestershire who claws children
+10. Black Shuck — huge red-eyed phantom hound haunting the English coast
+11. Bray Road Beast — upright wolf-man cryptid sighted in rural Wisconsin
+12. Buer — wheel-shaped demon of the Ars Goetia that rolls on five goat-legs
+13. Bukavac — six-legged horned night-monster of Slavic swamps
+14. Cadejo — spectral dog of Central America, white to protect, black to doom
+15. Caladrius — all-white bird that foretells whether the sick will live or die
+16. Catoblepas — downward-gazing beast whose stare and breath bring instant death
+17. Charybdis — monstrous whirlpool-maw that swallows the sea three times a day
+18. Cherufe — volcano-dwelling lava monster of the Mapuche that demands sacrifices
+19. Cipactli — primordial crocodile-fish sea demon from whom the earth was made
+20. Dahu — lopsided alpine goat with legs shorter on one side for the mountainside
+21. Dobhar-chu — the Irish "king otter," a vicious water-hound the size of a man
+22. Dover Demon — gaunt orange-eyed cryptid sighted in 1970s Massachusetts
+23. Each-uisge — deadly Scottish water-horse that drowns and devours its riders
+24. Encantado — river-dolphin shapeshifter of the Amazon that seduces villagers
+25. Erymanthian Boar — colossal tusked boar captured alive by Heracles
+26. Fear Liath — the Grey Man, a towering presence haunting a Scottish peak
+27. Flatwoods Monster — towering spade-headed entity from a 1952 West Virginia sighting
+28. Fresno Nightcrawler — pale walking-pants cryptid caught on California cameras
+29. Gaasyendietha — fire-breathing meteor dragon of the Seneca that dwells in lakes
+30. Gancanagh — honey-tongued Irish fairy whose touch makes mortals fatally besotted
+31. Gloucester Sea Serpent — many-humped sea monster seen off Massachusetts in 1817
+32. Grootslang — cave-dwelling elephant-serpent of South Africa guarding diamonds
+33. Hippocampus — sea-horse steed of Poseidon, fish-tailed and horse-fronted
+34. Hraesvelgr — corpse-eating giant eagle whose wingbeats make the world's winds
+35. Indus Worm — legendary white river-worm said to drag horses into the water
+36. Inkanyamba — giant winged serpent of Zulu legend that stirs storms over falls
+37. Ittan-momen — haunted strip of cotton cloth that strangles night travelers
+38. Jenny Greenteeth — green-skinned water hag who drags children beneath the pond
+39. Jersey Devil — winged hooved cryptid born cursed in the New Jersey Pine Barrens
+40. Jorogumo — spider-woman of Japan who lures men with the guise of a beauty
+41. Kamaitachi — sickle-clawed weasel whirlwind that slashes travelers unseen
+42. Keelut — hairless evil dog-spirit of the Inuit that hunts the lost on the ice
+43. Kishi — two-faced Angolan demon with a hyena's maw on the back of its head
+44. Kongamato — pterosaur-like cryptid said to capsize boats in central Africa
+45. Kraken — titanic many-armed sea monster that drags whole ships to the depths
+46. Lamia — child-devouring serpent-woman cursed by a jealous goddess
+47. Lavellan — venomous giant water-shrew of the Scottish Highlands
+48. Lindworm — wingless two-legged serpent-dragon of Germanic legend
+49. Loup-Garou — the Cajun werewolf of the Louisiana bayous, cursed for 101 days
+50. Loveland Frog — upright frog-faced humanoid sighted along an Ohio river
+51. Mahaha — grinning sinewy ice demon of the Arctic that tickles victims to death
+52. Manananggal — self-severing Filipino vampire whose torso flies on bat wings
+53. Mapinguari — one-eyed sloth-beast of the Amazon with a mouth in its belly
+54. Melusine — twin-tailed water spirit who becomes a serpent from the waist down
+55. Mngwa — enormous grey phantom cat that stalks the Tanzanian coast
+56. Mokele-mbembe — sauropod-like river cryptid rumored in the Congo basin
+57. Mongolian Death Worm — venomous electric red worm of the deep Gobi sands
+58. Mothman — red-eyed winged humanoid that haunted Point Pleasant before disaster
+59. Nandi Bear — hyena-like ferocious cryptid said to crush skulls in East Africa
+60. Nure-onna — serpent-bodied woman with a human head who haunts the shoreline
+61. Ogopogo — serpentine lake monster of Okanagan Lake in British Columbia
+62. Onocentaur — half-man, half-donkey beast of medieval moralizing bestiaries
+63. Ouroboros — world-serpent endlessly devouring its own tail
+64. Owlman — owl-faced winged cryptid sighted near a Cornish church tower
+65. Peluda — spined porcupine-dragon of France that poisoned rivers with its breath
+66. Peryton — winged stag that casts the shadow of a man until it kills
+67. Piasa — horned dragon-bird painted on the Mississippi bluffs by the Illini
+68. Pollo Maligno — child-eating bird-spirit of Colombian jungle folklore
+69. Pope Lick Monster — goat-horned man-beast luring victims onto a Kentucky trestle
+70. Pukwudgie — knee-high mischievous forest spirit of Wampanoag legend
+71. Qalupalik — long-nailed sea hag who snatches children from the Arctic shore
+72. Questing Beast — serpent-headed Arthurian monster whose belly bays like hounds
+73. Ratatoskr — gossip-bearing squirrel running messages up and down the World Tree
+74. Raven Mocker — most feared Cherokee witch that steals the life of the dying
+75. Roc — colossal bird of Arabian legend able to carry off elephants
+76. Salamander — fire-dwelling lizard of medieval lore that quenches flame with cold
+77. Selkie — seal-folk who shed their skins to walk the shore as humans
+78. Shahmaran — wise half-woman half-serpent queen of snakes in Anatolian myth
+79. Shojo — red-haired sea sprite of Japan drunk on endless sacred sake
+80. Skinwalker — malevolent shapeshifting witch of Navajo lore that wears animal hides
+81. Skvader — impossible Swedish taxidermy beast, half hare and half wood grouse
+82. Strigoi — restless Romanian undead that rises to drain the living
+83. Tarasque — dragon-turtle of Provence with a lion's head and a spiked shell
+84. Teju Jagua — fiery seven-headed lizard-god, first of the cursed Guarani brood
+85. Thunderbird — storm-wreathed giant bird whose wingbeats are thunder
+86. Tikbalang — horse-headed trickster of the Philippines that leads hikers in circles
+87. Tizheruk — huge serpent of the Arctic that snatches people from the docks
+88. Trauco — deformed forest dwarf of Chiloe who bewitches and ravishes maidens
+89. Trunko — white furry sea-beast washed ashore in South Africa in 1924
+90. Tsuchinoko — fat venomous snake-cryptid of Japan that can leap and whistle
+91. Ucumar — bipedal bear-ape cryptid of the South American Andes
+92. Vouivre — jewel-eyed flying serpent of French legend that guards a fiery gem
+93. Waheela — prehistoric dire-wolf cryptid of the Canadian far north
+94. Wampus Cat — six-legged shapeshifting feline haunting Appalachian forests
+95. Wani — Japanese sea-dragon crocodile that rules over the tides
+96. Will-o'-the-Wisp — ghostly marsh-light that lures wanderers to drown in the bog
+97. Yacumama — colossal river serpent said to swallow anything within its reach
+98. Yara-ma-yha-who — red frog-man of Aboriginal lore that drinks victims through its fingers
+99. Yowie — hulking ape-man cryptid of the Australian outback
+100. Ziz — gigantic sky-griffin of Hebrew legend, ruler of all the birds
 
 ---
 
@@ -261,5 +375,7 @@ This file lists only what is **still to be created** — everything already in t
 | XII — Nordic Mythology | 23 | +7 | 30 |
 | XIII — Indian Mythology | 11 | +19 | 30 |
 | XIV — Slavic Folklore | 18 | +12 | 30 |
-| XV — Miscellanea | 43 | +0 | 43 |
-| **TOTAL** | **313** | **+187** | **500** |
+| XV — Miscellanea (Part A) | 46 | +0 | 46 |
+| **Subtotal (Part A → 500)** | **313** | **+187** | **500** |
+| XV — Miscellanea (Part B) | 46 | +100 | 146 |
+| **TOTAL (→ 600)** | **313** | **+287** | **600** |
