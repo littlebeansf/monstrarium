@@ -357,6 +357,100 @@ Slugs will follow the convention `miscellaneous-<kebab-name>.webp` (e.g. `miscel
 
 ---
 
+## XVI — Curses (proposed new chapter) → +40
+
+A proposed new chapter: maledictions, hexes, and dooms laid from outside — each personified as a monster in the codex's dark-poetic register. Sorted alphabetically by name (ignoring the leading "The"). Slugs would follow `curses-<kebab-name>.webp`.
+
+1. The Bleeding Wall — a house that remembers a crime and weeps it forever
+2. The Bridal Veil — a marriage curse that buries each spouse before the next
+3. The Broken Vow — the oath you shattered, returned as a thing that keeps its word
+4. The Buried Tongue — silence forced on those who would speak the truth
+5. The Cold Hearth — warmth that flees the room the cursed one enters
+6. The Counted Days — a tally only the cursed can see, ticking toward a known hour
+7. The Crawling Shame — a mark that surfaces on the skin where guilt lives
+8. The Crooked Luck — misfortune sewn so deep that even fortune turns against you
+9. The Crown of Thorned Hours — a curse on the powerful to never rest easy again
+10. The Devouring Inheritance — wealth that consumes the heir who finally claims it
+11. The Drowned Bell — a toll heard only by those marked to follow it under
+12. The Echoing Debt — a sin that demands repayment from those not yet born
+13. The Endless Thirst — a curse of drinking the sea and never being slaked
+14. The Evil Eye — a gaze that withers what it admires, blessing turned to blight
+15. The Faithless Compass — a hex that bends every path back toward ruin
+16. The Famine Word — a syllable that turns every feast to dust on the tongue
+17. The Final Word — a deathbed sentence that binds the living to its grievance
+18. The Forgotten Face — a hex that erases you from every memory but your own
+19. The Forsworn Sky — weather that turns foul wherever the cursed one walks
+20. The Gallows Promise — the noose that waits patiently for a chosen bloodline
+21. The Generational Curse — the inherited wound that wears each child's face in turn
+22. The Hollow Gift — a present that takes more than it gives, year after year
+23. The Inherited Hunger — an appetite handed down that no amount can ever fill
+24. The Iron Promise — a binding that tightens whenever you try to break free
+25. The Last Reflection — a final image that traps the soul in glass at death
+26. The Locked Hour — condemned to relive the same cursed moment without end
+27. The Marked Threshold — a doorway that no blessing may cross again
+28. The Mirror's Spite — your reflection that began living a crueler life than yours
+29. The Name Unspoken — the curse that grows stronger each time you refuse to say it
+30. The Plague Kiss — affection that carries a slow and certain undoing
+31. The Rotting Word — praise that spoils whatever it is spoken over
+32. The Salted Field — barrenness laid on land and womb alike, nothing will take root
+33. The Severed Thread — a life cut from its fate, drifting with no destiny left
+34. The Sleepless Hex — the curse of never again closing both eyes at once
+35. The Stolen Shadow — a theft that leaves you casting nothing in any light
+36. The Tongue of Ash — the malediction spoken once, that unmakes every kindness after
+37. The Unhealing Wound — an injury that reopens each dawn, no scar permitted
+38. The Wailing Dowry — a gift of grief passed bride to bride down the line
+39. The Whispering Coin — payment for a wish that whispers the true price too late
+40. The Withering Touch — whatever it caresses ages a hundred years in a breath
+
+---
+
+## XVII — Fetishes (proposed new chapter) → +40
+
+A proposed new chapter: cursed objects, compulsions, and fixations — a mix of the anthropological (talismans, idols, hoarded relics) and the tasteful psychosexual (obsession, possession, surrender), rendered as eerie personified entities rather than anything explicit. Sorted alphabetically by name (ignoring the leading "The"). Slugs would follow `fetishes-<kebab-name>.webp`.
+
+1. The Bound Confession — a compulsion to be exposed, ashamed, and seen entire
+2. The Bound Lock of Hair — a keepsake that ties two souls past death and consent
+3. The Captured Gaze — a desire to be watched, withering when unseen
+4. The Collector — the urge to possess what should never be owned
+5. The Counting Hand — the need to number and touch each thing, again and again
+6. The Coveted Crown — the fixation on a station one will ruin everything to hold
+7. The Coveted Reflection — adoration of one's own image past all reason
+8. The Coveted Wound — a fixation on another's pain as a thing of beauty
+9. The Devotee's Knot — a binding tied tighter the more it is resisted
+10. The Effigy Lover — a made figure adored beyond any breathing beloved
+11. The Endless Acquisition — a hunger to have, that empties as fast as it fills
+12. The Fetish of Youth — an obsession with the unspoiled that preys upon it
+13. The Forbidden Portrait — a likeness gazed upon until the looker forgets the living
+14. The Forbidden Threshold — a craving for the one room, one act, one door denied
+15. The Gilded Cage — the desire to keep beauty by imprisoning it
+16. The Heirloom Compulsion — an object that passes its obsession to each new owner
+17. The Hoarded Relic — an object so beloved it begins to own its keeper
+18. The Hunger for the Forbidden — desire that lives only in what it must not have
+19. The Idol of Self — a graven likeness one worships in place of any god
+20. The Imitation Beloved — a doll or double cherished in a real one's place
+21. The Keeper of Locks — one who collects what can be sealed away and held
+22. The Kept Voice — a recording played until the speaker becomes a captive ghost
+23. The Marked Flesh — inscriptions cut to claim a body as belonging
+24. The Mask Worn Inward — a face put on so often the true one is lost beneath
+25. The Pristine Obsession — a need for the unblemished that destroys what it touches
+26. The Reliquary of Loss — a shrine built from what was taken, fed on grieving
+27. The Ritual Garment — robes that must be donned, lest the self come undone
+28. The Ritual of Order — a compulsion that must be obeyed or the world will end
+29. The Sacred Chain — bondage mistaken for devotion, the link worn as a vow
+30. The Sacred Object — a thing made holy by fixation, demanding sacrifice
+31. The Scent Memory — a fragrance hunted across years, enslaving the one who chases it
+32. The Shrine of the Other — a fixation that makes an altar of one person entire
+33. The Skin of Another — a longing to wear someone else's body and history
+34. The Surrendered Will — the craving to be owned, to lay down all choosing
+35. The Talisman of Control — a charm clutched to command what cannot be commanded
+36. The Trophy — a kept thing that demands ever-greater conquests to feed it
+37. The Velvet Chain of Habit — a pleasure repeated until it becomes a master
+38. The Velvet Compulsion — a craving for the touch of one texture above all else
+39. The Worn Garment — cloth kept long after its wearer, breathing their absence
+40. The Worshipped Foot — a fixation that kneels before a single chosen form
+
+---
+
 ## Chapter Count Summary
 
 | Chapter | Current | Additions | New Total |
@@ -379,3 +473,6 @@ Slugs will follow the convention `miscellaneous-<kebab-name>.webp` (e.g. `miscel
 | **Subtotal (Part A → 500)** | **313** | **+187** | **500** |
 | XV — Miscellanea (Part B) | 46 | +100 | 146 |
 | **TOTAL (→ 600)** | **313** | **+287** | **600** |
+| XVI — Curses (proposed) | 0 | +40 | 40 |
+| XVII — Fetishes (proposed) | 0 | +40 | 40 |
+| **GRAND TOTAL (with new chapters → 680)** | **313** | **+367** | **680** |
