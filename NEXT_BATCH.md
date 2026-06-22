@@ -1,21 +1,21 @@
 # Monstrarium — Next Batch (Image Creation List)
 
-**Current state:** the codex now holds **478 plates** across **16 chapters** (including the new **Anime & Cartoons** chapter, 48 plates).
+**Current state:** the codex now holds **504 plates** across **16 chapters** (including the new **Anime & Cartoons** chapter, 53 plates).
 
 This list has been updated after the latest batch — every plate that now exists in the book has been **subtracted**, so nothing below duplicates an existing plate. The two previously proposed chapters (Curses and Fetishes) have been **removed for now** at your request.
 
 It is organised in two parts:
 
-- **Part A — finish the psychological & mythology chapters** (+119): the remaining concepts and gods/creatures still owed to the smaller chapters.
+- **Part A — finish the psychological & mythology chapters** (+97): the remaining concepts and gods/creatures still owed to the smaller chapters.
 - **Part B — Insane Miscellanea** (+66): the remaining wild folklore, legends and cryptids, all added to Miscellanea.
 
 | Status | Count |
 |---|---|
-| Current plates | **478** |
-| Part A — still to create | **+119** |
+| Current plates | **504** |
+| Part A — still to create | **+97** |
 | Part B — still to create (Miscellanea) | **+66** |
-| **Total still to create** | **+185** |
-| **Target total** | **663** |
+| **Total still to create** | **+163** |
+| **Target total** | **667** |
 
 > Sort rules reminder: In **mythology** chapters, sort **gods first**, then **monsters/creatures/folklore**. For **Nordic**: three groups → gods → beings/creatures → cosmic/events. Single-type chapters (incl. Miscellanea and Anime & Cartoons) stay purely alphabetical.
 
@@ -23,47 +23,25 @@ It is organised in two parts:
 
 ## PART A — Finish the chapters
 
-## II — Afflictions (+1) → 30 → 31
-1. Selective Mutism
+## II — Afflictions (+0) → 31 — complete for this round
 
-## IV — Passions (+18) → 12 → 30
+## IV — Passions (+2) → 28 → 30
 1. Bloodlust
-2. Devotion
-3. Elation
-4. Euphoria
-5. Fanaticism
-6. Fervor
-7. Fury / Rage
-8. Longing
-9. Lust (the passion)
-10. Pride (the passion)
-11. Temptation
-12. Thrill
-13. Vengeance
-14. Wrath-Passion
-15. Yearning
-16. Zeal
-17. Avarice (craving)
-18. Rapture
+2. Avarice (craving)
 
-## V — Sorrows (+17) → 13 → 30
-1. Abandonment
-2. Bitterness
-3. Disappointment
-4. Disillusionment
-5. Emptiness
-6. Grief-Eternal
-7. Guilt
-8. Heartbreak
-9. Helplessness
-10. Hopelessness
-11. Longing-Sorrow
-12. Numbness
-13. Remorse
-14. Resentment
-15. Sorrow-Quiet
-16. Wistfulness
-17. Yearning-Sorrow
+## V — Sorrows (+12) → 18 → 30
+1. Grief-Eternal
+2. Guilt
+3. Heartbreak
+4. Helplessness
+5. Hopelessness
+6. Longing-Sorrow
+7. Numbness
+8. Remorse
+9. Resentment
+10. Sorrow-Quiet
+11. Wistfulness
+12. Yearning-Sorrow
 
 ## VI — The Self (+6) → 22 → 28
 1. Acceptance
@@ -120,7 +98,7 @@ It is organised in two parts:
 21. Trust
 22. Wisdom
 
-## IX — Greek Mythology (+1) → 32 → 33
+## IX — Greek Mythology (+1) → 31 → 32
 **Creatures (sort after gods):**
 1. Sphinx
 
@@ -251,20 +229,20 @@ Slugs follow the convention `miscellaneous-<kebab-name>.webp`.
 | Chapter | Now | Part A | Part B | New Total |
 |---|---|---|---|---|
 | I — Phobias | 40 | +0 | +0 | 40 |
-| II — Afflictions | 30 | +1 | +0 | 31 |
+| II — Afflictions | 31 | +0 | +0 | 31 |
 | III — Delusions & Disorders | 46 | +0 | +0 | 46 |
-| IV — Passions | 12 | +18 | +0 | 30 |
-| V — Sorrows | 13 | +17 | +0 | 30 |
+| IV — Passions | 28 | +2 | +0 | 30 |
+| V — Sorrows | 18 | +12 | +0 | 30 |
 | VI — The Self | 22 | +6 | +0 | 28 |
 | VII — Vices | 8 | +21 | +0 | 29 |
 | VIII — Virtues | 9 | +22 | +0 | 31 |
-| IX — Greek Mythology | 32 | +1 | +0 | 33 |
+| IX — Greek Mythology | 31 | +1 | +0 | 32 |
 | X — Japanese Yokai | 41 | +0 | +0 | 41 |
 | XI — Egyptian Mythology | 30 | +0 | +0 | 30 |
 | XII — Nordic Mythology | 28 | +2 | +0 | 30 |
 | XIII — Indian Mythology | 11 | +19 | +0 | 30 |
 | XIV — Slavic Folklore | 18 | +12 | +0 | 30 |
 | XV — Miscellanea | 90 | +0 | +66 | 156 |
-| XVI — Anime & Cartoons | 48 | +0 | +0 | 48 |
-| **TOTAL** | **478** | **+119** | **+66** | **663** |
+| XVI — Anime & Cartoons | 53 | +0 | +0 | 53 |
+| **TOTAL** | **504** | **+97** | **+66** | **667** |
 
