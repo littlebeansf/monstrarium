@@ -710,6 +710,8 @@
   const gallerySearchClear = document.getElementById("gallerySearchClear");
   const galleryChips = document.getElementById("galleryChips");
   const galleryEmpty = document.getElementById("galleryEmpty");
+  const galleryCount = document.getElementById("galleryCount");
+  const galleryTotal = (typeof MONSTERS !== "undefined" && MONSTERS) ? MONSTERS.length : 0;
   let galleryBuilt = false;
   let activeChapter = "all";
   let searchTerm = "";
@@ -747,6 +749,7 @@
       });
     });
     galleryBuilt = true;
+    applyGalleryFilter();
   }
   function buildChips(chapters) {
     if (!galleryChips) return;
@@ -784,6 +787,12 @@
       totalVisible += sectionVisible;
     });
     if (galleryEmpty) galleryEmpty.hidden = totalVisible !== 0;
+    if (galleryCount) {
+      const filtered = (activeChapter !== "all") || term.length > 0;
+      galleryCount.textContent = filtered
+        ? totalVisible + " of " + galleryTotal
+        : galleryTotal + " plates";
+    }
   }
   if (gallerySearch) {
     gallerySearch.addEventListener("input", () => {
