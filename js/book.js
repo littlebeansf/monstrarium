@@ -711,29 +711,44 @@
   const galleryChips = document.getElementById("galleryChips");
   const galleryEmpty = document.getElementById("galleryEmpty");
   const galleryCount = document.getElementById("galleryCount");
+  const libraryScroll = document.getElementById("libraryScroll");
+  const galleryModes = document.getElementById("galleryModes");
   const galleryTotal = (typeof MONSTERS !== "undefined" && MONSTERS) ? MONSTERS.length : 0;
+  const chapterTotal = (typeof CHAPTERS !== "undefined" && CHAPTERS) ? CHAPTERS.length : 0;
   let galleryBuilt = false;
+  let libraryBuilt = false;
   let activeChapter = "all";
   let searchTerm = "";
+  let viewMode = "library"; // "library" | "plates"
+
+  // Roman numerals for plate captions (matches the codex's Caput numbering vibe)
+  function roman(n) {
+    if (!n || n < 1) return "";
+    const map = [[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
+    let out = ""; for (const [v, s] of map) { while (n >= v) { out += s; n -= v; } } return out;
+  }
 
   function buildGallery() {
     if (galleryBuilt || !galleryScroll) return;
     const chapters = (typeof CHAPTERS !== "undefined" ? CHAPTERS : []);
     const html = chapters.map((ch, ci) => {
-      const items = ch.monsters.map((m) => {
+      const items = ch.monsters.map((m, mi) => {
         const src = `assets/plates/${m.file}`;
         const sp = spreadOfPage(plateFirstPage[m.id]);
-        return `<button class="gcard" type="button" data-spread="${sp}" data-name="${(m.name || "").toLowerCase()}" data-chapter="${ci}" aria-label="Open ${m.name}">
+        const num = mi + 1; // plate number within its chapter
+        return `<button class="gcard" type="button" data-spread="${sp}" data-name="${(m.name || "").toLowerCase()}" data-chapter="${ci}" aria-label="Open ${m.name}, plate ${num}">
           <span class="gcard__frame">
             <img class="gcard__img" src="${src}" alt="${m.name}" loading="lazy" decoding="async" draggable="false" />
+            <span class="gcard__num" aria-hidden="true">${roman(num)}</span>
           </span>
-          <span class="gcard__name">${m.name}</span>
+          <span class="gcard__name">${m.name} <i class="gcard__idx">[${num}]</i></span>
         </button>`;
       }).join("");
       return `<section class="gsection" data-chapter="${ci}">
         <header class="gsection__head">
           <span class="gsection__caput">Caput ${ch.caput}</span>
           <span class="gsection__title">${ch.title}</span>
+          <span class="gsection__tally">${ch.monsters.length}</span>
           <span class="gsection__rule"></span>
         </header>
         <div class="ggrid">${items}</div>
@@ -751,6 +766,100 @@
     galleryBuilt = true;
     applyGalleryFilter();
   }
+
+  // ── Library view: each chapter as a tome on the shelf, fronted by
+  //    its divider plate. Click a tome to dive into that chapter's plates.
+  function buildLibrary() {
+    if (libraryBuilt || !libraryScroll) return;
+    const chapters = (typeof CHAPTERS !== "undefined" ? CHAPTERS : []);
+    const cards = chapters.map((ch, ci) => {
+      const cover = ch.divider || (ch.monsters[0] ? `assets/plates/${ch.monsters[0].file}` : "");
+      const n = ch.monsters.length;
+      return `<button class="tome" type="button" data-chapter="${ci}" aria-label="Open ${ch.title}, ${n} plates">
+        <span class="tome__spine" aria-hidden="true"></span>
+        <span class="tome__cover">
+          <img class="tome__img" src="${cover}" alt="${ch.title}" loading="lazy" decoding="async" draggable="false" />
+          <span class="tome__veil" aria-hidden="true"></span>
+          <span class="tome__plate">
+            <span class="tome__caput">Caput ${ch.caput}</span>
+            <span class="tome__title">${ch.title}</span>
+            <span class="tome__count">${n} ${n === 1 ? "plate" : "plates"}</span>
+          </span>
+        </span>
+      </button>`;
+    }).join("");
+    libraryScroll.innerHTML =
+      `<div class="library__intro">
+         <span class="library__introtitle">The Library</span>
+         <span class="library__introsub">${chapterTotal} chapters &middot; ${galleryTotal} plates &middot; choose a tome</span>
+       </div>
+       <div class="library__shelf">${cards}</div>`;
+    libraryScroll.querySelectorAll(".tome").forEach((tome) => {
+      tome.addEventListener("click", () => {
+        const ci = tome.dataset.chapter;
+        // jump into All Plates view, filtered to this chapter
+        activeChapter = ci;
+        if (gallerySearch) { gallerySearch.value = ""; searchTerm = ""; }
+        if (gallerySearchClear) gallerySearchClear.hidden = true;
+        setMode("plates");
+        if (galleryChips) {
+          galleryChips.querySelectorAll(".gchip").forEach((c) => {
+            const on = c.dataset.chapter === ci;
+            c.classList.toggle("on", on);
+            c.setAttribute("aria-pressed", on ? "true" : "false");
+          });
+        }
+        applyGalleryFilter();
+        if (galleryScroll) galleryScroll.scrollTop = 0;
+      });
+    });
+    libraryBuilt = true;
+  }
+
+  // ── Switch between Library (shelf of tomes) and All Plates (grid) ──
+  function setMode(mode) {
+    viewMode = (mode === "plates") ? "plates" : "library";
+    if (viewMode === "plates") { buildGallery(); } else { buildLibrary(); }
+    const showPlates = viewMode === "plates";
+    if (galleryScroll) galleryScroll.hidden = !showPlates;
+    if (libraryScroll) libraryScroll.hidden = showPlates;
+    // The search + chapter chips only make sense in the plates grid.
+    const tools = document.querySelector(".gallery__search");
+    if (tools) tools.style.display = showPlates ? "" : "none";
+    if (galleryChips) galleryChips.style.display = showPlates ? "" : "none";
+    if (galleryEmpty && !showPlates) galleryEmpty.hidden = true;
+    if (galleryModes) {
+      galleryModes.querySelectorAll(".gmode").forEach((b) => {
+        const on = b.dataset.mode === viewMode;
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+    }
+    updateCount();
+  }
+  if (galleryModes) {
+    galleryModes.querySelectorAll(".gmode").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        // Clicking the All Plates tab directly clears any chapter filter
+        // (a tome click sets its own filter, then calls setMode itself).
+        if (btn.dataset.mode === "plates") {
+          activeChapter = "all";
+          if (gallerySearch) { gallerySearch.value = ""; searchTerm = ""; }
+          if (gallerySearchClear) gallerySearchClear.hidden = true;
+          if (galleryChips) {
+            galleryChips.querySelectorAll(".gchip").forEach((c) => {
+              const on = c.dataset.chapter === "all";
+              c.classList.toggle("on", on);
+              c.setAttribute("aria-pressed", on ? "true" : "false");
+            });
+          }
+        }
+        setMode(btn.dataset.mode);
+        if (btn.dataset.mode === "plates") applyGalleryFilter();
+      });
+    });
+  }
+
   function buildChips(chapters) {
     if (!galleryChips) return;
     const chips = [`<button class="gchip on" type="button" data-chapter="all" aria-pressed="true">All</button>`]
@@ -787,11 +896,25 @@
       totalVisible += sectionVisible;
     });
     if (galleryEmpty) galleryEmpty.hidden = totalVisible !== 0;
-    if (galleryCount) {
-      const filtered = (activeChapter !== "all") || term.length > 0;
-      galleryCount.textContent = filtered
-        ? totalVisible + " of " + galleryTotal
-        : galleryTotal + " plates";
+    updateCount(totalVisible);
+  }
+
+  // The header badge: shows total plates + chapter count, or the filtered
+  // tally when a chapter/search is active, or the chapter count in Library.
+  function updateCount(totalVisible) {
+    if (!galleryCount) return;
+    const chLabel = chapterTotal + (chapterTotal === 1 ? " chapter" : " chapters");
+    if (viewMode === "library") {
+      galleryCount.textContent = chLabel + " \u00B7 " + galleryTotal + " plates";
+      return;
+    }
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = (activeChapter !== "all") || term.length > 0;
+    if (filtered) {
+      const tv = (typeof totalVisible === "number") ? totalVisible : galleryTotal;
+      galleryCount.textContent = tv + " of " + galleryTotal;
+    } else {
+      galleryCount.textContent = galleryTotal + " plates \u00B7 " + chLabel;
     }
   }
   if (gallerySearch) {
@@ -811,7 +934,7 @@
     });
   }
   function openGallery() {
-    buildGallery();
+    setMode(viewMode);
     galleryEl.classList.add("on");
     galleryEl.setAttribute("aria-hidden", "false");
     document.body.classList.add("gallery-open");
