@@ -747,6 +747,7 @@ const CHAPTERS = [
       { id: "anime-nika", name: "Nika", file: "anime-nika.webp" },
       { id: "anime-joculator-rex", name: "Joculator Rex", file: "anime-joculator-rex.webp" },
       { id: "anime-perry-the-platypus", name: "Perry the Platypus", file: "anime-perry-the-platypus.webp" },
+      { id: "anime-jiminy", name: "Jiminy", file: "anime-jiminy.webp" },
       { id: "anime-pikachu", name: "Pikachu", file: "anime-pikachu.webp" },
       { id: "anime-bulbasaur", name: "Bulbasaur", file: "anime-bulbasaur.webp" },
       { id: "anime-charmander", name: "Charmander", file: "anime-charmander.webp" },
