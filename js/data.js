@@ -747,6 +747,9 @@ const CHAPTERS = [
       { id: "anime-nika", name: "Nika", file: "anime-nika.webp" },
       { id: "anime-joculator-rex", name: "Joculator Rex", file: "anime-joculator-rex.webp" },
       { id: "anime-perry-the-platypus", name: "Perry the Platypus", file: "anime-perry-the-platypus.webp" },
+      { id: "anime-pikachu", name: "Pikachu", file: "anime-pikachu.webp" },
+      { id: "anime-bulbasaur", name: "Bulbasaur", file: "anime-bulbasaur.webp" },
+      { id: "anime-charmander", name: "Charmander", file: "anime-charmander.webp" },
       { id: "anime-charizard", name: "Charizard", file: "anime-charizard.webp" },
       { id: "anime-squirtle", name: "Squirtle", file: "anime-squirtle.webp" },
       { id: "anime-psyduck", name: "Psyduck", file: "anime-psyduck.webp" },
@@ -760,6 +763,7 @@ const CHAPTERS = [
       { id: "anime-totoro", name: "Totoro", file: "anime-totoro.webp" },
       { id: "anime-no-face", name: "No-Face", file: "anime-no-face.webp" },
       { id: "anime-jack-skellington-and-sally", name: "Jack Skellington & Sally", file: "anime-jack-skellington-and-sally.webp" },
+      { id: "anime-geralt-and-yennefer", name: "Geralt von Riva & Jennifer von Vennenberg", file: "anime-geralt-and-yennefer.webp" },
     ]
   }
 ];
