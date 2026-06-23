@@ -84,7 +84,7 @@ const CHAPTERS = [
       { id: "phobia-thanatophobia", name: "Thanatophobia", file: "phobia-thanatophobia.webp" },
       { id: "phobia-tripophobia", name: "Tripophobia", file: "phobia-tripophobia.webp" },
       { id: "phobia-trypanophobia", name: "Trypanophobia", file: "phobia-trypanophobia.webp" },
-      { id: "phobia-xenophobia", name: "Xenophobia", file: "phobia-xenophobia.webp" }
+      { id: "phobia-xenophobia", name: "Xenophobia", file: "phobia-xenophobia.webp" },
     ]
   },
   {
@@ -123,7 +123,8 @@ const CHAPTERS = [
       { id: "afflictions-seasonal-affective-disorder", name: "Seasonal Affective Disorder", file: "afflictions-seasonal-affective-disorder.webp" },
       { id: "afflictions-selective-mutism", name: "Selective Mutism", file: "afflictions-selective-mutism.webp" },
       { id: "afflictions-somatization", name: "Somatization", file: "afflictions-somatization.webp" },
-      { id: "afflictions-trichotillomania", name: "Trichotillomania", file: "afflictions-trichotillomania.webp" }
+      { id: "afflictions-trichotillomania", name: "Trichotillomania", file: "afflictions-trichotillomania.webp" },
+      { id: "afflictions-vitiligo", name: "Vitiligo", file: "afflictions-vitiligo.webp" },
     ]
   },
   {
@@ -177,7 +178,7 @@ const CHAPTERS = [
       { id: "delusions-tom-jerry-syndrome", name: "Tom & Jerry Syndrome", file: "delusions-tom-jerry-syndrome.webp" },
       { id: "delusions-tourette", name: "Tourette", file: "delusions-tourette.webp" },
       { id: "delusions-truman-show-delusion", name: "Truman Show Delusion", file: "delusions-truman-show-delusion.webp" },
-      { id: "delusions-visual-snow-syndrome", name: "Visual Snow Syndrome", file: "delusions-visual-snow-syndrome.webp" }
+      { id: "delusions-visual-snow-syndrome", name: "Visual Snow Syndrome", file: "delusions-visual-snow-syndrome.webp" },
     ]
   },
   {
@@ -196,24 +197,28 @@ const CHAPTERS = [
       { id: "passions-euphoria", name: "Euphoria", file: "passions-euphoria.webp" },
       { id: "passions-fanaticism", name: "Fanaticism", file: "passions-fanaticism.webp" },
       { id: "passions-fervor", name: "Fervor", file: "passions-fervor.webp" },
+      { id: "passions-forelsket", name: "Forelsket", file: "passions-forelsket.webp" },
       { id: "passions-fury", name: "Fury", file: "passions-fury.webp" },
       { id: "passions-hate", name: "Hate", file: "passions-hate.webp" },
       { id: "passions-infatuation", name: "Infatuation", file: "passions-infatuation.webp" },
       { id: "passions-jealousy", name: "Jealousy", file: "passions-jealousy.webp" },
+      { id: "passions-kamasutra", name: "Kamasutra", file: "passions-kamasutra.webp" },
       { id: "passions-longing", name: "Longing", file: "passions-longing.webp" },
       { id: "passions-love", name: "Love", file: "passions-love.webp" },
       { id: "passions-lust-passion", name: "Lust (the passion)", file: "passions-lust-passion.webp" },
       { id: "passions-obsession", name: "Obsession", file: "passions-obsession.webp" },
+      { id: "passions-onsra", name: "Onsra", file: "passions-onsra.webp" },
       { id: "passions-passion", name: "Passion", file: "passions-passion.webp" },
       { id: "passions-pride-passion", name: "Pride (the passion)", file: "passions-pride-passion.webp" },
       { id: "passions-rapture", name: "Rapture", file: "passions-rapture.webp" },
+      { id: "passions-selenophilia", name: "Selenophilia", file: "passions-selenophilia.webp" },
       { id: "passions-temptation", name: "Temptation", file: "passions-temptation.webp" },
       { id: "passions-thrill", name: "Thrill", file: "passions-thrill.webp" },
       { id: "passions-vengeance", name: "Vengeance", file: "passions-vengeance.webp" },
       { id: "passions-wanderlust", name: "Wanderlust", file: "passions-wanderlust.webp" },
       { id: "passions-wrath-passion", name: "Wrath-Passion", file: "passions-wrath-passion.webp" },
       { id: "passions-yearning", name: "Yearning", file: "passions-yearning.webp" },
-      { id: "passions-zeal", name: "Zeal", file: "passions-zeal.webp" }
+      { id: "passions-zeal", name: "Zeal", file: "passions-zeal.webp" },
     ]
   },
   {
@@ -231,15 +236,30 @@ const CHAPTERS = [
       { id: "sorrows-disappointment", name: "Disappointment", file: "sorrows-disappointment.webp" },
       { id: "sorrows-disillusionment", name: "Disillusionment", file: "sorrows-disillusionment.webp" },
       { id: "sorrows-emptiness", name: "Emptiness", file: "sorrows-emptiness.webp" },
+      { id: "sorrows-fernweh", name: "Fernweh", file: "sorrows-fernweh.webp" },
       { id: "sorrows-grief", name: "Grief", file: "sorrows-grief.webp" },
+      { id: "sorrows-grief-eternal", name: "Grief Eternal", file: "sorrows-grief-eternal.webp" },
+      { id: "sorrows-guilt", name: "Guilt", file: "sorrows-guilt.webp" },
+      { id: "sorrows-heartbreak", name: "Heartbreak", file: "sorrows-heartbreak.webp" },
+      { id: "sorrows-helplessness", name: "Helplessness", file: "sorrows-helplessness.webp" },
+      { id: "sorrows-hiraeth", name: "Hiraeth", file: "sorrows-hiraeth.webp" },
       { id: "sorrows-homesickness", name: "Homesickness", file: "sorrows-homesickness.webp" },
+      { id: "sorrows-hopelessness", name: "Hopelessness", file: "sorrows-hopelessness.webp" },
       { id: "sorrows-loneliness", name: "Loneliness", file: "sorrows-loneliness.webp" },
+      { id: "sorrows-longing-sorrow", name: "Longing-Sorrow", file: "sorrows-longing-sorrow.webp" },
       { id: "sorrows-melancholy", name: "Melancholy", file: "sorrows-melancholy.webp" },
+      { id: "sorrows-mono-no-aware", name: "Mono no aware", file: "sorrows-mono-no-aware.webp" },
       { id: "sorrows-mourning", name: "Mourning", file: "sorrows-mourning.webp" },
       { id: "sorrows-nostalgia", name: "Nostalgia", file: "sorrows-nostalgia.webp" },
+      { id: "sorrows-numbness", name: "Numbness", file: "sorrows-numbness.webp" },
+      { id: "sorrows-quiet-sorrow", name: "Quiet Sorrow", file: "sorrows-quiet-sorrow.webp" },
       { id: "sorrows-regret", name: "Regret", file: "sorrows-regret.webp" },
+      { id: "sorrows-remorse", name: "Remorse", file: "sorrows-remorse.webp" },
+      { id: "sorrows-saudade", name: "Saudade", file: "sorrows-saudade.webp" },
       { id: "sorrows-sorrow", name: "Sorrow", file: "sorrows-sorrow.webp" },
-      { id: "sorrows-weltschmerz", name: "Weltschmerz", file: "sorrows-weltschmerz.webp" }
+      { id: "sorrows-weltschmerz", name: "Weltschmerz", file: "sorrows-weltschmerz.webp" },
+      { id: "sorrows-wistfulness", name: "Wistfulness", file: "sorrows-wistfulness.webp" },
+      { id: "sorrows-yearning-sorrow", name: "Yearning-Sorrow", file: "sorrows-yearning-sorrow.webp" },
     ]
   },
   {
@@ -248,9 +268,13 @@ const CHAPTERS = [
     slug: "self",
     divider: "assets/chapters/chapter-self.webp",
     monsters: [
+      { id: "self-acceptance", name: "Acceptance", file: "self-acceptance.webp" },
       { id: "self-awakening", name: "Awakening", file: "self-awakening.webp" },
+      { id: "self-becoming", name: "Becoming", file: "self-becoming.webp" },
       { id: "self-conscience", name: "Conscience", file: "self-conscience.webp" },
       { id: "self-curiosity", name: "Curiosity", file: "self-curiosity.webp" },
+      { id: "self-detachment", name: "Detachment", file: "self-detachment.webp" },
+      { id: "self-doubt", name: "Doubt", file: "self-doubt.webp" },
       { id: "self-deja-vu", name: "Déjà Vu", file: "self-deja-vu.webp" },
       { id: "self-ego", name: "Ego", file: "self-ego.webp" },
       { id: "self-fata-morgana", name: "Fata Morgana", file: "self-fata-morgana.webp" },
@@ -263,13 +287,16 @@ const CHAPTERS = [
       { id: "self-mortality", name: "Mortality", file: "self-mortality.webp" },
       { id: "self-overdosis", name: "Overdose", file: "self-overdosis.webp" },
       { id: "self-persona", name: "Persona", file: "self-persona.webp" },
+      { id: "self-pride-of-self", name: "Pride of Self", file: "self-pride-of-self.webp" },
       { id: "self-psychosis", name: "Psychosis", file: "self-psychosis.webp" },
       { id: "self-reflection", name: "Reflection", file: "self-reflection.webp" },
       { id: "self-shadow-self", name: "Shadow Self", file: "self-shadow-self.webp" },
       { id: "self-shame", name: "Shame", file: "self-shame.webp" },
       { id: "self-solitude", name: "Solitude", file: "self-solitude.webp" },
+      { id: "self-sonder", name: "Sonder", file: "self-sonder.webp" },
       { id: "self-soul", name: "Soul", file: "self-soul.webp" },
-      { id: "self-suicide", name: "Suicide", file: "self-suicide.webp" }
+      { id: "self-suicide", name: "Suicide", file: "self-suicide.webp" },
+      { id: "self-transformation", name: "Transformation", file: "self-transformation.webp" },
     ]
   },
   {
@@ -278,14 +305,30 @@ const CHAPTERS = [
     slug: "vices",
     divider: "assets/chapters/chapter-vices.webp",
     monsters: [
+      { id: "vices-acedia", name: "Acedia", file: "vices-acedia.webp" },
+      { id: "vices-arrogance", name: "Arrogance", file: "vices-arrogance.webp" },
+      { id: "vices-betrayal", name: "Betrayal", file: "vices-betrayal.webp" },
+      { id: "vices-cowardice", name: "Cowardice", file: "vices-cowardice.webp" },
+      { id: "vices-cruelty", name: "Cruelty", file: "vices-cruelty.webp" },
+      { id: "vices-deceit", name: "Deceit", file: "vices-deceit.webp" },
+      { id: "vices-despair-vice", name: "Despair (as vice)", file: "vices-despair-vice.webp" },
+      { id: "vices-dishonesty", name: "Dishonesty", file: "vices-dishonesty.webp" },
       { id: "vices-envy", name: "Envy", file: "vices-envy.webp" },
       { id: "vices-gluttony", name: "Gluttony", file: "vices-gluttony.webp" },
       { id: "vices-greed", name: "Greed", file: "vices-greed.webp" },
+      { id: "vices-hypocrisy", name: "Hypocrisy", file: "vices-hypocrisy.webp" },
+      { id: "vices-indolence", name: "Indolence", file: "vices-indolence.webp" },
+      { id: "vices-ingratitude", name: "Ingratitude", file: "vices-ingratitude.webp" },
       { id: "vices-lust", name: "Lust", file: "vices-lust.webp" },
+      { id: "vices-malice", name: "Malice", file: "vices-malice.webp" },
       { id: "vices-pride", name: "Pride", file: "vices-pride.webp" },
+      { id: "vices-resentment", name: "Resentment", file: "vices-resentment.webp" },
       { id: "vices-self-sabotage", name: "Self-Sabotage", file: "vices-self-sabotage.webp" },
+      { id: "vices-selfishness", name: "Selfishness", file: "vices-selfishness.webp" },
       { id: "vices-sloth", name: "Sloth", file: "vices-sloth.webp" },
-      { id: "vices-wrath", name: "Wrath", file: "vices-wrath.webp" }
+      { id: "vices-spite", name: "Spite", file: "vices-spite.webp" },
+      { id: "vices-tyranny", name: "Tyranny", file: "vices-tyranny.webp" },
+      { id: "vices-wrath", name: "Wrath", file: "vices-wrath.webp" },
     ]
   },
   {
@@ -300,9 +343,10 @@ const CHAPTERS = [
       { id: "virtues-generosity", name: "Generosity", file: "virtues-generosity.webp" },
       { id: "virtues-humility", name: "Humility", file: "virtues-humility.webp" },
       { id: "virtues-kindness", name: "Kindness", file: "virtues-kindness.webp" },
+      { id: "virtues-kintsugi", name: "Kintsugi", file: "virtues-kintsugi.webp" },
       { id: "virtues-patience", name: "Patience", file: "virtues-patience.webp" },
       { id: "virtues-temperance", name: "Temperance", file: "virtues-temperance.webp" },
-      { id: "virtues-willpower", name: "Willpower", file: "virtues-willpower.webp" }
+      { id: "virtues-willpower", name: "Willpower", file: "virtues-willpower.webp" },
     ]
   },
   {
@@ -341,7 +385,7 @@ const CHAPTERS = [
       { id: "greek-medusa", name: "Medusa", file: "greek-medusa.webp" },
       { id: "greek-minotaur", name: "Minotaur", file: "greek-minotaur.webp" },
       { id: "greek-pegasus", name: "Pegasus", file: "greek-pegasus.webp" },
-      { id: "greek-typhon", name: "Typhon", file: "greek-typhon.webp" }
+      { id: "greek-typhon", name: "Typhon", file: "greek-typhon.webp" },
     ]
   },
   {
@@ -358,6 +402,7 @@ const CHAPTERS = [
       { id: "japanese-azukiarai", name: "Azukiarai", file: "japanese-azukiarai.webp" },
       { id: "japanese-bake-kujira", name: "Bake-Kujira", file: "japanese-bake-kujira.webp" },
       { id: "japanese-bake-zori", name: "Bake-zori", file: "japanese-bake-zori.webp" },
+      { id: "japanese-baku", name: "Baku", file: "japanese-baku.webp" },
       { id: "japanese-bunbuku-chagama", name: "Bunbuku Chagama", file: "japanese-bunbuku-chagama.webp" },
       { id: "japanese-chochin-obake", name: "Chochin-obake", file: "japanese-chochin-obake.webp" },
       { id: "japanese-hitotsume-kozo", name: "Hitotsume-kozo", file: "japanese-hitotsume-kozo.webp" },
@@ -388,9 +433,10 @@ const CHAPTERS = [
       { id: "japanese-tenjoname", name: "Tenjoname", file: "japanese-tenjoname.webp" },
       { id: "japanese-tofu-kozo", name: "Tofu-Kozo", file: "japanese-tofu-kozo.webp" },
       { id: "japanese-wanyudo", name: "Wanyudo", file: "japanese-wanyudo.webp" },
+      { id: "japanese-yamata-no-orochi", name: "Yamata no Orochi", file: "japanese-yamata-no-orochi.webp" },
       { id: "japanese-yatagarasu", name: "Yatagarasu", file: "japanese-yatagarasu.webp" },
       { id: "japanese-yokai", name: "Yokai", file: "japanese-yokai.webp" },
-      { id: "japanese-yuki-onna", name: "Yuki-onna", file: "japanese-yuki-onna.webp" }
+      { id: "japanese-yuki-onna", name: "Yuki-onna", file: "japanese-yuki-onna.webp" },
     ]
   },
   {
@@ -428,7 +474,7 @@ const CHAPTERS = [
       { id: "egyptian-taweret", name: "Taweret", file: "egyptian-taweret.webp" },
       { id: "egyptian-tefnut", name: "Tefnut", file: "egyptian-tefnut.webp" },
       { id: "egyptian-thoth", name: "Thoth", file: "egyptian-thoth.webp" },
-      { id: "egyptian-wadjet", name: "Wadjet", file: "egyptian-wadjet.webp" }
+      { id: "egyptian-wadjet", name: "Wadjet", file: "egyptian-wadjet.webp" },
     ]
   },
   {
@@ -456,15 +502,18 @@ const CHAPTERS = [
       { id: "nordic-skadi", name: "Skadi", file: "nordic-skadi.webp" },
       { id: "nordic-thor", name: "Thor", file: "nordic-thor.webp" },
       { id: "nordic-tyr", name: "Tyr", file: "nordic-tyr.webp" },
+      { id: "nordic-vidar", name: "Vidar", file: "nordic-vidar.webp" },
       { id: "nordic-andhrimnir", name: "Andhrímnir", file: "nordic-andhrimnir.webp" },
       { id: "nordic-audumbla", name: "Audumbla", file: "nordic-audumbla.webp" },
       { id: "nordic-buri", name: "Buri", file: "nordic-buri.webp" },
+      { id: "nordic-fafnir", name: "Fafnir", file: "nordic-fafnir.webp" },
+      { id: "nordic-fenrir", name: "Fenrir", file: "nordic-fenrir.webp" },
       { id: "nordic-huldra", name: "Huldra", file: "nordic-huldra.webp" },
       { id: "nordic-jormungandr", name: "Jörmungandr", file: "nordic-jormungandr.webp" },
       { id: "nordic-sleipnir", name: "Sleipnir", file: "nordic-sleipnir.webp" },
       { id: "nordic-valkyries", name: "Valkyries", file: "nordic-valkyries.webp" },
       { id: "nordic-ragnarok", name: "Ragnarök", file: "nordic-ragnarok.webp" },
-      { id: "nordic-yggdrasil", name: "Yggdrasil", file: "nordic-yggdrasil.webp" }
+      { id: "nordic-yggdrasil", name: "Yggdrasil", file: "nordic-yggdrasil.webp" },
     ]
   },
   {
@@ -473,17 +522,33 @@ const CHAPTERS = [
     slug: "indian",
     divider: "assets/chapters/chapter-indian.webp",
     monsters: [
+      { id: "indian-agni", name: "Agni", file: "indian-agni.webp" },
       { id: "indian-brahma", name: "Brahma", file: "indian-brahma.webp" },
+      { id: "indian-chandra", name: "Chandra", file: "indian-chandra.webp" },
       { id: "indian-durga-kali", name: "Durga & Kali", file: "indian-durga-kali.webp" },
       { id: "indian-ganesha", name: "Ganesha", file: "indian-ganesha.webp" },
+      { id: "indian-garuda", name: "Garuda", file: "indian-garuda.webp" },
       { id: "indian-hanuman", name: "Hanuman", file: "indian-hanuman.webp" },
       { id: "indian-indra", name: "Indra", file: "indian-indra.webp" },
+      { id: "indian-indrani", name: "Indrani", file: "indian-indrani.webp" },
+      { id: "indian-kali", name: "Kali", file: "indian-kali.webp" },
+      { id: "indian-kartikeya", name: "Kartikeya", file: "indian-kartikeya.webp" },
+      { id: "indian-kubera", name: "Kubera", file: "indian-kubera.webp" },
       { id: "indian-lakshmi", name: "Lakshmi", file: "indian-lakshmi.webp" },
-      { id: "indian-murugan", name: "Murugan", file: "indian-murugan.webp" },
+      { id: "indian-makara", name: "Makara", file: "indian-makara.webp" },
+      { id: "indian-naga", name: "Naga", file: "indian-naga.webp" },
       { id: "indian-parvati", name: "Parvati", file: "indian-parvati.webp" },
+      { id: "indian-rakshasa", name: "Rakshasa", file: "indian-rakshasa.webp" },
+      { id: "indian-rama", name: "Rama", file: "indian-rama.webp" },
       { id: "indian-sarasvati", name: "Sarasvati", file: "indian-sarasvati.webp" },
+      { id: "indian-saraswatis-hamsa", name: "Saraswati's Hamsa", file: "indian-saraswatis-hamsa.webp" },
+      { id: "indian-sharabha", name: "Sharabha", file: "indian-sharabha.webp" },
       { id: "indian-shiva", name: "Shiva", file: "indian-shiva.webp" },
-      { id: "indian-vishnu", name: "Vishnu", file: "indian-vishnu.webp" }
+      { id: "indian-surya", name: "Surya", file: "indian-surya.webp" },
+      { id: "indian-vayu", name: "Vayu", file: "indian-vayu.webp" },
+      { id: "indian-vishnu", name: "Vishnu", file: "indian-vishnu.webp" },
+      { id: "indian-yakshini", name: "Yakshini", file: "indian-yakshini.webp" },
+      { id: "indian-yama", name: "Yama", file: "indian-yama.webp" },
     ]
   },
   {
@@ -493,23 +558,34 @@ const CHAPTERS = [
     divider: "assets/chapters/chapter-slavic.webp",
     monsters: [
       { id: "slavic-alkonost", name: "Alkonost", file: "slavic-alkonost.webp" },
+      { id: "slavic-aspid", name: "Aspid", file: "slavic-aspid.webp" },
       { id: "slavic-baba-yaga", name: "Baba Yaga", file: "slavic-baba-yaga.webp" },
       { id: "slavic-bannik", name: "Bannik", file: "slavic-bannik.webp" },
       { id: "slavic-chort", name: "Chort", file: "slavic-chort.webp" },
       { id: "slavic-domovoi", name: "Domovoi", file: "slavic-domovoi.webp" },
+      { id: "slavic-drekavac", name: "Drekavac", file: "slavic-drekavac.webp" },
       { id: "slavic-gamayun", name: "Gamayun", file: "slavic-gamayun.webp" },
       { id: "slavic-kikimora", name: "Kikimora", file: "slavic-kikimora.webp" },
       { id: "slavic-koschei", name: "Koschei the Deathless", file: "slavic-koschei.webp" },
       { id: "slavic-leshy", name: "Leshy", file: "slavic-leshy.webp" },
+      { id: "slavic-lihoradka", name: "Lihoradka", file: "slavic-lihoradka.webp" },
       { id: "slavic-likho", name: "Likho", file: "slavic-likho.webp" },
+      { id: "slavic-ovinnik", name: "Ovinnik", file: "slavic-ovinnik.webp" },
       { id: "slavic-polevik", name: "Polevik", file: "slavic-polevik.webp" },
       { id: "slavic-poludnitsa", name: "Poludnitsa", file: "slavic-poludnitsa.webp" },
+      { id: "slavic-psoglav", name: "Psoglav", file: "slavic-psoglav.webp" },
       { id: "slavic-rusalka", name: "Rusalka", file: "slavic-rusalka.webp" },
       { id: "slavic-sirin", name: "Sirin", file: "slavic-sirin.webp" },
       { id: "slavic-strzyga", name: "Strzyga", file: "slavic-strzyga.webp" },
+      { id: "slavic-tuburni", name: "Tuburni", file: "slavic-tuburni.webp" },
+      { id: "slavic-upyr", name: "Upyr", file: "slavic-upyr.webp" },
       { id: "slavic-vila", name: "Vila", file: "slavic-vila.webp" },
+      { id: "slavic-vodnik", name: "Vodník", file: "slavic-vodnik.webp" },
       { id: "slavic-vodyanoy", name: "Vodyanoy", file: "slavic-vodyanoy.webp" },
-      { id: "slavic-zmey", name: "Zmey", file: "slavic-zmey.webp" }
+      { id: "slavic-volkodlak", name: "Volkodlak", file: "slavic-volkodlak.webp" },
+      { id: "slavic-zduhac", name: "Zduhac", file: "slavic-zduhac.webp" },
+      { id: "slavic-zhar-ptitsa", name: "Zhar-Ptitsa", file: "slavic-zhar-ptitsa.webp" },
+      { id: "slavic-zmey", name: "Zmey", file: "slavic-zmey.webp" },
     ]
   },
   {
@@ -519,8 +595,10 @@ const CHAPTERS = [
     divider: "assets/chapters/chapter-miscellaneous.webp",
     monsters: [
       { id: "miscellaneous-adze", name: "Adze", file: "miscellaneous-adze.webp" },
+      { id: "miscellaneous-ahool", name: "Ahool", file: "miscellaneous-ahool.webp" },
       { id: "miscellaneous-ahuizotl", name: "Ahuizotl", file: "miscellaneous-ahuizotl.webp" },
       { id: "miscellaneous-akkorokamui", name: "Akkorokamui", file: "miscellaneous-akkorokamui.webp" },
+      { id: "miscellaneous-amarok", name: "Amarok", file: "miscellaneous-amarok.webp" },
       { id: "miscellaneous-annunaki", name: "Annunaki", file: "miscellaneous-annunaki.webp" },
       { id: "miscellaneous-aqrabuamelu", name: "Aqrabuamelu", file: "miscellaneous-aqrabuamelu.webp" },
       { id: "miscellaneous-aurelioren", name: "Aureliorën", file: "miscellaneous-aurelioren.webp" },
@@ -562,6 +640,7 @@ const CHAPTERS = [
       { id: "miscellaneous-kumiho", name: "Kumiho", file: "miscellaneous-kumiho.webp" },
       { id: "miscellaneous-leprechaun", name: "Leprechaun", file: "miscellaneous-leprechaun.webp" },
       { id: "miscellaneous-leviathan", name: "Leviathan", file: "miscellaneous-leviathan.webp" },
+      { id: "miscellaneous-long", name: "Long", file: "miscellaneous-long.webp" },
       { id: "miscellaneous-luminae", name: "Luminae", file: "miscellaneous-luminae.webp" },
       { id: "miscellaneous-mahaha", name: "Mahaha", file: "miscellaneous-mahaha.webp" },
       { id: "miscellaneous-mapinguari", name: "Mapinguari", file: "miscellaneous-mapinguari.webp" },
@@ -595,6 +674,7 @@ const CHAPTERS = [
       { id: "miscellaneous-teju-jagua", name: "Teju Jagua", file: "miscellaneous-teju-jagua.webp" },
       { id: "miscellaneous-dragon-king", name: "The Dragon King", file: "miscellaneous-dragon-king.webp" },
       { id: "miscellaneous-apocalyps-riders", name: "The Four Riders of the Apocalypse", file: "miscellaneous-apocalyps-riders.webp" },
+      { id: "miscellaneous-tiamat", name: "Tiamat", file: "miscellaneous-tiamat.webp" },
       { id: "miscellaneous-tilberi", name: "Tilberi", file: "miscellaneous-tilberi.webp" },
       { id: "miscellaneous-trauco", name: "Trauco", file: "miscellaneous-trauco.webp" },
       { id: "miscellaneous-troll", name: "Troll", file: "miscellaneous-troll.webp" },
@@ -607,7 +687,7 @@ const CHAPTERS = [
       { id: "miscellaneous-wisakedjak", name: "Wisakedjak", file: "miscellaneous-wisakedjak.webp" },
       { id: "miscellaneous-wolpertinger", name: "Wolpertinger", file: "miscellaneous-wolpertinger.webp" },
       { id: "miscellaneous-wuchowsen", name: "Wuchowsen", file: "miscellaneous-wuchowsen.webp" },
-      { id: "miscellaneous-yara-ma-yha-who", name: "Yara-ma-yha-who", file: "miscellaneous-yara-ma-yha-who.webp" }
+      { id: "miscellaneous-yara-ma-yha-who", name: "Yara-ma-yha-who", file: "miscellaneous-yara-ma-yha-who.webp" },
     ]
   },
   {
@@ -620,13 +700,18 @@ const CHAPTERS = [
       { id: "anime-marceline", name: "Marceline", file: "anime-marceline.webp" },
       { id: "anime-jake-the-dog", name: "Jake the Dog", file: "anime-jake-the-dog.webp" },
       { id: "anime-bmo", name: "BMO", file: "anime-bmo.webp" },
+      { id: "anime-asterix-obelix", name: "Asterix & Obelix", file: "anime-asterix-obelix.webp" },
       { id: "anime-levi-ackerman", name: "Levi Ackerman", file: "anime-levi-ackerman.webp" },
       { id: "anime-guts", name: "Guts", file: "anime-guts.webp" },
       { id: "anime-chaliceus", name: "Chaliceus", file: "anime-chaliceus.webp" },
+      { id: "anime-the-devil", name: "The Devil", file: "anime-the-devil.webp" },
+      { id: "anime-king-dice", name: "King Dice", file: "anime-king-dice.webp" },
       { id: "anime-turbo-granny", name: "Turbo Granny", file: "anime-turbo-granny.webp" },
       { id: "anime-ryuk", name: "Ryuk", file: "anime-ryuk.webp" },
       { id: "anime-dora-the-explorer", name: "Dora the Explorer", file: "anime-dora-the-explorer.webp" },
+      { id: "anime-goku", name: "Goku", file: "anime-goku.webp" },
       { id: "anime-master-roshi", name: "Master Roshi", file: "anime-master-roshi.webp" },
+      { id: "anime-vegeta", name: "Vegeta", file: "anime-vegeta.webp" },
       { id: "anime-natsu-dragneel", name: "Natsu Dragneel", file: "anime-natsu-dragneel.webp" },
       { id: "anime-happy", name: "Happy", file: "anime-happy.webp" },
       { id: "anime-frieren", name: "Frieren", file: "anime-frieren.webp" },
@@ -641,9 +726,11 @@ const CHAPTERS = [
       { id: "anime-megumi", name: "Megumi", file: "anime-megumi.webp" },
       { id: "anime-geto", name: "Geto", file: "anime-geto.webp" },
       { id: "anime-yuta-okkotsu", name: "Yuta Okkotsu", file: "anime-yuta-okkotsu.webp" },
+      { id: "anime-malevolent-shrine", name: "Malevolent Shrine", file: "anime-malevolent-shrine.webp" },
       { id: "anime-sora", name: "Sora", file: "anime-sora.webp" },
       { id: "anime-bugs-and-lola", name: "Bugs & Lola", file: "anime-bugs-and-lola.webp" },
       { id: "anime-naruto", name: "Naruto", file: "anime-naruto.webp" },
+      { id: "anime-sasuke", name: "Sasuke", file: "anime-sasuke.webp" },
       { id: "anime-pain", name: "Pain", file: "anime-pain.webp" },
       { id: "anime-monkey-d-luffy", name: "Monkey D. Luffy", file: "anime-monkey-d-luffy.webp" },
       { id: "anime-roronoa-zoro", name: "Roronoa Zoro", file: "anime-roronoa-zoro.webp" },
@@ -666,9 +753,13 @@ const CHAPTERS = [
       { id: "anime-gengar", name: "Gengar", file: "anime-gengar.webp" },
       { id: "anime-kuromi", name: "Kuromi", file: "anime-kuromi.webp" },
       { id: "anime-cartman", name: "Cartman", file: "anime-cartman.webp" },
+      { id: "anime-kenny", name: "Kenny", file: "anime-kenny.webp" },
+      { id: "anime-kyle", name: "Kyle", file: "anime-kyle.webp" },
+      { id: "anime-stan", name: "Stan", file: "anime-stan.webp" },
       { id: "anime-asmongold", name: "Asmongold", file: "anime-asmongold.webp" },
       { id: "anime-totoro", name: "Totoro", file: "anime-totoro.webp" },
-      { id: "anime-jack-skellington-and-sally", name: "Jack Skellington & Sally", file: "anime-jack-skellington-and-sally.webp" }
+      { id: "anime-no-face", name: "No-Face", file: "anime-no-face.webp" },
+      { id: "anime-jack-skellington-and-sally", name: "Jack Skellington & Sally", file: "anime-jack-skellington-and-sally.webp" },
     ]
   }
 ];
