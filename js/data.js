@@ -822,7 +822,7 @@ const CHAPTERS = [
   },
   {
     caput: "XVIII",
-    title: "Chinese Zodiac",
+    title: "Chinese Zodiac Signs",
     slug: "chinese-zodiac",
     divider: "assets/chapters/chapter-chinese-zodiac.webp",
     monsters: [
@@ -835,6 +835,7 @@ const CHAPTERS = [
       { id: "chinese-zodiac-xianglian", name: "Xianglian", file: "cz-xianglian.webp" },
       { id: "chinese-zodiac-yanglu", name: "Yánglù", file: "cz-yanglu.webp" },
       { id: "chinese-zodiac-houlin", name: "Hóulín", file: "cz-houlin.webp" },
+      { id: "chinese-zodiac-jidong", name: "Jì Dòng", file: "cz-jidong.webp" },
       { id: "chinese-zodiac-canis-veritatis", name: "Canis Veritatis", file: "cz-canis-veritatis.webp" },
       { id: "chinese-zodiac-zhuru", name: "Zhurù", file: "cz-zhuru.webp" },
     ]
