@@ -735,6 +735,7 @@ const CHAPTERS = [
       { id: "anime-turbo-granny", name: "Turbo Granny", file: "anime-turbo-granny.webp" },
       { id: "anime-momo-ayase", name: "Momo Ayase", file: "anime-momo-ayase.webp" },
       { id: "anime-takakuran", name: "Takakuran", file: "anime-takakuran.webp" },
+      { id: "anime-l", name: "L", file: "anime-l.webp" },
       { id: "anime-ryuk", name: "Ryuk", file: "anime-ryuk.webp" },
       { id: "anime-dora-the-explorer", name: "Dora the Explorer", file: "anime-dora-the-explorer.webp" },
       { id: "anime-swipr", name: "Swipr the Fox", file: "anime-swipr.webp" },
