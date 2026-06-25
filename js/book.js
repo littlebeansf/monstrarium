@@ -55,8 +55,10 @@
   const padToLeft  = () => { if (pages.length % 2 === 0) push({ type: "blank" }); };
 
   push({ type: "cover" });        // 0 — the closed cover (right-hand, single)
-  push({ type: "intro-left" });   // 1 — intro page art, LEFT of the first spread
-  push({ type: "intro-right" });  // 2 — intro page art, RIGHT of the first spread
+  push({ type: "intro-left" });   // 1 — title page art, LEFT of the first spread
+  push({ type: "intro-right" });  // 2 — disclaimer note art, RIGHT of the first spread
+  push({ type: "introduction" }); // 3 — "Introduction by The Author", LEFT of the second spread
+  push({ type: "author" });       // 4 — the Author's portrait plate, RIGHT of the second spread
 
   let plateNo = 0;
   const plateFirstPage = {};  // monster.id -> the page index it occupies
@@ -108,6 +110,16 @@
       const ch = page.chapter;
       return `<div class="art-face art-face--chapter" data-zoom="${ch.divider}">
         <img class="art-img" src="${ch.divider}" alt="Caput ${ch.caput} — ${ch.title}" draggable="false" />
+      </div>`;
+    }
+    if (page.type === "introduction") {
+      return `<div class="art-face art-face--introduction" data-zoom="assets/book/introduction.webp">
+        <img class="art-img" src="assets/book/introduction.webp" alt="Introduction by The Author" draggable="false" />
+      </div>`;
+    }
+    if (page.type === "author") {
+      return `<div class="art-face art-face--author" data-zoom="assets/book/author.webp">
+        <img class="art-img" src="assets/book/author.webp" alt="The Author — the Inkbound Idealist, by S.F." draggable="false" />
       </div>`;
     }
     if (page.type === "intro-left" || page.type === "intro-right") {
@@ -417,6 +429,8 @@
     if (p.type === "back")        return "assets/book/back.webp";
     if (p.type === "intro-left")  return "assets/book/intro00.webp";
     if (p.type === "intro-right") return "assets/book/intro11.webp";
+    if (p.type === "introduction") return "assets/book/introduction.webp";
+    if (p.type === "author")      return "assets/book/author.webp";
     if (p.type === "chapter")     return p.chapter.divider;
     if (p.type === "plate")   return `assets/plates/${p.monster.file}`;
     return null;
