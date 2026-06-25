@@ -737,6 +737,7 @@ const CHAPTERS = [
       { id: "anime-takakuran", name: "Takakuran", file: "anime-takakuran.webp" },
       { id: "anime-ryuk", name: "Ryuk", file: "anime-ryuk.webp" },
       { id: "anime-dora-the-explorer", name: "Dora the Explorer", file: "anime-dora-the-explorer.webp" },
+      { id: "anime-swipr", name: "Swipr the Fox", file: "anime-swipr.webp" },
       { id: "anime-doraemon", name: "Doraemon", file: "anime-doraemon.webp" },
       { id: "anime-goku", name: "Goku", file: "anime-goku.webp" },
       { id: "anime-vegeta", name: "Vegeta", file: "anime-vegeta.webp" },
