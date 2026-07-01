@@ -3,21 +3,29 @@
 
    A first-person walkable gallery that hangs every plate of the codex
    on the walls of a long enfilade of candlelit stone halls — one hall
-   per chapter, in order. Read from the same CHAPTERS / MONSTERS data
-   the book uses; no new asset pipeline.
+   per chapter, in order. Reads the same CHAPTERS / MONSTERS data the
+   book uses; no new asset pipeline.
 
-   PERFORMANCE (paramount):
+   PERFORMANCE (paramount — this is a full rewrite of the world builder
+   after an earlier version crashed browsers):
    • Three.js is imported lazily on first open — the book's initial
-     load is completely untouched.
-   • Walls, floors, ceilings and frames are built once from cheap
-     shared geometry/materials (few draw calls).
+     load is untouched.
+   • ZERO dynamic lights. Everything uses MeshBasicMaterial (unlit), so
+     the GPU never does per-fragment lighting math and shaders never get
+     recompiled per light count. Mood comes from flat warm colours +
+     THREE.Fog + additive glow sprites that cast NO light.
+   • Geometry and materials are created ONCE in a shared SHARED{} pool
+     and reused (meshes are just scaled/positioned) — few unique buffers.
+   • Halls are built LAZILY: only the current hall ± HALL_WINDOW are in
+     the scene at once. Distant halls are disposed. Each hall is built
+     across animation frames (await yieldFrame) so the main thread never
+     freezes.
    • Plate TEXTURES stream in only for frames near the player and are
-     disposed when far away, so GPU memory stays bounded even at 730
-     plates. Distant frames show a parchment canvas placeholder.
-   • devicePixelRatio capped at 2. Fog hides distant halls.
+     disposed when far away. Distant frames show a parchment placeholder.
+   • devicePixelRatio capped at 2. Fog + tight camera far plane.
 
    INTEGRATION: standalone. Exposes window.MonstrariumMuseum with
-   .open(startChapterIndex) / .close(). No edits needed to book.js.
+   .open(startChapterIndex) / .close() / .isOpen(). No edits to book.js.
    ════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
@@ -25,7 +33,6 @@
   // ── Config ──────────────────────────────────────────────────────
   const THREE_URL = "https://unpkg.com/three@0.160.0/build/three.module.js";
   const PLATE_DIR = "assets/plates/";
-  const CHAP_DIR  = ""; // dividers already carry assets/chapters/ prefix
 
   const WALL_H       = 6.4;      // hall height
   const HALL_HALF_W  = 5.2;      // half-width of a hall (x from -W..W)
@@ -42,6 +49,7 @@
   const STREAM_FAR   = 34;       // dispose beyond this
   const MOVE_SPEED   = 5.4;      // units / sec
   const RUN_MULT     = 1.85;
+  const HALL_WINDOW  = 2;        // keep current hall ± this many built
 
   // ── State ───────────────────────────────────────────────────────
   let THREE = null;
@@ -53,21 +61,26 @@
   const keys = Object.create(null);
   let yaw = 0, pitch = 0;
   const pos = { x: 0, y: EYE_H, z: 0 };
-  let halls = [];            // { chapter, zStart, zEnd, centerZ }
-  let frames = [];           // { mesh, mat, file, name, chapter, caput, x, z, cz, loaded, loading }
+  let halls = [];            // { index, chapter, caput, title, zStart, zEnd, ... built, group, frameRefs[] }
+  let frames = [];           // persistent registry of ALL currently-built frames (for zoom nav + streaming)
   let totalDepth = 0;
   let dom = {};              // overlay elements
   let touch = { active: false, id: null, dx: 0, dy: 0 };       // joystick
-  let look = { dragging: false, id: null, lx: 0, ly: 0 };      // drag-look
+  let look = { dragging: false, id: null, lx: 0, ly: 0, moved: 0 }; // drag-look
   let pointerLocked = false;
   let currentHall = -1;
+  let builtWindowCenter = -999; // last hall index we built the window around
   let focusFrame = null;     // frame currently under reticle
   let zoomIndex = -1;        // index into frames for zoom nav
   let helpTimer = 0;
   let placeholderTex = null;
+  let glowTex = null;
   const loadQueue = [];
   let activeLoads = 0;
   const MAX_LOADS = 4;
+
+  // Shared geometry + materials — created ONCE, reused everywhere.
+  const SHARED = {};
 
   // ── Data access (from data.js, already global) ──────────────────
   function chapters() { return (typeof CHAPTERS !== "undefined" && CHAPTERS) ? CHAPTERS : []; }
@@ -99,22 +112,26 @@
         console.error("[museum] three import failed", e);
         return;
       }
-      setProgress(30);
-      await buildWorld();
-      setProgress(100);
+      setProgress(28);
+      await buildWorld();          // scene + shared assets + hall layout (NO geometry yet)
       inited = true;
     }
 
+    // build the halls around the requested start BEFORE revealing
+    const startIdx = Math.max(0, Math.min(halls.length - 1, startChapter || 0));
+    setProgress(55);
+    await ensureHallsAround(startIdx);
+    setProgress(100);
+
     // place player at the requested hall's entrance
-    spawnAtHall(startChapter);
+    spawnAtHall(startIdx);
     updateHallLabel(true);
 
     running = true;
     clock = clock || new THREE.Clock();
     clock.start();
     bindInput();
-    // reveal
-    setTimeout(() => dom.load.classList.add("hidden"), 260);
+    setTimeout(() => dom.load.classList.add("hidden"), 240);
     showHelp();
     if (!raf) loop();
   }
@@ -130,153 +147,70 @@
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  WORLD CONSTRUCTION
+  //  WORLD CONSTRUCTION  (unlit + lazy)
   // ════════════════════════════════════════════════════════════════
   async function buildWorld() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b0805);
-    scene.fog = new THREE.Fog(0x140d07, 26, 78);
+    // tighter fog so only a couple of halls are ever visible at once
+    scene.fog = new THREE.Fog(0x0b0805, 14, 52);
 
-    camera = new THREE.PerspectiveCamera(70, aspect(), 0.1, 400);
+    camera = new THREE.PerspectiveCamera(70, aspect(), 0.1, 120);
 
     renderer = new THREE.WebGLRenderer({ canvas: dom.canvas, antialias: true, powerPreference: "high-performance" });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     resize();
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.28;
+    // unlit materials — no tone mapping needed; keep colours as authored.
 
     texLoader = new THREE.TextureLoader();
     placeholderTex = makePlaceholderTexture();
+    glowTex = makeGlowTexture();
 
-    // Lay out halls along +Z, one per chapter.
+    buildSharedAssets();
     layoutHalls();
 
-    // Shared materials -------------------------------------------------
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x3a2c1a, roughness: 0.9, metalness: 0.02 });
-    const wallMat  = new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 0.94, metalness: 0.0 });
-    const ceilMat  = new THREE.MeshStandardMaterial({ color: 0x140d08, roughness: 1.0, metalness: 0.0 });
-    const trimMat  = new THREE.MeshStandardMaterial({ color: 0x6f5626, roughness: 0.55, metalness: 0.55, emissive: 0x1a1206, emissiveIntensity: 0.4 });
-
-    const geo = { floor: [], wall: [], ceil: [] };
-
-    // Global ambient + a warm hemispheric fill so nothing is pure black.
-    scene.add(new THREE.HemisphereLight(0x6b5230, 0x1a120a, 0.9));
-    const amb = new THREE.AmbientLight(0x6a5030, 0.55);
-    scene.add(amb);
-
-    const runnerMat = new THREE.MeshStandardMaterial({ color: 0x3a1512, roughness: 0.95 }); // carpet runner
-
-    for (let i = 0; i < halls.length; i++) {
-      const h = halls[i];
-      const len = h.zEnd - h.zStart;
-      const cz = (h.zStart + h.zEnd) / 2;
-
-      // floor
-      const floor = new THREE.Mesh(new THREE.PlaneGeometry(HALL_HALF_W * 2, len), floorMat);
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.set(0, 0, cz);
-      scene.add(floor);
-
-      // carpet runner down the middle
-      const runner = new THREE.Mesh(new THREE.PlaneGeometry(2.2, len - 0.5), runnerMat);
-      runner.rotation.x = -Math.PI / 2;
-      runner.position.set(0, 0.01, cz);
-      scene.add(runner);
-
-      // ceiling
-      const ceil = new THREE.Mesh(new THREE.PlaneGeometry(HALL_HALF_W * 2, len), ceilMat);
-      ceil.rotation.x = Math.PI / 2;
-      ceil.position.set(0, WALL_H, cz);
-      scene.add(ceil);
-
-      // side walls (left = -x, right = +x)
-      for (const sign of [-1, 1]) {
-        const w = new THREE.Mesh(new THREE.PlaneGeometry(len, WALL_H), wallMat);
-        w.position.set(sign * HALL_HALF_W, WALL_H / 2, cz);
-        w.rotation.y = sign > 0 ? -Math.PI / 2 : Math.PI / 2;
-        scene.add(w);
-        // baseboard trim
-        const base = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, len), trimMat);
-        base.position.set(sign * (HALL_HALF_W - 0.06), 0.14, cz);
-        scene.add(base);
-      }
-
-      // end walls with doorway (except pass-throughs between halls)
-      buildEndWall(h.zStart, i === 0, wallMat, trimMat);           // near end
-      if (i === halls.length - 1) buildEndWall(h.zEnd, true, wallMat, trimMat, true); // final back wall (solid)
-
-      // hall marker plaque above the entrance doorway
-      addHallPlaque(h, wallMat, trimMat);
-
-      // lay the plates
-      layoutFramesForHall(h, trimMat);
-
-      // warm track lighting: a few point lights spaced down the hall
-      const nLights = Math.max(2, Math.round(len / 9));
-      for (let l = 0; l < nLights; l++) {
-        const lz = h.zStart + (len * (l + 0.5)) / nLights;
-        const pl = new THREE.PointLight(0xffc072, 26, 26, 1.7);
-        pl.position.set(0, WALL_H - 1.0, lz);
-        scene.add(pl);
-        // small fixture mesh
-        const fix = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8),
-          new THREE.MeshStandardMaterial({ color: 0xffcf8a, emissive: 0xffb457, emissiveIntensity: 2.2 }));
-        fix.position.copy(pl.position);
-        scene.add(fix);
-      }
-
-      // a bench in the middle of larger halls
-      if (len > 14) {
-        const bench = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.5, 0.7),
-          new THREE.MeshStandardMaterial({ color: 0x2a1d10, roughness: 0.8 }));
-        bench.position.set(0, 0.25, cz);
-        scene.add(bench);
-      }
-    }
-
-    yieldFrame();
+    await yieldFrame();
   }
 
-  function buildEndWall(z, solid, wallMat, trimMat, forceSolid) {
-    if (solid || forceSolid) {
-      const w = new THREE.Mesh(new THREE.PlaneGeometry(HALL_HALF_W * 2, WALL_H), wallMat);
-      w.position.set(0, WALL_H / 2, z);
-      w.rotation.y = (z < totalDepth / 2 && !forceSolid) ? 0 : Math.PI;
-      scene.add(w);
-      return;
-    }
-    // wall with a central doorway — build as three panels
-    const side = (HALL_HALF_W * 2 - DOOR_W) / 2;
-    for (const sgn of [-1, 1]) {
-      const p = new THREE.Mesh(new THREE.PlaneGeometry(side, WALL_H), wallMat);
-      p.position.set(sgn * (DOOR_W / 2 + side / 2), WALL_H / 2, z);
-      scene.add(p);
-      const pb = p.clone(); pb.rotation.y = Math.PI; pb.position.z = z; scene.add(pb);
-    }
-    // lintel above door
-    const lintel = new THREE.Mesh(new THREE.PlaneGeometry(DOOR_W, WALL_H - DOOR_H), wallMat);
-    lintel.position.set(0, DOOR_H + (WALL_H - DOOR_H) / 2, z);
-    scene.add(lintel);
-    // gilt door frame trim
-    const jamb = new THREE.BoxGeometry(0.16, DOOR_H, 0.16);
-    for (const sgn of [-1, 1]) {
-      const j = new THREE.Mesh(jamb, trimMat);
-      j.position.set(sgn * DOOR_W / 2, DOOR_H / 2, z);
-      scene.add(j);
-    }
-    const top = new THREE.Mesh(new THREE.BoxGeometry(DOOR_W + 0.32, 0.16, 0.16), trimMat);
-    top.position.set(0, DOOR_H, z);
-    scene.add(top);
+  // Create every geometry + material exactly once. -------------------
+  function buildSharedAssets() {
+    // unit primitives (scale meshes rather than making new geometry)
+    SHARED.unitPlane = new THREE.PlaneGeometry(1, 1);
+    SHARED.unitBox   = new THREE.BoxGeometry(1, 1, 1);
+    SHARED.glowPlane = new THREE.PlaneGeometry(1, 1);
+
+    // frame geometry (fixed size — one border + one plate quad, reused)
+    SHARED.frameBorder = new THREE.BoxGeometry(PLATE_W + 0.34, PLATE_H + 0.34, 0.12);
+    SHARED.framePlate  = new THREE.PlaneGeometry(PLATE_W, PLATE_H);
+
+    // fixture sphere for the faux track-lights
+    SHARED.fixtureSphere = new THREE.SphereGeometry(0.13, 10, 10);
+
+    // unlit materials — flat warm palette tuned to read as candlelit stone
+    SHARED.floorMat  = new THREE.MeshBasicMaterial({ color: 0x241a10, fog: true });
+    SHARED.runnerMat = new THREE.MeshBasicMaterial({ color: 0x3a1512, fog: true });
+    SHARED.wallMat   = new THREE.MeshBasicMaterial({ color: 0x1c140b, fog: true });
+    SHARED.wallLoMat = new THREE.MeshBasicMaterial({ color: 0x120c07, fog: true }); // lower/darker band
+    SHARED.ceilMat   = new THREE.MeshBasicMaterial({ color: 0x0c0805, fog: true });
+    SHARED.trimMat   = new THREE.MeshBasicMaterial({ color: 0x8a6a2c, fog: true }); // gilt
+    SHARED.trimLitMat= new THREE.MeshBasicMaterial({ color: 0xc9a14a, fog: true }); // brighter gilt
+    SHARED.benchMat  = new THREE.MeshBasicMaterial({ color: 0x2a1d10, fog: true });
+    SHARED.fixtureMat= new THREE.MeshBasicMaterial({ color: 0xffd79a, fog: true }); // glowing bulb look
+    SHARED.plaqueMat = null; // per-hall (unique text texture) — tracked as disposable
+
+    // additive glow sprite material (shared; casts no light)
+    SHARED.glowMat = new THREE.MeshBasicMaterial({
+      map: glowTex, transparent: true, blending: THREE.AdditiveBlending,
+      depthWrite: false, fog: false, color: 0xffb457
+    });
   }
 
-  function addHallPlaque(h, wallMat, trimMat) {
-    // a small illuminated plaque above the entrance naming the chapter
-    const tex = makeTextTexture("CAPUT " + h.caput, h.title);
-    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-    const plq = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.9), mat);
-    plq.position.set(0, DOOR_H + 0.55, h.zStart + 0.06);
-    scene.add(plq);
+  // Make a plain flat mesh from a shared geometry+material, scaled.
+  function panel(geo, mat, sx, sy, sz) {
+    const m = new THREE.Mesh(geo, mat);
+    m.scale.set(sx, sy, sz || 1);
+    return m;
   }
 
   // ── Hall layout: chapter -> [zStart, zEnd] along +Z ─────────────
@@ -287,7 +221,6 @@
     for (let i = 0; i < chs.length; i++) {
       const ch = chs[i];
       const n = ch.monsters.length;
-      // plates alternate walls, so slots-per-wall = ceil(n/2)
       const perWall = Math.ceil(n / 2);
       const len = Math.max(12, perWall * SLOT_GAP + HALL_PAD_END * 2);
       halls.push({
@@ -296,20 +229,202 @@
         caput: ch.caput,
         title: ch.title,
         slug: ch.slug,
-        divider: ch.divider,
         zStart: z,
         zEnd: z + len,
         centerZ: z + len / 2,
-        perWall
+        perWall,
+        built: false,
+        group: null,
+        frameRefs: [],   // frame objects owned by this hall
+        disposables: []  // per-hall unique geo/mat/tex to dispose
       });
       z += len;
     }
     totalDepth = z;
   }
 
-  function layoutFramesForHall(h, trimMat) {
+  // ════════════════════════════════════════════════════════════════
+  //  LAZY HALL WINDOW — build current ± HALL_WINDOW, dispose the rest
+  // ════════════════════════════════════════════════════════════════
+  let ensuring = false;
+  async function ensureHallsAround(idx) {
+    if (idx === builtWindowCenter || ensuring) return;
+    ensuring = true;
+    builtWindowCenter = idx;
+    const lo = Math.max(0, idx - HALL_WINDOW);
+    const hi = Math.min(halls.length - 1, idx + HALL_WINDOW);
+
+    // dispose halls outside the window
+    for (let i = 0; i < halls.length; i++) {
+      if ((i < lo || i > hi) && halls[i].built) disposeHall(halls[i]);
+    }
+    // build halls inside the window (nearest first), yielding between each
+    const order = [];
+    for (let i = lo; i <= hi; i++) order.push(i);
+    order.sort((a, b) => Math.abs(a - idx) - Math.abs(b - idx));
+    for (const i of order) {
+      if (!halls[i].built) {
+        buildHall(halls[i]);
+        await yieldFrame();
+      }
+    }
+    ensuring = false;
+  }
+
+  function buildHall(h) {
+    const g = new THREE.Group();
+    const len = h.zEnd - h.zStart;
+    const cz = h.centerZ;
+
+    // floor
+    const floor = panel(SHARED.unitPlane, SHARED.floorMat, HALL_HALF_W * 2, len);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, 0, cz);
+    g.add(floor);
+
+    // carpet runner
+    const runner = panel(SHARED.unitPlane, SHARED.runnerMat, 2.2, len - 0.5);
+    runner.rotation.x = -Math.PI / 2;
+    runner.position.set(0, 0.012, cz);
+    g.add(runner);
+
+    // ceiling
+    const ceil = panel(SHARED.unitPlane, SHARED.ceilMat, HALL_HALF_W * 2, len);
+    ceil.rotation.x = Math.PI / 2;
+    ceil.position.set(0, WALL_H, cz);
+    g.add(ceil);
+
+    // side walls (two-tone: darker lower band, lighter upper) + baseboard trim
+    for (const sign of [-1, 1]) {
+      const upH = WALL_H - 1.6;
+      const up = panel(SHARED.unitPlane, SHARED.wallMat, len, upH);
+      up.position.set(sign * HALL_HALF_W, 1.6 + upH / 2, cz);
+      up.rotation.y = sign > 0 ? -Math.PI / 2 : Math.PI / 2;
+      g.add(up);
+      const lo = panel(SHARED.unitPlane, SHARED.wallLoMat, len, 1.6);
+      lo.position.set(sign * HALL_HALF_W, 0.8, cz);
+      lo.rotation.y = sign > 0 ? -Math.PI / 2 : Math.PI / 2;
+      g.add(lo);
+      // baseboard trim
+      const base = panel(SHARED.unitBox, SHARED.trimMat, 0.12, 0.28, len);
+      base.position.set(sign * (HALL_HALF_W - 0.06), 0.16, cz);
+      g.add(base);
+      // picture-rail gilt line at plate height
+      const rail = panel(SHARED.unitBox, SHARED.trimMat, 0.08, 0.08, len);
+      rail.position.set(sign * (HALL_HALF_W - 0.05), 4.3, cz);
+      g.add(rail);
+    }
+
+    // end walls with doorways (first hall gets a solid near wall; last a solid back wall)
+    addEndWall(g, h.zStart, h.index === 0);                     // near end
+    if (h.index === halls.length - 1) addEndWall(g, h.zEnd, true); // final solid back wall
+
+    // hall plaque above the entrance (unique text texture — disposable)
+    addHallPlaque(g, h);
+
+    // faux track lighting: fixture bulbs + additive glow quads (NO real lights)
+    const nLights = Math.max(2, Math.round(len / 9));
+    for (let l = 0; l < nLights; l++) {
+      const lz = h.zStart + (len * (l + 0.5)) / nLights;
+      const fix = new THREE.Mesh(SHARED.fixtureSphere, SHARED.fixtureMat);
+      fix.position.set(0, WALL_H - 0.9, lz);
+      g.add(fix);
+      // downward-facing glow quad under each bulb (billboard-ish, static)
+      const glow = new THREE.Mesh(SHARED.glowPlane, SHARED.glowMat);
+      glow.scale.set(9, 9, 1);
+      glow.position.set(0, WALL_H - 2.4, lz);
+      glow.rotation.x = -Math.PI / 2 + 0.0001;
+      g.add(glow);
+    }
+
+    // bench in larger halls
+    if (len > 14) {
+      const bench = panel(SHARED.unitBox, SHARED.benchMat, 2.4, 0.5, 0.7);
+      bench.position.set(0, 0.25, cz);
+      g.add(bench);
+    }
+
+    // plates
+    buildFramesForHall(h, g);
+
+    scene.add(g);
+    h.group = g;
+    h.built = true;
+  }
+
+  function disposeHall(h) {
+    if (!h.built) return;
+    // remove this hall's frames from the global registry + queues
+    for (const f of h.frameRefs) {
+      if (f === focusFrame) focusFrame = null;
+      const gi = frames.indexOf(f);
+      if (gi >= 0) frames.splice(gi, 1);
+      const qi = loadQueue.indexOf(f);
+      if (qi >= 0) loadQueue.splice(qi, 1);
+      if (f.tex) { f.tex.dispose(); f.tex = null; }
+      if (f.mat) f.mat.dispose();          // per-frame material is unique
+    }
+    h.frameRefs.length = 0;
+    // dispose per-hall unique resources (plaque texture/material)
+    for (const d of h.disposables) { if (d && d.dispose) d.dispose(); }
+    h.disposables.length = 0;
+    // remove the group (shared geometry/materials are NOT disposed)
+    if (h.group) { scene.remove(h.group); h.group = null; }
+    h.built = false;
+  }
+
+  function addEndWall(g, z, solid) {
+    if (solid) {
+      const w = panel(SHARED.unitPlane, SHARED.wallMat, HALL_HALF_W * 2, WALL_H);
+      w.position.set(0, WALL_H / 2, z);
+      g.add(w);
+      const wb = panel(SHARED.unitPlane, SHARED.wallMat, HALL_HALF_W * 2, WALL_H);
+      wb.position.set(0, WALL_H / 2, z);
+      wb.rotation.y = Math.PI;
+      g.add(wb);
+      return;
+    }
+    // wall with a central doorway — side panels + lintel, double-sided
+    const side = (HALL_HALF_W * 2 - DOOR_W) / 2;
+    for (const sgn of [-1, 1]) {
+      const px = sgn * (DOOR_W / 2 + side / 2);
+      for (const ry of [0, Math.PI]) {
+        const p = panel(SHARED.unitPlane, SHARED.wallMat, side, WALL_H);
+        p.position.set(px, WALL_H / 2, z);
+        p.rotation.y = ry;
+        g.add(p);
+      }
+    }
+    // lintel above the door
+    for (const ry of [0, Math.PI]) {
+      const lintel = panel(SHARED.unitPlane, SHARED.wallMat, DOOR_W, WALL_H - DOOR_H);
+      lintel.position.set(0, DOOR_H + (WALL_H - DOOR_H) / 2, z);
+      lintel.rotation.y = ry;
+      g.add(lintel);
+    }
+    // gilt door jambs + lintel trim
+    for (const sgn of [-1, 1]) {
+      const j = panel(SHARED.unitBox, SHARED.trimLitMat, 0.16, DOOR_H, 0.16);
+      j.position.set(sgn * DOOR_W / 2, DOOR_H / 2, z);
+      g.add(j);
+    }
+    const top = panel(SHARED.unitBox, SHARED.trimLitMat, DOOR_W + 0.32, 0.16, 0.16);
+    top.position.set(0, DOOR_H, z);
+    g.add(top);
+  }
+
+  function addHallPlaque(g, h) {
+    const tex = makeTextTexture("CAPUT " + h.caput, h.title);
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, fog: true });
+    const plq = new THREE.Mesh(SHARED.unitPlane, mat);
+    plq.scale.set(2.6, 0.9, 1);
+    plq.position.set(0, DOOR_H + 0.55, h.zStart + 0.06);
+    g.add(plq);
+    h.disposables.push(tex, mat);
+  }
+
+  function buildFramesForHall(h, g) {
     const mons = h.chapter.monsters;
-    // walls: -x (left) and +x (right); alternate placement
     let leftCount = 0, rightCount = 0;
     for (let k = 0; k < mons.length; k++) {
       const m = mons[k];
@@ -317,47 +432,37 @@
       const slot = onLeft ? leftCount++ : rightCount++;
       const z = h.zStart + HALL_PAD_END + slot * SLOT_GAP + SLOT_GAP / 2;
       const x = (onLeft ? -1 : 1) * (HALL_HALF_W - WALL_INSET);
-      addFrame({
-        file: m.file,
-        name: m.name,
-        caput: h.caput,
-        chapterTitle: h.title,
-        x, z,
-        faceRight: onLeft,            // left wall faces +x
-        trimMat
+      addFrame(h, g, {
+        file: m.file, name: m.name, caput: h.caput, chapterTitle: h.title,
+        x, z, faceRight: onLeft
       });
     }
   }
 
-  function addFrame(o) {
-    // gilt frame border (box) + inner plate quad using placeholder first
+  function addFrame(h, g, o) {
     const group = new THREE.Group();
-    const border = new THREE.Mesh(
-      new THREE.BoxGeometry(PLATE_W + 0.34, PLATE_H + 0.34, 0.14),
-      o.trimMat
-    );
+    // gilt border (shared geometry + shared material)
+    const border = new THREE.Mesh(SHARED.frameBorder, SHARED.trimMat);
     group.add(border);
-    // Plates read like softly backlit gallery prints: a low emissive tied to
-    // the same map keeps the artwork legible even between the warm lights,
-    // without washing out the candlelit mood.
-    const mat = new THREE.MeshStandardMaterial({
-      map: placeholderTex, roughness: 0.72, metalness: 0.0,
-      emissive: 0xffffff, emissiveMap: placeholderTex, emissiveIntensity: 0.32
-    });
-    const plate = new THREE.Mesh(new THREE.PlaneGeometry(PLATE_W, PLATE_H), mat);
-    plate.position.z = 0.08;
+    // plate quad — UNLIT, full brightness. Material is unique per frame
+    // (its .map changes as the texture streams in) so it's disposable.
+    const mat = new THREE.MeshBasicMaterial({ map: placeholderTex, fog: true });
+    const plate = new THREE.Mesh(SHARED.framePlate, mat);
+    plate.position.z = 0.075;
     group.add(plate);
 
     group.position.set(o.x, 2.55, o.z);
     group.rotation.y = o.faceRight ? Math.PI / 2 : -Math.PI / 2;
-    scene.add(group);
+    g.add(group);
 
-    frames.push({
+    const f = {
       group, plate, mat,
       file: o.file, name: o.name, caput: o.caput, chapterTitle: o.chapterTitle,
       x: o.x, z: o.z,
       loaded: false, loading: false, tex: null
-    });
+    };
+    frames.push(f);
+    h.frameRefs.push(f);
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -384,24 +489,23 @@
   }
 
   function pumpQueue() {
-    // sort so nearest loads first
     if (loadQueue.length > 1) loadQueue.sort((a, b) =>
       (Math.hypot(a.x - pos.x, a.z - pos.z)) - (Math.hypot(b.x - pos.x, b.z - pos.z)));
     while (activeLoads < MAX_LOADS && loadQueue.length) {
       const f = loadQueue.shift();
-      // skip if it wandered out of range while queued
       if (Math.hypot(f.x - pos.x, f.z - pos.z) > STREAM_FAR) { f.loading = false; continue; }
       activeLoads++;
       texLoader.load(PLATE_DIR + f.file,
         (tex) => {
           activeLoads--;
+          // frame may have been disposed while loading
+          if (!f.mat || frames.indexOf(f) < 0) { tex.dispose(); pumpQueue(); return; }
           tex.colorSpace = THREE.SRGBColorSpace;
           tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
           tex.generateMipmaps = true;
           tex.minFilter = THREE.LinearMipmapLinearFilter;
           f.tex = tex;
           f.mat.map = tex;
-          f.mat.emissiveMap = tex;
           f.mat.needsUpdate = true;
           f.loaded = true;
           f.loading = false;
@@ -416,26 +520,39 @@
   function unloadFrame(f) {
     if (f.tex) { f.tex.dispose(); f.tex = null; }
     f.mat.map = placeholderTex;
-    f.mat.emissiveMap = placeholderTex;
     f.mat.needsUpdate = true;
     f.loaded = false;
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  CANVAS TEXTURES (placeholder + plaques)
+  //  CANVAS TEXTURES (placeholder + glow + plaques)
   // ════════════════════════════════════════════════════════════════
   function makePlaceholderTexture() {
     const c = document.createElement("canvas");
     c.width = 128; c.height = 180;
     const g = c.getContext("2d");
     g.fillStyle = "#2a2016"; g.fillRect(0, 0, c.width, c.height);
-    // subtle parchment grain
     for (let i = 0; i < 900; i++) {
       g.fillStyle = "rgba(201,161,74," + (Math.random() * 0.05) + ")";
       g.fillRect(Math.random() * c.width, Math.random() * c.height, 1.5, 1.5);
     }
     g.strokeStyle = "rgba(201,161,74,0.25)"; g.lineWidth = 3;
     g.strokeRect(8, 8, c.width - 16, c.height - 16);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  }
+
+  function makeGlowTexture() {
+    const c = document.createElement("canvas");
+    c.width = c.height = 128;
+    const g = c.getContext("2d");
+    const grd = g.createRadialGradient(64, 64, 2, 64, 64, 64);
+    grd.addColorStop(0, "rgba(255,200,130,0.9)");
+    grd.addColorStop(0.35, "rgba(255,170,90,0.35)");
+    grd.addColorStop(1, "rgba(255,150,70,0)");
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 128, 128);
     const t = new THREE.CanvasTexture(c);
     t.colorSpace = THREE.SRGBColorSpace;
     return t;
@@ -473,8 +590,6 @@
   }
 
   function update(dt) {
-    // ── look from touch drag / already-applied pointerlock deltas ──
-    // movement vector in local space
     let mf = 0, ms = 0;
     if (keys["w"] || keys["arrowup"]) mf += 1;
     if (keys["s"] || keys["arrowdown"]) mf -= 1;
@@ -489,7 +604,6 @@
       const len = Math.hypot(mf, ms) || 1;
       mf /= len; ms /= len;
       const sin = Math.sin(yaw), cos = Math.cos(yaw);
-      // forward is +Z when yaw 0
       const dz = (mf * cos - ms * sin) * speed;
       const dx = (mf * sin + ms * cos) * speed;
       tryMove(pos.x + dx, pos.z + dz);
@@ -498,15 +612,15 @@
     streamTextures();
     updateHallLabel(false);
     updateFocus();
+
+    // lazy hall window follows the player (kicks off async build; safe to call every frame)
+    const ci = currentHallIndex();
+    if (ci !== builtWindowCenter) ensureHallsAround(ci);
   }
 
   function tryMove(nx, nz) {
-    // clamp inside hall bounds; allow passing through doorways (center)
     const margin = 0.5;
-    // z within total corridor
     nz = Math.max(0.8, Math.min(totalDepth - 0.8, nz));
-    // x clamp — but near a doorway (end wall) the full width is walkable;
-    // walls are continuous on the sides, so just clamp to hall half width.
     const maxX = HALL_HALF_W - margin;
     nx = Math.max(-maxX, Math.min(maxX, nx));
     pos.x = nx; pos.z = nz;
@@ -542,20 +656,17 @@
     }
   }
 
-  // ── Reticle focus (raycast center → nearest frame) ──────────────
-  const _ray = { origin: null, dir: null };
+  // ── Reticle focus (proximity + facing check) ────────────────────
   function updateFocus() {
-    // cheap proximity + facing check instead of full raycast every frame
     let best = null, bestD = 7.5;
     for (let i = 0; i < frames.length; i++) {
       const f = frames[i];
       const dx = f.x - pos.x, dz = f.z - pos.z;
       const d = Math.hypot(dx, dz);
       if (d > bestD) continue;
-      // is it roughly in front of the camera?
       const fdx = Math.sin(yaw), fdz = Math.cos(yaw);
       const dot = (dx * fdx + dz * fdz) / (d || 1);
-      if (dot < 0.55) continue; // must be within ~57° of view center
+      if (dot < 0.55) continue;
       if (d < bestD) { bestD = d; best = f; }
     }
     if (best !== focusFrame) {
@@ -590,7 +701,7 @@
     dom.zoomChapter.textContent = "Caput " + f.caput + " · " + f.chapterTitle;
   }
   function zoomStep(delta) {
-    if (zoomIndex < 0) return;
+    if (zoomIndex < 0 || !frames.length) return;
     zoomIndex = (zoomIndex + delta + frames.length) % frames.length;
     renderZoom();
   }
@@ -608,11 +719,9 @@
     window.addEventListener("mouseup", onCanvasUp, false);
     dom.canvas.addEventListener("click", onCanvasClick, false);
     document.addEventListener("pointerlockchange", onLockChange, false);
-    // touch
     dom.canvas.addEventListener("touchstart", onTouchStart, { passive: false });
     dom.canvas.addEventListener("touchmove", onTouchMove, { passive: false });
     dom.canvas.addEventListener("touchend", onTouchEnd, false);
-    // joystick
     dom.stick.addEventListener("touchstart", onStickStart, { passive: false });
     dom.stick.addEventListener("touchmove", onStickMove, { passive: false });
     dom.stick.addEventListener("touchend", onStickEnd, false);
@@ -671,7 +780,6 @@
   }
   function onCanvasClick(e) {
     if (dom.zoom.classList.contains("on")) return;
-    // if we dragged, don't treat as click
     if (look.moved && look.moved > 6) { look.moved = 0; return; }
     if (!pointerLocked && focusFrame) { openZoom(focusFrame); return; }
     if (!pointerLocked) { requestPointerLock(); return; }
@@ -691,7 +799,6 @@
     dom.reticle.classList.toggle("show", pointerLocked);
   }
 
-  // touch drag-look (single finger on the right/free area)
   function onTouchStart(e) {
     if (dom.zoom.classList.contains("on")) return;
     const t = e.changedTouches[0];
@@ -718,7 +825,6 @@
     }
   }
 
-  // joystick
   function onStickStart(e) {
     const t = e.changedTouches[0];
     touch.active = true; touch.id = t.identifier;
