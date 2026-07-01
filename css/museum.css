@@ -1,0 +1,339 @@
+/* ════════════════════════════════════════════════════════════════
+   MONSTRARIUM — 3D MUSEUM
+   A walkable, candlelit stone gallery that hangs every plate of the
+   codex on its walls. Opened from the HUD button beside the Gallery.
+   Aesthetic inherits the book's tokens: dark room, gilt frames,
+   parchment light. Overlay UI only — the world itself is WebGL.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Root overlay — sits above everything, hidden until opened. */
+.museum {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: #050402;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 520ms var(--ease-out), visibility 0s linear 520ms;
+  overflow: hidden;
+  touch-action: none;
+}
+.museum.on {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 520ms var(--ease-out);
+}
+
+/* The WebGL canvas fills the overlay. */
+.museum__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+.museum__canvas.locked { cursor: none; }
+.museum__canvas:active { cursor: grabbing; }
+
+/* ── Loading veil ─────────────────────────────────────────────── */
+.museum__load {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 30%, #241a10 0%, var(--room-2) 45%, var(--room) 100%);
+  z-index: 6;
+  transition: opacity 640ms var(--ease-out);
+}
+.museum__load.hidden { opacity: 0; pointer-events: none; }
+.museum__load-mark { color: var(--gilt); animation: museumPulse 2.4s var(--ease-in-out) infinite; }
+@keyframes museumPulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+.museum__load-title {
+  font-family: var(--titling);
+  font-size: clamp(20px, 3vw, 30px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--parch-lit);
+  margin: 0;
+}
+.museum__load-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--parch-dark);
+  letter-spacing: 0.04em;
+}
+.museum__load-bar {
+  width: min(280px, 60vw);
+  height: 2px;
+  background: rgba(201,161,74,0.18);
+  overflow: hidden;
+  border-radius: 2px;
+}
+.museum__load-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gilt), var(--gilt-lit));
+  transition: width 240ms var(--ease-out);
+}
+
+/* ── Top HUD inside the museum ────────────────────────────────── */
+.museum__hud {
+  position: absolute;
+  top: 16px;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 4;
+  pointer-events: none;
+}
+.museum__hud > * { pointer-events: auto; }
+
+.museum__hall {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: linear-gradient(180deg, rgba(20,12,7,0.72), rgba(11,8,5,0.78));
+  border: 1px solid rgba(201,161,74,0.3);
+  border-radius: 3px;
+  padding: 8px 15px;
+  backdrop-filter: blur(6px);
+  min-width: 0;
+  max-width: 62vw;
+}
+.museum__hall-caput {
+  font-family: var(--titling);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gilt-lit);
+}
+.museum__hall-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--parch-lit);
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.museum__exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  font-family: var(--titling);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--parch);
+  background: linear-gradient(180deg, rgba(42,26,16,0.85), rgba(20,12,7,0.9));
+  border: 1px solid rgba(201,161,74,0.35);
+  border-radius: 3px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.museum__exit:hover { color: var(--gilt-lit); border-color: rgba(201,161,74,0.7); }
+
+/* ── Crosshair / focus reticle ────────────────────────────────── */
+.museum__reticle {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 22px; height: 22px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+.museum__reticle.show { opacity: 1; }
+.museum__reticle::before, .museum__reticle::after {
+  content: "";
+  position: absolute;
+  background: rgba(232,200,120,0.85);
+  box-shadow: 0 0 3px rgba(0,0,0,0.6);
+}
+.museum__reticle::before { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+.museum__reticle::after  { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+.museum__reticle.focus { width: 30px; height: 30px; }
+.museum__reticle.focus::before, .museum__reticle.focus::after { background: var(--gilt-lit); }
+
+/* ── Look-target caption (plate name under reticle) ───────────── */
+.museum__target {
+  position: absolute;
+  top: calc(50% + 26px);
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 180ms var(--ease-out);
+  max-width: 70vw;
+}
+.museum__target.show { opacity: 1; }
+.museum__target-name {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--parch-lit);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 14px rgba(0,0,0,0.6);
+}
+.museum__target-hint {
+  display: block;
+  font-family: var(--titling);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gilt);
+  margin-top: 3px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+
+/* ── Controls hint (fades) ────────────────────────────────────── */
+.museum__help {
+  position: absolute;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--parch-dark);
+  text-align: center;
+  z-index: 3;
+  pointer-events: none;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+  transition: opacity 600ms var(--ease-out);
+  padding: 0 20px;
+}
+.museum__help.gone { opacity: 0; }
+
+/* ── Plate zoom overlay (reuses loupe/gallery aesthetic) ──────── */
+.museum__zoom {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4vh 4vw;
+  background: rgba(5,4,2,0.86);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 340ms var(--ease-out), visibility 0s linear 340ms;
+}
+.museum__zoom.on {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 340ms var(--ease-out);
+}
+.museum__zoom-frame {
+  position: relative;
+  max-height: 92vh;
+  max-width: 92vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  transform: scale(0.94);
+  transition: transform 380ms var(--ease-out);
+}
+.museum__zoom.on .museum__zoom-frame { transform: scale(1); }
+.museum__zoom-img {
+  max-height: 78vh;
+  max-width: 88vw;
+  height: auto;
+  width: auto;
+  border: 10px solid transparent;
+  border-image: linear-gradient(150deg, #6f5626, var(--gilt-lit) 45%, #4a3a1c) 1;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.5);
+  background: #120d08;
+}
+.museum__zoom-cap {
+  text-align: center;
+}
+.museum__zoom-name {
+  font-family: var(--serif);
+  font-size: clamp(20px, 3vw, 30px);
+  color: var(--parch-lit);
+  line-height: 1.1;
+}
+.museum__zoom-chapter {
+  display: block;
+  font-family: var(--titling);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gilt);
+  margin-top: 6px;
+}
+.museum__zoom-close {
+  position: absolute;
+  top: -6px; right: -6px;
+  width: 40px; height: 40px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--parch);
+  background: linear-gradient(180deg, rgba(42,26,16,0.95), rgba(20,12,7,0.95));
+  border: 1px solid rgba(201,161,74,0.4);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.museum__zoom-close:hover { color: var(--gilt-lit); border-color: var(--gilt); }
+.museum__zoom-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px; height: 76px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--parch);
+  background: linear-gradient(180deg, rgba(30,19,11,0.7), rgba(15,10,6,0.75));
+  border: 1px solid rgba(201,161,74,0.28);
+  cursor: pointer;
+  transition: color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.museum__zoom-nav:hover { color: var(--gilt-lit); border-color: var(--gilt); }
+.museum__zoom-nav--prev { left: 8px; border-radius: 0 4px 4px 0; }
+.museum__zoom-nav--next { right: 8px; border-radius: 4px 0 0 4px; }
+
+/* ── Mobile joystick ──────────────────────────────────────────── */
+.museum__stick {
+  position: absolute;
+  bottom: 26px; left: 26px;
+  width: 128px; height: 128px;
+  z-index: 5;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,161,74,0.08), rgba(201,161,74,0.03) 60%, transparent 72%);
+  border: 1px solid rgba(201,161,74,0.22);
+  display: none;
+  touch-action: none;
+}
+.museum__stick-knob {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 52px; height: 52px;
+  margin: -26px 0 0 -26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, rgba(232,200,120,0.55), rgba(120,90,40,0.5));
+  border: 1px solid rgba(232,200,120,0.5);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  transition: transform 60ms linear;
+}
+.museum.is-touch .museum__stick { display: block; }
+.museum.is-touch .museum__help { bottom: 168px; }
+
+/* ── Reduced-clutter on small screens ─────────────────────────── */
+@media (max-width: 640px) {
+  .museum__hall { max-width: 56vw; padding: 6px 12px; }
+  .museum__hall-title { font-size: 15px; }
+  .museum__help { font-size: 12px; }
+}

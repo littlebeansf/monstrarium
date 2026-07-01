@@ -8,7 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@500;600;700&family=UnifrakturMaguntia&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/style.css?v=20260618ae" />
+<link rel="stylesheet" href="css/style.css?v=20260618af" />
+<link rel="stylesheet" href="css/museum.css?v=20260618af" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23120d08'/%3E%3Cpath d='M16 4 L20 12 L28 12 L21 18 L24 27 L16 21 L8 27 L11 18 L4 12 L12 12 Z' fill='none' stroke='%23c9a14a' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='15' r='3' fill='%23c9a14a'/%3E%3C/svg%3E" />
 </head>
 <body class="is-loading">
@@ -46,6 +47,10 @@
   <button class="hud__btn" id="galleryBtn" title="View all plates in a gallery">
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" fill="none"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" fill="none"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" fill="none"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
     <span class="hud__label">Gallery</span>
+  </button>
+  <button class="hud__btn" id="museumBtn" title="Walk the halls in 3D">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3 3 8h18L12 3z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M5 10v8M9.3 10v8M14.7 10v8M19 10v8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span class="hud__label">Museum</span>
   </button>
   <button class="hud__btn" id="soundBtn" aria-pressed="false" title="Toggle ambient sound">
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path class="snd-on" d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path class="snd-on" d="M16 8c1.5 1.2 1.5 6.8 0 8" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/><path class="snd-on" d="M18.5 5.5c3 2.6 3 10.4 0 13" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
@@ -141,8 +146,21 @@
   } catch (e) { /* no-op */ }
 })();
 </script>
-<script src="js/data.js?v=20260618ae"></script>
-<script src="js/audio.js?v=20260618ae"></script>
-<script src="js/book.js?v=20260618ae"></script>
+<script src="js/data.js?v=20260618af"></script>
+<script src="js/audio.js?v=20260618af"></script>
+<script src="js/book.js?v=20260618af"></script>
+<script src="js/museum.js?v=20260618af"></script>
+<script>
+(function () {
+  // Wire the Museum button. Opens at the chapter the reader is currently
+  // browsing when possible; otherwise starts at the first hall.
+  var btn = document.getElementById("museumBtn");
+  if (!btn || !window.MonstrariumMuseum) return;
+  btn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    window.MonstrariumMuseum.open(0);
+  });
+})();
+</script>
 </body>
 </html>
